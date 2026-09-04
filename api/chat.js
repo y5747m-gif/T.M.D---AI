@@ -1,18 +1,39 @@
 "use strict";
 
+/*
+ * ============================================================
+ * T.M.D AI
+ * Groq Chat API
+ *
+ * T.M.D AI -> /api/chat -> Groq
+ *
+ * OpenAI غير مستخدم.
+ * ============================================================
+ */
+
 const GROQ_URL =
   "https://api.groq.com/openai/v1/chat/completions";
 
 const DEFAULT_MODEL =
+  process.env.GROQ_MODEL ||
   "llama-3.1-8b-instant";
 
-const ALLOWED_MODELS =
-  new Set([
-    "llama-3.1-8b-instant",
-    "llama-3.3-70b-versatile"
-  ]);
+const FALLBACK_MODEL =
+  "llama-3.3-70b-versatile";
+
+const ALLOWED_MODELS = new Set([
+  "llama-3.1-8b-instant",
+  "llama-3.3-70b-versatile"
+]);
+
 
 module.exports = async function handler(req, res) {
+
+  /*
+   * ==========================================================
+   * CORS
+   * ==========================================================
+   */
 
   res.setHeader(
     "Access-Control-Allow-Origin",
@@ -35,20 +56,48 @@ module.exports = async function handler(req, res) {
   );
 
 
+  /*
+   * ==========================================================
+   * OPTIONS
+   * ==========================================================
+   */
+
   if (req.method === "OPTIONS") {
-    return res.status(204).end();
+
+    return res
+      .status(204)
+      .end();
+
   }
 
+
+  /*
+   * ==========================================================
+   * POST ONLY
+   * ==========================================================
+   */
 
   if (req.method !== "POST") {
 
-    return res.status(405).json({
-      ok: false,
-      error: "Method Not Allowed"
-    });
+    return res
+      .status(405)
+      .json({
+
+        ok: false,
+
+        error:
+          "Method Not Allowed"
+
+      });
 
   }
 
+
+  /*
+   * ==========================================================
+   * GROQ API KEY
+   * ==========================================================
+   */
 
   const apiKey =
     process.env.GROQ_API_KEY;
@@ -56,63 +105,135 @@ module.exports = async function handler(req, res) {
 
   if (!apiKey) {
 
-    return res.status(500).json({
-      ok: false,
-      error:
-        "GROQ_API_KEY غير موجود في Vercel."
-    });
+    console.error(
+      "GROQ_API_KEY is missing."
+    );
+
+    return res
+      .status(500)
+      .json({
+
+        ok: false,
+
+        error:
+          "GROQ_API_KEY غير موجود في Vercel."
+
+      });
 
   }
 
 
   try {
 
+    /*
+     * ========================================================
+     * REQUEST BODY
+     * ========================================================
+     */
+
     const body =
       typeof req.body === "string"
-        ? JSON.parse(req.body || "{}")
-        : (req.body || {});
 
+        ? JSON.parse(
+            req.body || "{}"
+          )
+
+        : (
+            req.body || {}
+          );
+
+
+    /*
+     * ========================================================
+     * MESSAGES
+     * ========================================================
+     */
 
     const messages =
-      Array.isArray(body.messages)
+      Array.isArray(
+        body.messages
+      )
+
         ? body.messages
+
         : [];
 
 
     if (!messages.length) {
 
-      return res.status(400).json({
-        ok: false,
-        error:
-          "لم يتم إرسال أي رسالة."
-      });
+      return res
+        .status(400)
+        .json({
+
+          ok: false,
+
+          error:
+            "لم يتم إرسال أي رسالة."
+
+        });
 
     }
 
 
-    const requestedModel =
+    /*
+     * ========================================================
+     * MODEL
+     * ========================================================
+     */
+
+    let requestedModel =
       typeof body.model === "string"
+
         ? body.model.trim()
+
         : DEFAULT_MODEL;
 
 
-    const model =
-      ALLOWED_MODELS.has(
+    if (
+      !ALLOWED_MODELS.has(
         requestedModel
       )
-        ? requestedModel
-        : DEFAULT_MODEL;
+    ) {
 
+      requestedModel =
+        DEFAULT_MODEL;
+
+    }
+
+
+    /*
+     * ========================================================
+     * SYSTEM MESSAGE
+     * ========================================================
+     */
 
     const systemMessage = {
 
       role: "system",
 
       content:
-        "أنت T.M.D AI، مساعد ذكاء اصطناعي ذكي ومحترف. أجب باللغة العربية عندما يتحدث المستخدم بالعربية، وكن واضحًا ومنظمًا ومباشرًا."
+        `
+أنت T.M.D AI، مساعد ذكاء اصطناعي ذكي ومحترف.
+
+تعليماتك:
+
+- أجب باللغة العربية عندما يتحدث المستخدم بالعربية.
+- كن واضحًا ومنظمًا ومباشرًا.
+- استخدم العناوين والقوائم عند الحاجة.
+- عند التعامل مع الأكواد، اشرحها بطريقة مفهومة.
+- لا تدّعي أنك قرأت ملفًا أو صورة لم يتم إرسالها.
+- لا تخترع معلومات غير موجودة في المحتوى المرسل.
+- ساعد المستخدم في البرمجة والتصميم وتحليل المحتوى.
+        `.trim()
 
     };
 
+
+    /*
+     * ========================================================
+     * FINAL MESSAGES
+     * ========================================================
+     */
 
     const finalMessages = [
 
@@ -123,45 +244,58 @@ module.exports = async function handler(req, res) {
     ];
 
 
-    const response =
+    /*
+     * ========================================================
+     * GROQ REQUEST
+     * ========================================================
+     */
+
+    let response =
       await fetch(
         GROQ_URL,
         {
-          method: "POST",
+
+          method:
+            "POST",
 
           headers: {
+
             "Content-Type":
               "application/json",
 
             "Authorization":
               `Bearer ${apiKey}`
+
           },
 
           body:
             JSON.stringify({
 
               model:
-
-                model,
+                requestedModel,
 
               messages:
-
                 finalMessages,
 
               temperature:
-
                 0.7,
 
               max_tokens:
-
                 4096
 
             })
+
         }
       );
 
 
-    const data =
+    /*
+     * ========================================================
+     * RESPONSE
+     * ========================================================
+     */
+
+    let data =
       await response
         .json()
         .catch(
@@ -169,83 +303,213 @@ module.exports = async function handler(req, res) {
         );
 
 
-    if (!response.ok) {
+    /*
+     * ========================================================
+     * FALLBACK MODEL
+     * ========================================================
+     *
+     * إذا رفض Groq الموديل الأول،
+     * نحاول بالموديل الاحتياطي.
+     * ========================================================
+     */
 
-      console.error(
-        "Groq Error:",
-        data
+    if (
+      !response.ok &&
+      requestedModel !== FALLBACK_MODEL &&
+      (
+        response.status === 400 ||
+        response.status === 404
+      )
+    ) {
+
+      console.warn(
+        "Trying fallback Groq model."
       );
 
 
-      return res.status(
-        response.status
-      ).json({
+      response =
+        await fetch(
+          GROQ_URL,
+          {
 
-        ok: false,
+            method:
+              "POST",
 
-        error:
-          data?.error?.message ||
-          "حدث خطأ من Groq.",
+            headers: {
 
-        model:
-          model
+              "Content-Type":
+                "application/json",
 
-      });
+              "Authorization":
+                `Bearer ${apiKey}`
+
+            },
+
+            body:
+              JSON.stringify({
+
+                model:
+                  FALLBACK_MODEL,
+
+                messages:
+                  finalMessages,
+
+                temperature:
+                  0.7,
+
+                max_tokens:
+                  4096
+
+              })
+
+          }
+        );
+
+
+      data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
 
     }
 
 
-    const reply =
-      data?.choices?.[0]?.message?.content;
+    /*
+     * ========================================================
+     * GROQ ERROR
+     * ========================================================
+     */
 
+    if (!response.ok) {
+
+      console.error(
+        "Groq API Error:",
+        data
+      );
+
+
+      return res
+        .status(
+          response.status
+        )
+        .json({
+
+          ok: false,
+
+          error:
+            data?.error?.message ||
+
+            "حدث خطأ أثناء الاتصال بخدمة Groq.",
+
+          model:
+            requestedModel
+
+        });
+
+    }
+
+
+    /*
+     * ========================================================
+     * EXTRACT REPLY
+     * ========================================================
+     */
+
+    const reply =
+      data
+        ?.choices
+        ?.at?.(0)
+        ?.message
+        ?.content
+      ??
+      data
+        ?.choices
+        ?.[0]
+        ?.message
+        ?.content;
+
+
+    /*
+     * ========================================================
+     * EMPTY RESPONSE
+     * ========================================================
+     */
 
     if (
       typeof reply !== "string" ||
       !reply.trim()
     ) {
 
-      return res.status(502).json({
+      console.error(
+        "Groq returned no text:",
+        data
+      );
 
-        ok: false,
 
-        error:
-          "Groq لم يرجع إجابة نصية."
+      return res
+        .status(502)
+        .json({
 
-      });
+          ok: false,
+
+          error:
+            "لم يرجع Groq أي إجابة نصية."
+
+        });
 
     }
 
 
-    return res.status(200).json({
+    /*
+     * ========================================================
+     * SUCCESS
+     * ========================================================
+     */
 
-      ok: true,
+    return res
+      .status(200)
+      .json({
 
-      reply:
-        reply.trim(),
+        ok: true,
 
-      model:
-        model
+        reply:
+          reply.trim(),
 
-    });
+        model:
+          data?.model ||
+          requestedModel
+
+      });
 
 
   } catch (error) {
 
+    /*
+     * ========================================================
+     * UNEXPECTED ERROR
+     * ========================================================
+     */
+
     console.error(
-      "T.M.D AI Groq Error:",
+      "T.M.D AI / Groq Error:",
       error
     );
 
 
-    return res.status(500).json({
+    return res
+      .status(500)
+      .json({
 
-      ok: false,
+        ok: false,
 
-      error:
-        error?.message ||
-        "حدث خطأ أثناء الاتصال بـ Groq."
+        error:
+          error?.message ||
 
-    });
+          "حدث خطأ غير متوقع أثناء الاتصال بـ Groq."
+
+      });
 
   }
 
