@@ -1,423 +1,2207 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+"use strict";
 
-  <meta name="theme-color" content="#0b0b0c">
-  <meta
-    name="description"
-    content="T.M.D AI — مساعد الذكاء الاصطناعي الفائق"
-  >
+/*
+===========================================================
+ T.M.D AI
+ Frontend Application
+ Groq Only
+===========================================================
+*/
 
-  <title>T.M.D AI</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+const state = {
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
+  messages:
+    JSON.parse(
+      localStorage.getItem("tmd_messages") || "[]"
+    ),
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
-  <script>
-    window.pdfjsReady = import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs").then(m => { window.pdfjsLib = m; return m; });
-  </script>
-  <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  conversations:
+    JSON.parse(
+      localStorage.getItem("tmd_conversations") || "[]"
+    ),
 
-  <link rel="stylesheet" href="style.css">
-</head>
+  theme:
+    localStorage.getItem("tmd_theme") || "dark",
 
-<body>
+  model:
+    localStorage.getItem("tmd_model") ||
+    "llama-3.1-8b-instant",
 
-<div class="app">
+  busy: false,
 
-  <aside class="sidebar" id="sidebar">
+  controller: null,
 
-    <div class="sidebar-top">
+  selectedImage: null,
 
-      <div class="brand">
+  selectedDocument: null,
 
-        <div class="brand-logo">
-          T
-        </div>
+  imageMode: "analyze"
 
-        <div class="brand-name">
-          T.M.D AI
-          <span>✦</span>
-        </div>
+};
 
-      </div>
 
-      <button
-        class="sidebar-icon"
-        id="closeSidebar"
-        title="إغلاق القائمة"
-        type="button"
-      >
-        ‹
-      </button>
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-    </div>
+const chat =
+  document.getElementById("chat");
 
+const welcome =
+  document.getElementById("welcome");
 
-    <button
-      class="new-chat"
-      id="newChat"
-      type="button"
-    >
-      <span class="plus">＋</span>
-      <b>محادثة جديدة</b>
-    </button>
+const input =
+  document.getElementById("input");
 
+const sendButton =
+  document.getElementById("send");
 
-    <div
-      class="history-list"
-      id="history"
-    ></div>
+const plusButton =
+  document.getElementById("plusButton");
 
+const plusMenu =
+  document.getElementById("plusMenu");
 
-    <div class="sidebar-footer">
+const imageInput =
+  document.getElementById("imageInput");
 
-      <button
-        class="footer-btn"
-        id="settingsBtn"
-        type="button"
-      >
-        ⚙ الإعدادات
-      </button>
+const documentInput =
+  document.getElementById("documentInput");
 
-    </div>
+const addImageButton =
+  document.getElementById("addImageButton");
 
-  </aside>
+const analyzeDocumentButton =
+  document.getElementById(
+    "analyzeDocumentButton"
+  );
 
+const imageEditButton =
+  document.getElementById(
+    "imageEditButton"
+  );
 
-  <main class="main">
+const imagePreviewContainer =
+  document.getElementById(
+    "imagePreviewContainer"
+  );
 
+const imagePreview =
+  document.getElementById(
+    "imagePreview"
+  );
 
-    <header class="topbar">
+const imageFileName =
+  document.getElementById(
+    "imageFileName"
+  );
 
-      <button
-        class="mobile-menu"
-        id="openSidebar"
-        type="button"
-      >
-        ☰
-      </button>
+const imageModeLabel =
+  document.getElementById(
+    "imageModeLabel"
+  );
 
+const removeImage =
+  document.getElementById(
+    "removeImage"
+  );
 
-      <div class="model-selector">
+const history =
+  document.getElementById("history");
 
-        <span
-          class="model-badge"
-          id="modelName"
-        >
-          T.M.D Fast (Llama 3.3)
-        </span>
+const newChat =
+  document.getElementById("newChat");
 
-      </div>
+const settingsBtn =
+  document.getElementById(
+    "settingsBtn"
+  );
 
+const modalBackdrop =
+  document.getElementById(
+    "modalBackdrop"
+  );
 
-      <button
-        class="theme-top"
-        id="themeTop"
-        type="button"
-        title="تغيير المظهر"
-      >
-        ◑
-      </button>
+const modalClose =
+  document.getElementById(
+    "modalClose"
+  );
 
-    </header>
+const themeSelect =
+  document.getElementById(
+    "themeSelect"
+  );
 
+const modelSelect =
+  document.getElementById(
+    "modelSelect"
+  );
 
-    <section
-      class="chat-zone"
-      id="chat"
-    >
+const themeTop =
+  document.getElementById(
+    "themeTop"
+  );
 
-      <div
-        class="welcome"
-        id="welcome"
-      >
+const modelName =
+  document.getElementById(
+    "modelName"
+  );
 
-        <div class="welcome-logo">
-          T
-        </div>
+const toast =
+  document.getElementById(
+    "toast"
+  );
 
-        <h1>
-          بمَ يمكنني مساعدتك اليوم؟
-        </h1>
+const sidebar =
+  document.getElementById(
+    "sidebar"
+  );
 
-        <p>
-          مساعدك الذكي المدعوم بـ Groq.
-          اختر محادثة أو ابدأ بسؤال جديد.
-        </p>
+const openSidebar =
+  document.getElementById(
+    "openSidebar"
+  );
 
-      </div>
+const closeSidebar =
+  document.getElementById(
+    "closeSidebar"
+  );
 
-    </section>
 
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
-    <div class="composer-zone">
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-      <div class="composer">
+    applyTheme();
 
+    updateModelUI();
 
-        <div
-          class="image-preview-container hidden"
-          id="imagePreviewContainer"
-        >
+    renderHistory();
 
-          <div class="image-preview">
+    renderMessages();
 
-            <img
-              id="imagePreview"
-              src=""
-              alt="معاينة الصورة"
-            >
+    setupTextarea();
 
-            <button
-              id="removeImage"
-              class="remove-image"
-              type="button"
-              title="إزالة الصورة"
-            >
-              ×
-            </button>
+  }
+);
 
-          </div>
 
-          <div class="image-preview-info">
+/* =========================================================
+   THEME
+========================================================= */
 
-            <span id="imageFileName">
-              الصورة المحددة
-            </span>
+function applyTheme() {
 
-            <span id="imageModeLabel">
-              إضافة صورة
-            </span>
+  document.documentElement.dataset.theme =
+    state.theme;
 
-          </div>
+  document.body.dataset.theme =
+    state.theme;
 
-        </div>
+  if (themeSelect) {
+    themeSelect.value =
+      state.theme;
+  }
 
+}
 
-        <textarea
-          id="input"
-          rows="1"
-          maxlength="16000"
-          placeholder="اكتب رسالتك إلى T.M.D AI..."
-        ></textarea>
 
+function toggleTheme() {
 
-        <div class="composer-actions">
+  state.theme =
+    state.theme === "dark"
+      ? "light"
+      : "dark";
 
+  localStorage.setItem(
+    "tmd_theme",
+    state.theme
+  );
 
-          <div class="plus-menu-wrapper">
+  applyTheme();
 
-            <button
-              class="plus-btn"
-              id="plusButton"
-              type="button"
-              title="إضافة"
-              aria-label="إضافة صورة أو ملف"
-              aria-expanded="false"
-            >
-              ＋
-            </button>
+}
 
 
-            <div
-              class="plus-menu hidden"
-              id="plusMenu"
-            >
+/* =========================================================
+   MODEL
+========================================================= */
 
-              <button
-                class="plus-menu-item"
-                id="analyzeDocumentButton"
-                type="button"
-              >
+function updateModelUI() {
 
-                <span class="plus-menu-icon">
-                  🔍
-                </span>
+  if (modelSelect) {
 
-                <span>
-                  تحليل الملفات
-                </span>
+    modelSelect.value =
+      state.model;
 
-              </button>
+  }
 
 
-              <button
-                class="plus-menu-item"
-                id="addImageButton"
-                type="button"
-              >
+  if (!modelName) {
+    return;
+  }
 
-                <span class="plus-menu-icon">
-                  🖼️
-                </span>
 
-                <span>
-                  إضافة صورة
-                </span>
+  const names = {
 
-              </button>
+    "llama-3.1-8b-instant":
+      "T.M.D Fast",
 
+    "llama-3.3-70b-versatile":
+      "T.M.D Pro",
 
-              <button
-                class="plus-menu-item"
-                id="imageEditButton"
-                type="button"
-              >
+    "meta-llama/llama-4-scout-17b-16e-instruct":
+      "T.M.D Vision"
 
-                <span class="plus-menu-icon">
-                  ✨
-                </span>
+  };
 
-                <span>
-                  تعديل صورة بالذكاء الاصطناعي
-                </span>
 
-              </button>
+  modelName.textContent =
+    names[state.model] ||
+    "T.M.D AI";
 
-            </div>
+}
 
-          </div>
 
+/* =========================================================
+   LOCAL STORAGE
+========================================================= */
 
-          <input
-            type="file"
-            id="imageInput"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            hidden
-          >
+function saveMessages() {
 
-          <input
-            type="file"
-            id="documentInput"
-            accept=".txt,.js,.json,.html,.css,.py,.md,.csv,.pdf,.docx"
-            hidden
-          >
+  localStorage.setItem(
+    "tmd_messages",
+    JSON.stringify(
+      state.messages
+    )
+  );
 
+}
 
-          <button
-            class="send-btn"
-            id="send"
-            type="button"
-            title="إرسال"
-            aria-label="إرسال الرسالة"
-          >
-            ↑
-          </button>
 
-        </div>
+function saveConversations() {
 
-      </div>
+  localStorage.setItem(
+    "tmd_conversations",
+    JSON.stringify(
+      state.conversations
+    )
+  );
 
+}
 
-      <div class="composer-note">
-        قد يخطئ T.M.D AI أحيانًا.
-        يرجى التحقق من المعلومات المهمة.
-      </div>
 
-    </div>
+/* =========================================================
+   TOAST
+========================================================= */
 
-  </main>
+function showToast(message) {
 
-</div>
+  if (!toast) {
+    return;
+  }
 
 
-<div
-  class="modal-backdrop hidden"
-  id="modalBackdrop"
->
+  toast.textContent =
+    message;
 
-  <div class="modal">
+  toast.classList.add(
+    "show"
+  );
 
-    <div class="modal-head">
 
-      <h3>
-        الإعدادات
-      </h3>
+  setTimeout(
+    () => {
 
-      <button
-        id="modalClose"
-        type="button"
-        title="إغلاق"
-      >
-        ×
-      </button>
+      toast.classList.remove(
+        "show"
+      );
 
-    </div>
+    },
+    3000
+  );
 
+}
 
-    <div class="settings-body">
 
-      <label>
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
-        المظهر
+function escapeHTML(text) {
 
-        <select id="themeSelect">
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 
-          <option value="dark">
-            داكن
-          </option>
+}
 
-          <option value="light">
-            فاتح
-          </option>
 
-        </select>
+/* =========================================================
+   MARKDOWN
+========================================================= */
 
-      </label>
+function renderMarkdown(text) {
 
+  let html =
+    escapeHTML(text);
 
-      <label>
 
-        النموذج البرمجي
+  html =
+    html.replace(
+      /```([\s\S]*?)```/g,
+      (_, code) => {
 
-        <select id="modelSelect">
+        return `
+          <pre class="code-block">
+            <code>${code.trim()}</code>
+          </pre>
+        `;
 
-          <option value="llama-3.1-8b-instant">
-            Llama 3.1 8B — سريع
-          </option>
+      }
+    );
 
-          <option value="llama-3.3-70b-versatile">
-            Llama 3.3 70B — احترافي
-          </option>
 
-          <option value="meta-llama/llama-4-scout-17b-16e-instruct">
-            Llama 4 Scout — تحليل الصور
-          </option>
+  html =
+    html.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
 
-          <option value="mixtral-8x7b-32768">
-            Mixtral 8x7b
-          </option>
 
-        </select>
+  html =
+    html.replace(
+      /^### (.*)$/gm,
+      "<h4>$1</h4>"
+    );
 
-      </label>
 
-    </div>
+  html =
+    html.replace(
+      /^## (.*)$/gm,
+      "<h3>$1</h3>"
+    );
 
-  </div>
 
-</div>
+  html =
+    html.replace(
+      /^# (.*)$/gm,
+      "<h2>$1</h2>"
+    );
 
 
-<div
-  class="toast"
-  id="toast"
-></div>
+  html =
+    html.replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    );
 
 
-<script>
-  window.pdfjsReady?.catch(() => {});
-</script>
-<script src="app.js"></script>
+  html =
+    html.replace(
+      /\*(.*?)\*/g,
+      "<em>$1</em>"
+    );
 
-</body>
-</html>
+
+  html =
+    html.replace(
+      /^\- (.*)$/gm,
+      "<li>$1</li>"
+    );
+
+
+  html =
+    html.replace(
+      /\n/g,
+      "<br>"
+    );
+
+
+  return html;
+
+}
+
+
+/* =========================================================
+   RENDER MESSAGES
+========================================================= */
+
+function renderMessages() {
+
+  if (!chat) {
+    return;
+  }
+
+
+  chat.innerHTML = "";
+
+
+  if (
+    !state.messages.length
+  ) {
+
+    if (welcome) {
+
+      chat.appendChild(
+        welcome
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  state.messages.forEach(
+    message => {
+
+      renderMessage(
+        message
+      );
+
+    }
+  );
+
+
+  scrollToBottom();
+
+}
+
+
+function renderMessage(message) {
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+
+  wrapper.className =
+    `message ${
+      message.role === "user"
+        ? "user-message"
+        : "assistant-message"
+    }`;
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+
+  bubble.className =
+    "message-bubble";
+
+
+  if (
+    message.role === "assistant"
+  ) {
+
+    bubble.innerHTML =
+      renderMarkdown(
+        message.content || ""
+      );
+
+  } else {
+
+    bubble.textContent =
+      message.content || "";
+
+  }
+
+
+  wrapper.appendChild(
+    bubble
+  );
+
+
+  chat.appendChild(
+    wrapper
+  );
+
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+function scrollToBottom() {
+
+  if (!chat) {
+    return;
+  }
+
+
+  chat.scrollTop =
+    chat.scrollHeight;
+
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+function setupTextarea() {
+
+  if (!input) {
+    return;
+  }
+
+
+  input.addEventListener(
+    "input",
+    () => {
+
+      input.style.height =
+        "auto";
+
+      input.style.height =
+        Math.min(
+          input.scrollHeight,
+          220
+        ) + "px";
+
+    }
+  );
+
+
+  input.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        sendCurrentMessage();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SEND CURRENT MESSAGE
+========================================================= */
+
+async function sendCurrentMessage() {
+
+  if (state.busy) {
+    return;
+  }
+
+
+  const text =
+    input?.value.trim() || "";
+
+
+  /*
+   * إذا توجد صورة
+   */
+
+  if (
+    state.selectedImage
+  ) {
+
+    await analyzeSelectedImage(
+      text
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * إذا يوجد ملف
+   */
+
+  if (
+    state.selectedDocument
+  ) {
+
+    await analyzeSelectedDocument(
+      text
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * رسالة عادية
+   */
+
+  if (!text) {
+    return;
+  }
+
+
+  input.value = "";
+
+  input.style.height =
+    "auto";
+
+
+  const userMessage = {
+
+    role: "user",
+
+    content: text
+
+  };
+
+
+  state.messages.push(
+    userMessage
+  );
+
+
+  saveMessages();
+
+  renderMessages();
+
+  renderHistory();
+
+
+  await requestGroq();
+
+}
+
+
+/* =========================================================
+   GROQ CHAT
+========================================================= */
+
+async function requestGroq() {
+
+  setBusy(true);
+
+
+  try {
+
+    const controller =
+      new AbortController();
+
+
+    state.controller =
+      controller;
+
+
+    const response =
+      await fetch(
+        "/api/chat",
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              model:
+                state.model,
+
+              messages:
+                state.messages
+
+            }),
+
+          signal:
+            controller.signal
+
+        }
+      );
+
+
+    const data =
+      await response
+        .json()
+        .catch(
+          () => ({})
+        );
+
+
+    if (
+      !response.ok ||
+      !data.ok
+    ) {
+
+      throw new Error(
+        data.error ||
+        `خطأ HTTP ${response.status}`
+      );
+
+    }
+
+
+    const reply =
+      data.reply ||
+      data.message;
+
+
+    if (!reply) {
+
+      throw new Error(
+        "لم يصل رد من Groq."
+      );
+
+    }
+
+
+    state.messages.push({
+
+      role:
+        "assistant",
+
+      content:
+        reply
+
+    });
+
+
+    saveMessages();
+
+    renderMessages();
+
+    renderHistory();
+
+
+  } catch (error) {
+
+    if (
+      error.name ===
+      "AbortError"
+    ) {
+
+      return;
+
+    }
+
+
+    console.error(
+      error
+    );
+
+
+    showToast(
+      error.message ||
+      "حدث خطأ أثناء الاتصال بـ Groq."
+    );
+
+
+  } finally {
+
+    state.controller =
+      null;
+
+    setBusy(false);
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSY
+========================================================= */
+
+function setBusy(value) {
+
+  state.busy =
+    value;
+
+
+  if (!sendButton) {
+    return;
+  }
+
+
+  sendButton.disabled =
+    value;
+
+
+  if (value) {
+
+    sendButton.textContent =
+      "…";
+
+  } else {
+
+    sendButton.textContent =
+      "↑";
+
+  }
+
+}
+
+
+/* =========================================================
+   PLUS MENU
+========================================================= */
+
+if (plusButton) {
+
+  plusButton.addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+      plusMenu?.classList.toggle(
+        "hidden"
+      );
+
+      plusButton.setAttribute(
+        "aria-expanded",
+        plusMenu &&
+        !plusMenu.classList.contains(
+          "hidden"
+        )
+      );
+
+    }
+  );
+
+}
+
+
+document.addEventListener(
+  "click",
+  event => {
+
+    if (
+      plusMenu &&
+      !plusMenu.contains(event.target) &&
+      event.target !== plusButton
+    ) {
+
+      plusMenu.classList.add(
+        "hidden"
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   IMAGE INPUT
+========================================================= */
+
+if (addImageButton) {
+
+  addImageButton.addEventListener(
+    "click",
+    () => {
+
+      plusMenu?.classList.add(
+        "hidden"
+      );
+
+      imageMode =
+        "analyze";
+
+      imageInput?.click();
+
+    }
+  );
+
+}
+
+
+if (imageEditButton) {
+
+  imageEditButton.addEventListener(
+    "click",
+    () => {
+
+      plusMenu?.classList.add(
+        "hidden"
+      );
+
+      state.imageMode =
+        "edit";
+
+      imageMode =
+        "edit";
+
+      imageInput?.click();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   IMAGE CHANGE
+========================================================= */
+
+if (imageInput) {
+
+  imageInput.addEventListener(
+    "change",
+    async event => {
+
+      const file =
+        event.target.files?.[0];
+
+
+      if (!file) {
+        return;
+      }
+
+
+      if (
+        !file.type.startsWith(
+          "image/"
+        )
+      ) {
+
+        showToast(
+          "الملف المختار ليس صورة."
+        );
+
+        return;
+
+      }
+
+
+      if (
+        file.size >
+        20 * 1024 * 1024
+      ) {
+
+        showToast(
+          "الصورة كبيرة جدًا. الحد الأقصى 20MB."
+        );
+
+        return;
+
+      }
+
+
+      state.selectedImage =
+        file;
+
+
+      showImagePreview(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   IMAGE PREVIEW
+========================================================= */
+
+function showImagePreview(file) {
+
+  if (!imagePreviewContainer) {
+    return;
+  }
+
+
+  const url =
+    URL.createObjectURL(
+      file
+    );
+
+
+  if (imagePreview) {
+
+    imagePreview.src =
+      url;
+
+  }
+
+
+  if (imageFileName) {
+
+    imageFileName.textContent =
+      file.name;
+
+  }
+
+
+  if (imageModeLabel) {
+
+    imageModeLabel.textContent =
+      imageMode === "edit"
+        ? "تعديل الصورة"
+        : "تحليل الصورة";
+
+  }
+
+
+  imagePreviewContainer
+    .classList
+    .remove(
+      "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   REMOVE IMAGE
+========================================================= */
+
+if (removeImage) {
+
+  removeImage.addEventListener(
+    "click",
+    () => {
+
+      clearImage();
+
+    }
+  );
+
+}
+
+
+function clearImage() {
+
+  state.selectedImage =
+    null;
+
+
+  if (imageInput) {
+
+    imageInput.value =
+      "";
+
+  }
+
+
+  if (imagePreview) {
+
+    imagePreview.src =
+      "";
+
+  }
+
+
+  imagePreviewContainer
+    ?.classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   IMAGE ANALYSIS
+========================================================= */
+
+async function analyzeSelectedImage(
+  prompt
+) {
+
+  const file =
+    state.selectedImage;
+
+
+  if (!file) {
+    return;
+  }
+
+
+  setBusy(true);
+
+
+  try {
+
+    const base64 =
+      await fileToDataURL(
+        file
+      );
+
+
+    const userText =
+      prompt ||
+      "حلل هذه الصورة بالتفصيل، واشرح ما يظهر فيها واقرأ النصوص الواضحة داخلها.";
+
+
+    state.messages.push({
+
+      role:
+        "user",
+
+      content:
+        userText
+
+    });
+
+
+    saveMessages();
+
+    renderMessages();
+
+
+    const response =
+      await fetch(
+        "/api/image",
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              image:
+                base64,
+
+              prompt:
+                userText
+
+            })
+
+        }
+      );
+
+
+    const data =
+      await response
+        .json()
+        .catch(
+          () => ({})
+        );
+
+
+    if (
+      !response.ok ||
+      !data.ok
+    ) {
+
+      throw new Error(
+        data.error ||
+        "فشل تحليل الصورة."
+      );
+
+    }
+
+
+    state.messages.push({
+
+      role:
+        "assistant",
+
+      content:
+        data.message ||
+        data.reply ||
+        "لم يصل تحليل الصورة."
+
+    });
+
+
+    saveMessages();
+
+    renderMessages();
+
+
+    clearImage();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    showToast(
+      error.message ||
+      "حدث خطأ أثناء تحليل الصورة."
+    );
+
+  } finally {
+
+    setBusy(false);
+
+  }
+
+}
+
+
+/* =========================================================
+   FILE INPUT
+========================================================= */
+
+if (analyzeDocumentButton) {
+
+  analyzeDocumentButton.addEventListener(
+    "click",
+    () => {
+
+      plusMenu?.classList.add(
+        "hidden"
+      );
+
+      documentInput?.click();
+
+    }
+  );
+
+}
+
+
+if (documentInput) {
+
+  documentInput.addEventListener(
+    "change",
+    event => {
+
+      const file =
+        event.target.files?.[0];
+
+
+      if (!file) {
+        return;
+      }
+
+
+      state.selectedDocument =
+        file;
+
+
+      showDocumentPreview(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   DOCUMENT PREVIEW
+========================================================= */
+
+function showDocumentPreview(file) {
+
+  if (!imagePreviewContainer) {
+    return;
+  }
+
+
+  imagePreviewContainer
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  if (imagePreview) {
+
+    imagePreview.removeAttribute(
+      "src"
+    );
+
+  }
+
+
+  if (imageFileName) {
+
+    imageFileName.textContent =
+      file.name;
+
+  }
+
+
+  if (imageModeLabel) {
+
+    imageModeLabel.textContent =
+      `ملف للتحليل — ${formatBytes(file.size)}`;
+
+  }
+
+}
+
+
+/* =========================================================
+   DOCUMENT ANALYSIS
+========================================================= */
+
+async function analyzeSelectedDocument(
+  prompt
+) {
+
+  const file =
+    state.selectedDocument;
+
+
+  if (!file) {
+    return;
+  }
+
+
+  setBusy(true);
+
+
+  try {
+
+    const text =
+      await extractDocument(
+        file
+      );
+
+
+    if (!text.trim()) {
+
+      throw new Error(
+        "لم يتم العثور على نص داخل الملف."
+      );
+
+    }
+
+
+    const request =
+      prompt ||
+      "حلل هذا الملف بالتفصيل، ثم قدم ملخصًا لأهم محتوياته.";
+
+
+    const content =
+      `
+طلب المستخدم:
+${request}
+
+اسم الملف:
+${file.name}
+
+محتوى الملف:
+----------------
+${text}
+----------------
+`;
+
+
+    state.messages.push({
+
+      role:
+        "user",
+
+      content
+
+    });
+
+
+    saveMessages();
+
+    renderMessages();
+
+
+    clearDocument();
+
+
+    await requestGroq();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    showToast(
+      error.message ||
+      "حدث خطأ أثناء تحليل الملف."
+    );
+
+  } finally {
+
+    setBusy(false);
+
+  }
+
+}
+
+
+/* =========================================================
+   EXTRACT DOCUMENT
+========================================================= */
+
+async function extractDocument(file) {
+
+  const name =
+    file.name.toLowerCase();
+
+
+  /*
+   * TXT / MD / JS / JSON / HTML / CSS
+   * PY / CSV / XML / YAML / LOG
+   */
+
+  const textExtensions = [
+
+    ".txt",
+    ".md",
+    ".js",
+    ".json",
+    ".html",
+    ".htm",
+    ".css",
+    ".py",
+    ".csv",
+    ".xml",
+    ".yaml",
+    ".yml",
+    ".log"
+
+  ];
+
+
+  if (
+    textExtensions.some(
+      ext =>
+        name.endsWith(ext)
+    )
+  ) {
+
+    return await file.text();
+
+  }
+
+
+  /*
+   * PDF
+   */
+
+  if (
+    name.endsWith(".pdf")
+  ) {
+
+    return await extractPDF(
+      file
+    );
+
+  }
+
+
+  /*
+   * DOCX
+   */
+
+  if (
+    name.endsWith(".docx")
+  ) {
+
+    return await extractDOCX(
+      file
+    );
+
+  }
+
+
+  throw new Error(
+    "نوع الملف غير مدعوم."
+  );
+
+}
+
+
+/* =========================================================
+   PDF
+========================================================= */
+
+async function extractPDF(file) {
+
+  if (
+    window.pdfjsReady
+  ) {
+
+    try {
+
+      await window.pdfjsReady;
+
+    } catch {}
+
+  }
+
+
+  if (
+    !window.pdfjsLib
+  ) {
+
+    throw new Error(
+      "مكتبة PDF غير متاحة."
+    );
+
+  }
+
+
+  const buffer =
+    await file.arrayBuffer();
+
+
+  const pdf =
+    await window.pdfjsLib
+      .getDocument({
+        data: buffer
+      })
+      .promise;
+
+
+  const pages = [];
+
+
+  for (
+    let i = 1;
+    i <= pdf.numPages;
+    i++
+  ) {
+
+    const page =
+      await pdf.getPage(
+        i
+      );
+
+
+    const content =
+      await page.getTextContent();
+
+
+    const pageText =
+      content.items
+        .map(
+          item =>
+            item.str
+        )
+        .join(" ");
+
+
+    pages.push(
+      `--- الصفحة ${i} ---\n${pageText}`
+    );
+
+  }
+
+
+  return pages.join(
+    "\n\n"
+  );
+
+}
+
+
+/* =========================================================
+   DOCX
+========================================================= */
+
+async function extractDOCX(file) {
+
+  if (
+    !window.mammoth
+  ) {
+
+    throw new Error(
+      "مكتبة DOCX غير متاحة."
+    );
+
+  }
+
+
+  const buffer =
+    await file.arrayBuffer();
+
+
+  const result =
+    await window.mammoth
+      .extractRawText({
+        arrayBuffer:
+          buffer
+      });
+
+
+  return result.value || "";
+
+}
+
+
+/* =========================================================
+   FILE TO DATA URL
+========================================================= */
+
+function fileToDataURL(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () => resolve(
+          reader.result
+        );
+
+
+      reader.onerror =
+        () => reject(
+          new Error(
+            "تعذر قراءة الصورة."
+          )
+        );
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   CLEAR DOCUMENT
+========================================================= */
+
+function clearDocument() {
+
+  state.selectedDocument =
+    null;
+
+
+  if (documentInput) {
+
+    documentInput.value =
+      "";
+
+  }
+
+
+  imagePreviewContainer
+    ?.classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT BYTES
+========================================================= */
+
+function formatBytes(bytes) {
+
+  if (
+    bytes < 1024
+  ) {
+
+    return `${bytes} B`;
+
+  }
+
+
+  if (
+    bytes < 1024 ** 2
+  ) {
+
+    return `${(
+      bytes / 1024
+    ).toFixed(1)} KB`;
+
+  }
+
+
+  return `${(
+    bytes /
+    (1024 ** 2)
+  ).toFixed(1)} MB`;
+
+}
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+if (sendButton) {
+
+  sendButton.addEventListener(
+    "click",
+    sendCurrentMessage
+  );
+
+}
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+if (newChat) {
+
+  newChat.addEventListener(
+    "click",
+    () => {
+
+      if (
+        state.messages.length
+      ) {
+
+        state.conversations.unshift({
+
+          id:
+            Date.now(),
+
+          title:
+            getConversationTitle(),
+
+          messages:
+            state.messages,
+
+          createdAt:
+            new Date().toISOString()
+
+        });
+
+
+        state.conversations =
+          state.conversations.slice(
+            0,
+            50
+          );
+
+
+        saveConversations();
+
+      }
+
+
+      state.messages =
+        [];
+
+
+      saveMessages();
+
+      renderMessages();
+
+      renderHistory();
+
+      clearImage();
+
+      clearDocument();
+
+
+      if (input) {
+
+        input.value =
+          "";
+
+      }
+
+
+      closeMobileSidebar();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   CONVERSATION TITLE
+========================================================= */
+
+function getConversationTitle() {
+
+  const first =
+    state.messages.find(
+      message =>
+        message.role ===
+        "user"
+    );
+
+
+  if (!first) {
+
+    return "محادثة جديدة";
+
+  }
+
+
+  return String(
+    first.content
+  )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .slice(
+      0,
+      45
+    );
+
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function renderHistory() {
+
+  if (!history) {
+    return;
+  }
+
+
+  history.innerHTML =
+    "";
+
+
+  /*
+   * المحادثة الحالية
+   */
+
+  if (
+    state.messages.length
+  ) {
+
+    const item =
+      createHistoryItem(
+        getConversationTitle(),
+        true
+      );
+
+
+    history.appendChild(
+      item
+    );
+
+  }
+
+
+  state.conversations
+    .forEach(
+      conversation => {
+
+        const item =
+          createHistoryItem(
+            conversation.title ||
+            "محادثة",
+            false,
+            conversation
+          );
+
+
+        history.appendChild(
+          item
+        );
+
+      }
+    );
+
+}
+
+
+function createHistoryItem(
+  title,
+  current,
+  conversation
+) {
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.type =
+    "button";
+
+
+  button.className =
+    "history-item";
+
+
+  if (current) {
+
+    button.classList.add(
+      "active"
+    );
+
+  }
+
+
+  button.textContent =
+    title;
+
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !conversation
+      ) {
+
+        return;
+
+      }
+
+
+      state.messages =
+        conversation.messages ||
+        [];
+
+
+      saveMessages();
+
+      renderMessages();
+
+      closeMobileSidebar();
+
+    }
+  );
+
+
+  return button;
+
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+if (settingsBtn) {
+
+  settingsBtn.addEventListener(
+    "click",
+    openSettings
+  );
+
+}
+
+
+function openSettings() {
+
+  modalBackdrop
+    ?.classList
+    .remove(
+      "hidden"
+    );
+
+}
+
+
+if (modalClose) {
+
+  modalClose.addEventListener(
+    "click",
+    closeSettings
+  );
+
+}
+
+
+if (modalBackdrop) {
+
+  modalBackdrop.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        modalBackdrop
+      ) {
+
+        closeSettings();
+
+      }
+
+    }
+  );
+
+}
+
+
+function closeSettings() {
+
+  modalBackdrop
+    ?.classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   THEME SELECT
+========================================================= */
+
+if (themeSelect) {
+
+  themeSelect.addEventListener(
+    "change",
+    () => {
+
+      state.theme =
+        themeSelect.value;
+
+
+      localStorage.setItem(
+        "tmd_theme",
+        state.theme
+      );
+
+
+      applyTheme();
+
+    }
+  );
+
+}
+
+
+if (themeTop) {
+
+  themeTop.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+}
+
+
+/* =========================================================
+   MODEL SELECT
+========================================================= */
+
+if (modelSelect) {
+
+  modelSelect.addEventListener(
+    "change",
+    () => {
+
+      state.model =
+        modelSelect.value;
+
+
+      localStorage.setItem(
+        "tmd_model",
+        state.model
+      );
+
+
+      updateModelUI();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+if (openSidebar) {
+
+  openSidebar.addEventListener(
+    "click",
+    () => {
+
+      sidebar?.classList.add(
+        "open"
+      );
+
+    }
+  );
+
+}
+
+
+if (closeSidebar) {
+
+  closeSidebar.addEventListener(
+    "click",
+    closeMobileSidebar
+  );
+
+}
+
+
+function closeMobileSidebar() {
+
+  sidebar?.classList.remove(
+    "open"
+  );
+
+}
+
+
+/* =========================================================
+   GLOBAL ESCAPE
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Escape"
+    ) {
+
+      closeSettings();
+
+      plusMenu?.classList.add(
+        "hidden"
+      );
+
+      closeMobileSidebar();
+
+    }
+
+  }
+);
