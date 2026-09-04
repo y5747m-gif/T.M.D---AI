@@ -1,2207 +1,3038 @@
-"use strict";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-/*
-===========================================================
- T.M.D AI
- Frontend Application
- Groq Only
-===========================================================
-*/
+<head>
 
+  <meta charset="UTF-8">
 
-const state = {
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  messages:
-    JSON.parse(
-      localStorage.getItem("tmd_messages") || "[]"
-    ),
+  <meta
+    name="theme-color"
+    content="#0b0d10"
+  >
 
-  conversations:
-    JSON.parse(
-      localStorage.getItem("tmd_conversations") || "[]"
-    ),
+  <meta
+    name="description"
+    content="T.M.D AI - مساعد ذكاء اصطناعي يعمل بواسطة Groq"
+  >
 
-  theme:
-    localStorage.getItem("tmd_theme") || "dark",
+  <title>T.M.D AI</title>
 
-  model:
-    localStorage.getItem("tmd_model") ||
-    "llama-3.1-8b-instant",
 
-  busy: false,
+  <!-- =====================================================
+       Fonts
+  ====================================================== -->
 
-  controller: null,
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
 
-  selectedImage: null,
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
 
-  selectedDocument: null,
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
 
-  imageMode: "analyze"
 
-};
+  <!-- =====================================================
+       PDF.js
+  ====================================================== -->
 
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs"
+    type="module"
+  ></script>
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
 
-const chat =
-  document.getElementById("chat");
+  <!-- =====================================================
+       Mammoth DOCX
+  ====================================================== -->
 
-const welcome =
-  document.getElementById("welcome");
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"
+  ></script>
 
-const input =
-  document.getElementById("input");
 
-const sendButton =
-  document.getElementById("send");
+  <!-- =====================================================
+       Application CSS
+  ====================================================== -->
 
-const plusButton =
-  document.getElementById("plusButton");
+  <style>
 
-const plusMenu =
-  document.getElementById("plusMenu");
+    /* =====================================================
+       VARIABLES
+    ====================================================== */
 
-const imageInput =
-  document.getElementById("imageInput");
+    :root {
 
-const documentInput =
-  document.getElementById("documentInput");
+      --bg:
+        #0b0d10;
 
-const addImageButton =
-  document.getElementById("addImageButton");
+      --bg-secondary:
+        #111419;
 
-const analyzeDocumentButton =
-  document.getElementById(
-    "analyzeDocumentButton"
-  );
+      --panel:
+        #14181e;
 
-const imageEditButton =
-  document.getElementById(
-    "imageEditButton"
-  );
+      --panel-2:
+        #191e25;
 
-const imagePreviewContainer =
-  document.getElementById(
-    "imagePreviewContainer"
-  );
+      --border:
+        rgba(255,255,255,.08);
 
-const imagePreview =
-  document.getElementById(
-    "imagePreview"
-  );
+      --border-strong:
+        rgba(255,255,255,.14);
 
-const imageFileName =
-  document.getElementById(
-    "imageFileName"
-  );
+      --text:
+        #f5f7fa;
 
-const imageModeLabel =
-  document.getElementById(
-    "imageModeLabel"
-  );
+      --muted:
+        #9ca5b1;
 
-const removeImage =
-  document.getElementById(
-    "removeImage"
-  );
+      --muted-2:
+        #707985;
 
-const history =
-  document.getElementById("history");
+      --accent:
+        #21c47b;
 
-const newChat =
-  document.getElementById("newChat");
+      --accent-hover:
+        #29d487;
 
-const settingsBtn =
-  document.getElementById(
-    "settingsBtn"
-  );
+      --danger:
+        #ef5350;
 
-const modalBackdrop =
-  document.getElementById(
-    "modalBackdrop"
-  );
+      --user:
+        #1b222b;
 
-const modalClose =
-  document.getElementById(
-    "modalClose"
-  );
+      --assistant:
+        transparent;
 
-const themeSelect =
-  document.getElementById(
-    "themeSelect"
-  );
+      --sidebar:
+        #101318;
 
-const modelSelect =
-  document.getElementById(
-    "modelSelect"
-  );
+      --shadow:
+        0 20px 60px rgba(0,0,0,.35);
 
-const themeTop =
-  document.getElementById(
-    "themeTop"
-  );
-
-const modelName =
-  document.getElementById(
-    "modelName"
-  );
-
-const toast =
-  document.getElementById(
-    "toast"
-  );
-
-const sidebar =
-  document.getElementById(
-    "sidebar"
-  );
-
-const openSidebar =
-  document.getElementById(
-    "openSidebar"
-  );
-
-const closeSidebar =
-  document.getElementById(
-    "closeSidebar"
-  );
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    applyTheme();
-
-    updateModelUI();
-
-    renderHistory();
-
-    renderMessages();
-
-    setupTextarea();
-
-  }
-);
-
-
-/* =========================================================
-   THEME
-========================================================= */
-
-function applyTheme() {
-
-  document.documentElement.dataset.theme =
-    state.theme;
-
-  document.body.dataset.theme =
-    state.theme;
-
-  if (themeSelect) {
-    themeSelect.value =
-      state.theme;
-  }
-
-}
-
-
-function toggleTheme() {
-
-  state.theme =
-    state.theme === "dark"
-      ? "light"
-      : "dark";
-
-  localStorage.setItem(
-    "tmd_theme",
-    state.theme
-  );
-
-  applyTheme();
-
-}
-
-
-/* =========================================================
-   MODEL
-========================================================= */
-
-function updateModelUI() {
-
-  if (modelSelect) {
-
-    modelSelect.value =
-      state.model;
-
-  }
-
-
-  if (!modelName) {
-    return;
-  }
-
-
-  const names = {
-
-    "llama-3.1-8b-instant":
-      "T.M.D Fast",
-
-    "llama-3.3-70b-versatile":
-      "T.M.D Pro",
-
-    "meta-llama/llama-4-scout-17b-16e-instruct":
-      "T.M.D Vision"
-
-  };
-
-
-  modelName.textContent =
-    names[state.model] ||
-    "T.M.D AI";
-
-}
-
-
-/* =========================================================
-   LOCAL STORAGE
-========================================================= */
-
-function saveMessages() {
-
-  localStorage.setItem(
-    "tmd_messages",
-    JSON.stringify(
-      state.messages
-    )
-  );
-
-}
-
-
-function saveConversations() {
-
-  localStorage.setItem(
-    "tmd_conversations",
-    JSON.stringify(
-      state.conversations
-    )
-  );
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(message) {
-
-  if (!toast) {
-    return;
-  }
-
-
-  toast.textContent =
-    message;
-
-  toast.classList.add(
-    "show"
-  );
-
-
-  setTimeout(
-    () => {
-
-      toast.classList.remove(
-        "show"
-      );
-
-    },
-    3000
-  );
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(text) {
-
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-
-/* =========================================================
-   MARKDOWN
-========================================================= */
-
-function renderMarkdown(text) {
-
-  let html =
-    escapeHTML(text);
-
-
-  html =
-    html.replace(
-      /```([\s\S]*?)```/g,
-      (_, code) => {
-
-        return `
-          <pre class="code-block">
-            <code>${code.trim()}</code>
-          </pre>
-        `;
-
-      }
-    );
-
-
-  html =
-    html.replace(
-      /`([^`]+)`/g,
-      "<code>$1</code>"
-    );
-
-
-  html =
-    html.replace(
-      /^### (.*)$/gm,
-      "<h4>$1</h4>"
-    );
-
-
-  html =
-    html.replace(
-      /^## (.*)$/gm,
-      "<h3>$1</h3>"
-    );
-
-
-  html =
-    html.replace(
-      /^# (.*)$/gm,
-      "<h2>$1</h2>"
-    );
-
-
-  html =
-    html.replace(
-      /\*\*(.*?)\*\*/g,
-      "<strong>$1</strong>"
-    );
-
-
-  html =
-    html.replace(
-      /\*(.*?)\*/g,
-      "<em>$1</em>"
-    );
-
-
-  html =
-    html.replace(
-      /^\- (.*)$/gm,
-      "<li>$1</li>"
-    );
-
-
-  html =
-    html.replace(
-      /\n/g,
-      "<br>"
-    );
-
-
-  return html;
-
-}
-
-
-/* =========================================================
-   RENDER MESSAGES
-========================================================= */
-
-function renderMessages() {
-
-  if (!chat) {
-    return;
-  }
-
-
-  chat.innerHTML = "";
-
-
-  if (
-    !state.messages.length
-  ) {
-
-    if (welcome) {
-
-      chat.appendChild(
-        welcome
-      );
+      --radius:
+        18px;
 
     }
 
-    return;
 
-  }
+    /* =====================================================
+       LIGHT THEME
+    ===================================================== */
 
+    [data-theme="light"] {
 
-  state.messages.forEach(
-    message => {
+      --bg:
+        #f7f8fa;
 
-      renderMessage(
-        message
-      );
+      --bg-secondary:
+        #ffffff;
 
-    }
-  );
+      --panel:
+        #ffffff;
 
+      --panel-2:
+        #f1f3f5;
 
-  scrollToBottom();
+      --border:
+        rgba(0,0,0,.08);
 
-}
+      --border-strong:
+        rgba(0,0,0,.14);
 
+      --text:
+        #16191d;
 
-function renderMessage(message) {
+      --muted:
+        #69717c;
 
-  const wrapper =
-    document.createElement(
-      "div"
-    );
+      --muted-2:
+        #8b929c;
 
+      --user:
+        #eef1f4;
 
-  wrapper.className =
-    `message ${
-      message.role === "user"
-        ? "user-message"
-        : "assistant-message"
-    }`;
+      --assistant:
+        transparent;
 
+      --sidebar:
+        #f0f2f4;
 
-  const bubble =
-    document.createElement(
-      "div"
-    );
-
-
-  bubble.className =
-    "message-bubble";
-
-
-  if (
-    message.role === "assistant"
-  ) {
-
-    bubble.innerHTML =
-      renderMarkdown(
-        message.content || ""
-      );
-
-  } else {
-
-    bubble.textContent =
-      message.content || "";
-
-  }
-
-
-  wrapper.appendChild(
-    bubble
-  );
-
-
-  chat.appendChild(
-    wrapper
-  );
-
-}
-
-
-/* =========================================================
-   SCROLL
-========================================================= */
-
-function scrollToBottom() {
-
-  if (!chat) {
-    return;
-  }
-
-
-  chat.scrollTop =
-    chat.scrollHeight;
-
-}
-
-
-/* =========================================================
-   TEXTAREA
-========================================================= */
-
-function setupTextarea() {
-
-  if (!input) {
-    return;
-  }
-
-
-  input.addEventListener(
-    "input",
-    () => {
-
-      input.style.height =
-        "auto";
-
-      input.style.height =
-        Math.min(
-          input.scrollHeight,
-          220
-        ) + "px";
+      --shadow:
+        0 20px 60px rgba(0,0,0,.12);
 
     }
-  );
 
 
-  input.addEventListener(
-    "keydown",
-    event => {
+    /* =====================================================
+       RESET
+    ====================================================== */
 
-      if (
-        event.key === "Enter" &&
-        !event.shiftKey
-      ) {
+    * {
 
-        event.preventDefault();
+      box-sizing:
+        border-box;
 
-        sendCurrentMessage();
+      margin:
+        0;
 
-      }
+      padding:
+        0;
 
     }
-  );
-
-}
 
 
-/* =========================================================
-   SEND CURRENT MESSAGE
-========================================================= */
+    html {
 
-async function sendCurrentMessage() {
+      width:
+        100%;
 
-  if (state.busy) {
-    return;
-  }
+      height:
+        100%;
 
+      background:
+        var(--bg);
 
-  const text =
-    input?.value.trim() || "";
-
-
-  /*
-   * إذا توجد صورة
-   */
-
-  if (
-    state.selectedImage
-  ) {
-
-    await analyzeSelectedImage(
-      text
-    );
-
-    return;
-
-  }
+    }
 
 
-  /*
-   * إذا يوجد ملف
-   */
+    body {
 
-  if (
-    state.selectedDocument
-  ) {
+      width:
+        100%;
 
-    await analyzeSelectedDocument(
-      text
-    );
+      height:
+        100%;
 
-    return;
+      overflow:
+        hidden;
 
-  }
+      font-family:
+        "Cairo",
+        Arial,
+        sans-serif;
 
+      background:
+        var(--bg);
 
-  /*
-   * رسالة عادية
-   */
+      color:
+        var(--text);
 
-  if (!text) {
-    return;
-  }
+      transition:
+        background .2s ease,
+        color .2s ease;
 
-
-  input.value = "";
-
-  input.style.height =
-    "auto";
+    }
 
 
-  const userMessage = {
+    button,
+    input,
+    textarea,
+    select {
 
-    role: "user",
+      font:
+        inherit;
 
-    content: text
-
-  };
-
-
-  state.messages.push(
-    userMessage
-  );
+    }
 
 
-  saveMessages();
+    button {
 
-  renderMessages();
+      border:
+        0;
 
-  renderHistory();
+      cursor:
+        pointer;
 
-
-  await requestGroq();
-
-}
-
-
-/* =========================================================
-   GROQ CHAT
-========================================================= */
-
-async function requestGroq() {
-
-  setBusy(true);
+    }
 
 
-  try {
+    ::selection {
 
-    const controller =
-      new AbortController();
+      background:
+        rgba(33,196,123,.25);
 
-
-    state.controller =
-      controller;
+    }
 
 
-    const response =
-      await fetch(
-        "/api/chat",
-        {
+    /* =====================================================
+       APP
+    ====================================================== */
 
-          method: "POST",
+    .app {
 
-          headers: {
+      width:
+        100%;
 
-            "Content-Type":
-              "application/json"
+      height:
+        100vh;
 
-          },
+      display:
+        flex;
 
-          body:
-            JSON.stringify({
+      position:
+        relative;
 
-              model:
-                state.model,
+      overflow:
+        hidden;
 
-              messages:
-                state.messages
-
-            }),
-
-          signal:
-            controller.signal
-
-        }
-      );
+    }
 
 
-    const data =
-      await response
-        .json()
-        .catch(
-          () => ({})
+    /* =====================================================
+       SIDEBAR
+    ====================================================== */
+
+    .sidebar {
+
+      width:
+        285px;
+
+      height:
+        100%;
+
+      flex:
+        0 0 285px;
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      background:
+        var(--sidebar);
+
+      border-left:
+        1px solid var(--border);
+
+      position:
+        relative;
+
+      z-index:
+        50;
+
+      transition:
+        transform .25s ease;
+
+    }
+
+
+    .sidebar-header {
+
+      padding:
+        18px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      border-bottom:
+        1px solid var(--border);
+
+    }
+
+
+    .brand {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        11px;
+
+    }
+
+
+    .brand-logo {
+
+      width:
+        42px;
+
+      height:
+        42px;
+
+      border-radius:
+        13px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--accent),
+          #159a61
         );
 
+      color:
+        #fff;
 
-    if (
-      !response.ok ||
-      !data.ok
-    ) {
+      font-size:
+        16px;
 
-      throw new Error(
-        data.error ||
-        `خطأ HTTP ${response.status}`
-      );
+      font-weight:
+        800;
 
-    }
-
-
-    const reply =
-      data.reply ||
-      data.message;
-
-
-    if (!reply) {
-
-      throw new Error(
-        "لم يصل رد من Groq."
-      );
+      box-shadow:
+        0 8px 25px rgba(33,196,123,.18);
 
     }
 
 
-    state.messages.push({
+    .brand-info {
 
-      role:
-        "assistant",
+      display:
+        flex;
 
-      content:
-        reply
+      flex-direction:
+        column;
 
-    });
-
-
-    saveMessages();
-
-    renderMessages();
-
-    renderHistory();
-
-
-  } catch (error) {
-
-    if (
-      error.name ===
-      "AbortError"
-    ) {
-
-      return;
+      line-height:
+        1.25;
 
     }
 
 
-    console.error(
-      error
-    );
+    .brand-name {
 
+      font-size:
+        17px;
 
-    showToast(
-      error.message ||
-      "حدث خطأ أثناء الاتصال بـ Groq."
-    );
-
-
-  } finally {
-
-    state.controller =
-      null;
-
-    setBusy(false);
-
-  }
-
-}
-
-
-/* =========================================================
-   BUSY
-========================================================= */
-
-function setBusy(value) {
-
-  state.busy =
-    value;
-
-
-  if (!sendButton) {
-    return;
-  }
-
-
-  sendButton.disabled =
-    value;
-
-
-  if (value) {
-
-    sendButton.textContent =
-      "…";
-
-  } else {
-
-    sendButton.textContent =
-      "↑";
-
-  }
-
-}
-
-
-/* =========================================================
-   PLUS MENU
-========================================================= */
-
-if (plusButton) {
-
-  plusButton.addEventListener(
-    "click",
-    event => {
-
-      event.stopPropagation();
-
-      plusMenu?.classList.toggle(
-        "hidden"
-      );
-
-      plusButton.setAttribute(
-        "aria-expanded",
-        plusMenu &&
-        !plusMenu.classList.contains(
-          "hidden"
-        )
-      );
-
-    }
-  );
-
-}
-
-
-document.addEventListener(
-  "click",
-  event => {
-
-    if (
-      plusMenu &&
-      !plusMenu.contains(event.target) &&
-      event.target !== plusButton
-    ) {
-
-      plusMenu.classList.add(
-        "hidden"
-      );
+      font-weight:
+        800;
 
     }
 
-  }
-);
 
+    .brand-sub {
 
-/* =========================================================
-   IMAGE INPUT
-========================================================= */
+      color:
+        var(--muted);
 
-if (addImageButton) {
+      font-size:
+        11px;
 
-  addImageButton.addEventListener(
-    "click",
-    () => {
-
-      plusMenu?.classList.add(
-        "hidden"
-      );
-
-      imageMode =
-        "analyze";
-
-      imageInput?.click();
+      margin-top:
+        3px;
 
     }
-  );
-
-}
 
 
-if (imageEditButton) {
+    .icon-button {
 
-  imageEditButton.addEventListener(
-    "click",
-    () => {
+      width:
+        38px;
 
-      plusMenu?.classList.add(
-        "hidden"
-      );
+      height:
+        38px;
 
-      state.imageMode =
-        "edit";
+      border-radius:
+        11px;
 
-      imageMode =
-        "edit";
+      display:
+        grid;
 
-      imageInput?.click();
+      place-items:
+        center;
+
+      background:
+        transparent;
+
+      color:
+        var(--muted);
+
+      transition:
+        .18s ease;
 
     }
-  );
-
-}
 
 
-/* =========================================================
-   IMAGE CHANGE
-========================================================= */
+    .icon-button:hover {
 
-if (imageInput) {
+      background:
+        var(--panel-2);
 
-  imageInput.addEventListener(
-    "change",
-    async event => {
+      color:
+        var(--text);
 
-      const file =
-        event.target.files?.[0];
+    }
 
 
-      if (!file) {
-        return;
-      }
+    .new-chat {
+
+      margin:
+        16px;
+
+      min-height:
+        46px;
+
+      border-radius:
+        13px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      gap:
+        9px;
+
+      background:
+        var(--accent);
+
+      color:
+        #07130d;
+
+      font-size:
+        14px;
+
+      font-weight:
+        800;
+
+      transition:
+        .18s ease;
+
+    }
 
 
-      if (
-        !file.type.startsWith(
-          "image/"
-        )
-      ) {
+    .new-chat:hover {
 
-        showToast(
-          "الملف المختار ليس صورة."
+      background:
+        var(--accent-hover);
+
+      transform:
+        translateY(-1px);
+
+    }
+
+
+    .history-title {
+
+      padding:
+        2px 18px 10px;
+
+      color:
+        var(--muted-2);
+
+      font-size:
+        11px;
+
+      font-weight:
+        700;
+
+    }
+
+
+    .history {
+
+      flex:
+        1;
+
+      overflow:
+        auto;
+
+      padding:
+        0 10px 12px;
+
+    }
+
+
+    .history::-webkit-scrollbar {
+
+      width:
+        5px;
+
+    }
+
+
+    .history::-webkit-scrollbar-thumb {
+
+      background:
+        var(--border-strong);
+
+      border-radius:
+        10px;
+
+    }
+
+
+    .history-item {
+
+      width:
+        100%;
+
+      padding:
+        11px 12px;
+
+      margin-bottom:
+        5px;
+
+      border-radius:
+        11px;
+
+      text-align:
+        right;
+
+      white-space:
+        nowrap;
+
+      overflow:
+        hidden;
+
+      text-overflow:
+        ellipsis;
+
+      background:
+        transparent;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+      transition:
+        .18s ease;
+
+    }
+
+
+    .history-item:hover,
+    .history-item.active {
+
+      background:
+        var(--panel-2);
+
+      color:
+        var(--text);
+
+    }
+
+
+    .sidebar-footer {
+
+      padding:
+        13px;
+
+      border-top:
+        1px solid var(--border);
+
+      display:
+        flex;
+
+      gap:
+        7px;
+
+    }
+
+
+    .footer-button {
+
+      flex:
+        1;
+
+      min-height:
+        40px;
+
+      border-radius:
+        10px;
+
+      background:
+        transparent;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+    }
+
+
+    .footer-button:hover {
+
+      background:
+        var(--panel-2);
+
+      color:
+        var(--text);
+
+    }
+
+
+    /* =====================================================
+       MAIN
+    ====================================================== */
+
+    .main {
+
+      min-width:
+        0;
+
+      flex:
+        1;
+
+      height:
+        100%;
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      background:
+        var(--bg);
+
+    }
+
+
+    /* =====================================================
+       TOPBAR
+    ====================================================== */
+
+    .topbar {
+
+      height:
+        66px;
+
+      flex:
+        0 0 66px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      padding:
+        0 20px;
+
+      border-bottom:
+        1px solid var(--border);
+
+      background:
+        color-mix(
+          in srgb,
+          var(--bg) 94%,
+          transparent
         );
 
-        return;
+      backdrop-filter:
+        blur(15px);
 
-      }
+      position:
+        relative;
 
-
-      if (
-        file.size >
-        20 * 1024 * 1024
-      ) {
-
-        showToast(
-          "الصورة كبيرة جدًا. الحد الأقصى 20MB."
-        );
-
-        return;
-
-      }
-
-
-      state.selectedImage =
-        file;
-
-
-      showImagePreview(
-        file
-      );
+      z-index:
+        20;
 
     }
-  );
-
-}
 
 
-/* =========================================================
-   IMAGE PREVIEW
-========================================================= */
+    .topbar-right {
 
-function showImagePreview(file) {
+      display:
+        flex;
 
-  if (!imagePreviewContainer) {
-    return;
-  }
+      align-items:
+        center;
 
-
-  const url =
-    URL.createObjectURL(
-      file
-    );
-
-
-  if (imagePreview) {
-
-    imagePreview.src =
-      url;
-
-  }
-
-
-  if (imageFileName) {
-
-    imageFileName.textContent =
-      file.name;
-
-  }
-
-
-  if (imageModeLabel) {
-
-    imageModeLabel.textContent =
-      imageMode === "edit"
-        ? "تعديل الصورة"
-        : "تحليل الصورة";
-
-  }
-
-
-  imagePreviewContainer
-    .classList
-    .remove(
-      "hidden"
-    );
-
-}
-
-
-/* =========================================================
-   REMOVE IMAGE
-========================================================= */
-
-if (removeImage) {
-
-  removeImage.addEventListener(
-    "click",
-    () => {
-
-      clearImage();
+      gap:
+        9px;
 
     }
-  );
-
-}
 
 
-function clearImage() {
+    .mobile-menu {
 
-  state.selectedImage =
-    null;
+      display:
+        none;
 
-
-  if (imageInput) {
-
-    imageInput.value =
-      "";
-
-  }
+    }
 
 
-  if (imagePreview) {
+    .model-selector {
 
-    imagePreview.src =
-      "";
+      min-width:
+        190px;
 
-  }
+      height:
+        42px;
 
+      padding:
+        0 12px;
 
-  imagePreviewContainer
-    ?.classList
-    .add(
-      "hidden"
-    );
+      border:
+        1px solid var(--border);
 
-}
+      border-radius:
+        12px;
 
+      display:
+        flex;
 
-/* =========================================================
-   IMAGE ANALYSIS
-========================================================= */
+      align-items:
+        center;
 
-async function analyzeSelectedImage(
-  prompt
-) {
+      gap:
+        8px;
 
-  const file =
-    state.selectedImage;
+      background:
+        var(--panel);
 
-
-  if (!file) {
-    return;
-  }
+    }
 
 
-  setBusy(true);
+    .model-dot {
+
+      width:
+        8px;
+
+      height:
+        8px;
+
+      flex:
+        0 0 8px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--accent);
+
+      box-shadow:
+        0 0 0 4px rgba(33,196,123,.09);
+
+    }
 
 
-  try {
+    .model-selector select {
 
-    const base64 =
-      await fileToDataURL(
-        file
-      );
+      width:
+        100%;
 
+      border:
+        0;
 
-    const userText =
-      prompt ||
-      "حلل هذه الصورة بالتفصيل، واشرح ما يظهر فيها واقرأ النصوص الواضحة داخلها.";
+      outline:
+        0;
 
+      background:
+        transparent;
 
-    state.messages.push({
+      color:
+        var(--text);
 
-      role:
-        "user",
+      cursor:
+        pointer;
 
-      content:
-        userText
+      font-size:
+        12px;
 
-    });
+      appearance:
+        none;
 
-
-    saveMessages();
-
-    renderMessages();
-
-
-    const response =
-      await fetch(
-        "/api/image",
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-          body:
-            JSON.stringify({
-
-              image:
-                base64,
-
-              prompt:
-                userText
-
-            })
-
-        }
-      );
+    }
 
 
-    const data =
-      await response
-        .json()
-        .catch(
-          () => ({})
+    .model-selector option {
+
+      background:
+        var(--panel);
+
+      color:
+        var(--text);
+
+    }
+
+
+    .top-actions {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        5px;
+
+    }
+
+
+    /* =====================================================
+       CHAT
+    ====================================================== */
+
+    .chat {
+
+      flex:
+        1;
+
+      overflow:
+        auto;
+
+      padding:
+        35px 20px 180px;
+
+      scroll-behavior:
+        smooth;
+
+    }
+
+
+    .chat::-webkit-scrollbar {
+
+      width:
+        7px;
+
+    }
+
+
+    .chat::-webkit-scrollbar-thumb {
+
+      background:
+        var(--border-strong);
+
+      border-radius:
+        20px;
+
+    }
+
+
+    .chat-inner {
+
+      width:
+        min(900px, 100%);
+
+      margin:
+        auto;
+
+    }
+
+
+    /* =====================================================
+       WELCOME
+    ====================================================== */
+
+    .welcome {
+
+      min-height:
+        calc(100vh - 300px);
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      flex-direction:
+        column;
+
+      text-align:
+        center;
+
+      padding:
+        50px 20px;
+
+    }
+
+
+    .welcome-logo {
+
+      width:
+        76px;
+
+      height:
+        76px;
+
+      border-radius:
+        24px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--accent),
+          #128a55
         );
 
+      color:
+        white;
 
-    if (
-      !response.ok ||
-      !data.ok
+      font-size:
+        23px;
+
+      font-weight:
+        800;
+
+      box-shadow:
+        0 20px 50px rgba(33,196,123,.18);
+
+      margin-bottom:
+        22px;
+
+    }
+
+
+    .welcome h1 {
+
+      font-size:
+        clamp(26px, 4vw, 38px);
+
+      font-weight:
+        800;
+
+      letter-spacing:
+        -.7px;
+
+    }
+
+
+    .welcome p {
+
+      max-width:
+        620px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        14px;
+
+      line-height:
+        1.9;
+
+      margin-top:
+        10px;
+
+    }
+
+
+    .welcome-cards {
+
+      width:
+        min(720px, 100%);
+
+      margin-top:
+        30px;
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      gap:
+        10px;
+
+    }
+
+
+    .welcome-card {
+
+      padding:
+        16px;
+
+      border:
+        1px solid var(--border);
+
+      background:
+        var(--panel);
+
+      border-radius:
+        15px;
+
+      text-align:
+        right;
+
+      transition:
+        .18s ease;
+
+    }
+
+
+    .welcome-card:hover {
+
+      transform:
+        translateY(-2px);
+
+      border-color:
+        var(--border-strong);
+
+    }
+
+
+    .welcome-card-icon {
+
+      font-size:
+        20px;
+
+      margin-bottom:
+        9px;
+
+    }
+
+
+    .welcome-card strong {
+
+      display:
+        block;
+
+      font-size:
+        13px;
+
+    }
+
+
+    .welcome-card span {
+
+      display:
+        block;
+
+      margin-top:
+        4px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+
+      line-height:
+        1.7;
+
+    }
+
+
+    /* =====================================================
+       MESSAGES
+    ====================================================== */
+
+    .message {
+
+      width:
+        100%;
+
+      display:
+        flex;
+
+      margin-bottom:
+        24px;
+
+    }
+
+
+    .user-message {
+
+      justify-content:
+        flex-start;
+
+    }
+
+
+    .assistant-message {
+
+      justify-content:
+        flex-end;
+
+    }
+
+
+    .message-bubble {
+
+      max-width:
+        min(780px, 92%);
+
+      padding:
+        13px 16px;
+
+      border-radius:
+        17px;
+
+      font-size:
+        14px;
+
+      line-height:
+        1.9;
+
+      overflow:
+        hidden;
+
+    }
+
+
+    .user-message .message-bubble {
+
+      background:
+        var(--user);
+
+      border:
+        1px solid var(--border);
+
+      border-bottom-left-radius:
+        5px;
+
+    }
+
+
+    .assistant-message .message-bubble {
+
+      background:
+        var(--assistant);
+
+      border-bottom-right-radius:
+        5px;
+
+    }
+
+
+    .message-bubble h2,
+    .message-bubble h3,
+    .message-bubble h4 {
+
+      margin:
+        10px 0 6px;
+
+    }
+
+
+    .message-bubble strong {
+
+      font-weight:
+        800;
+
+    }
+
+
+    .message-bubble code {
+
+      padding:
+        2px 6px;
+
+      border-radius:
+        6px;
+
+      background:
+        var(--panel-2);
+
+      font-family:
+        Consolas,
+        monospace;
+
+      font-size:
+        12px;
+
+    }
+
+
+    .code-block {
+
+      direction:
+        ltr;
+
+      text-align:
+        left;
+
+      overflow:
+        auto;
+
+      margin:
+        12px 0;
+
+      padding:
+        15px;
+
+      border-radius:
+        12px;
+
+      background:
+        #090b0e;
+
+      color:
+        #e8edf2;
+
+      border:
+        1px solid rgba(255,255,255,.08);
+
+    }
+
+
+    .code-block code {
+
+      padding:
+        0;
+
+      background:
+        transparent;
+
+      color:
+        inherit;
+
+    }
+
+
+    /* =====================================================
+       COMPOSER
+    ====================================================== */
+
+    .composer-wrap {
+
+      position:
+        absolute;
+
+      bottom:
+        0;
+
+      right:
+        0;
+
+      left:
+        0;
+
+      padding:
+        18px 20px 20px;
+
+      background:
+        linear-gradient(
+          to bottom,
+          transparent,
+          var(--bg) 28%
+        );
+
+      pointer-events:
+        none;
+
+    }
+
+
+    .composer {
+
+      width:
+        min(900px, 100%);
+
+      margin:
+        auto;
+
+      position:
+        relative;
+
+      pointer-events:
+        auto;
+
+    }
+
+
+    .input-shell {
+
+      min-height:
+        62px;
+
+      display:
+        flex;
+
+      align-items:
+        flex-end;
+
+      gap:
+        9px;
+
+      padding:
+        9px;
+
+      border:
+        1px solid var(--border-strong);
+
+      border-radius:
+        19px;
+
+      background:
+        color-mix(
+          in srgb,
+          var(--panel) 94%,
+          transparent
+        );
+
+      box-shadow:
+        var(--shadow);
+
+      backdrop-filter:
+        blur(18px);
+
+    }
+
+
+    .input-shell:focus-within {
+
+      border-color:
+        rgba(33,196,123,.4);
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.3),
+        0 0 0 3px rgba(33,196,123,.06);
+
+    }
+
+
+    .input-area {
+
+      flex:
+        1;
+
+      min-width:
+        0;
+
+      max-height:
+        220px;
+
+      resize:
+        none;
+
+      border:
+        0;
+
+      outline:
+        0;
+
+      background:
+        transparent;
+
+      color:
+        var(--text);
+
+      padding:
+        9px 7px;
+
+      line-height:
+        1.7;
+
+      font-size:
+        14px;
+
+    }
+
+
+    .input-area::placeholder {
+
+      color:
+        var(--muted-2);
+
+    }
+
+
+    .circle-button {
+
+      width:
+        43px;
+
+      height:
+        43px;
+
+      flex:
+        0 0 43px;
+
+      border-radius:
+        13px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      background:
+        var(--panel-2);
+
+      color:
+        var(--text);
+
+      border:
+        1px solid var(--border);
+
+      transition:
+        .18s ease;
+
+    }
+
+
+    .circle-button:hover {
+
+      background:
+        var(--border-strong);
+
+    }
+
+
+    .send-button {
+
+      background:
+        var(--accent);
+
+      color:
+        #06130c;
+
+      font-size:
+        20px;
+
+      font-weight:
+        900;
+
+    }
+
+
+    .send-button:hover {
+
+      background:
+        var(--accent-hover);
+
+    }
+
+
+    .send-button:disabled {
+
+      opacity:
+        .5;
+
+      cursor:
+        not-allowed;
+
+    }
+
+
+    .composer-note {
+
+      text-align:
+        center;
+
+      color:
+        var(--muted-2);
+
+      font-size:
+        10px;
+
+      margin-top:
+        8px;
+
+    }
+
+
+    /* =====================================================
+       PLUS MENU
+    ====================================================== */
+
+    .plus-menu {
+
+      position:
+        absolute;
+
+      bottom:
+        72px;
+
+      right:
+        0;
+
+      width:
+        250px;
+
+      padding:
+        8px;
+
+      border:
+        1px solid var(--border-strong);
+
+      border-radius:
+        15px;
+
+      background:
+        var(--panel);
+
+      box-shadow:
+        var(--shadow);
+
+      z-index:
+        100;
+
+    }
+
+
+    .plus-menu.hidden {
+
+      display:
+        none;
+
+    }
+
+
+    .plus-menu-title {
+
+      padding:
+        8px 10px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        10px;
+
+      font-weight:
+        700;
+
+    }
+
+
+    .plus-option {
+
+      width:
+        100%;
+
+      padding:
+        11px 10px;
+
+      border-radius:
+        10px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        11px;
+
+      background:
+        transparent;
+
+      color:
+        var(--text);
+
+      text-align:
+        right;
+
+    }
+
+
+    .plus-option:hover {
+
+      background:
+        var(--panel-2);
+
+    }
+
+
+    .plus-option-icon {
+
+      width:
+        35px;
+
+      height:
+        35px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      border-radius:
+        10px;
+
+      background:
+        var(--panel-2);
+
+      font-size:
+        16px;
+
+    }
+
+
+    .plus-option-content {
+
+      flex:
+        1;
+
+    }
+
+
+    .plus-option-title {
+
+      display:
+        block;
+
+      font-size:
+        12px;
+
+      font-weight:
+        700;
+
+    }
+
+
+    .plus-option-desc {
+
+      display:
+        block;
+
+      color:
+        var(--muted);
+
+      font-size:
+        9px;
+
+      margin-top:
+        2px;
+
+    }
+
+
+    /* =====================================================
+       FILE PREVIEW
+    ====================================================== */
+
+    .preview {
+
+      width:
+        min(900px, 100%);
+
+      margin:
+        0 auto 8px;
+
+      padding:
+        9px;
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        14px;
+
+      background:
+        var(--panel);
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+    }
+
+
+    .preview.hidden {
+
+      display:
+        none;
+
+    }
+
+
+    .preview-image {
+
+      width:
+        50px;
+
+      height:
+        50px;
+
+      object-fit:
+        cover;
+
+      border-radius:
+        10px;
+
+      background:
+        var(--panel-2);
+
+    }
+
+
+    .preview-info {
+
+      min-width:
+        0;
+
+      flex:
+        1;
+
+    }
+
+
+    .preview-name {
+
+      display:
+        block;
+
+      overflow:
+        hidden;
+
+      white-space:
+        nowrap;
+
+      text-overflow:
+        ellipsis;
+
+      font-size:
+        12px;
+
+      font-weight:
+        700;
+
+    }
+
+
+    .preview-mode {
+
+      display:
+        block;
+
+      color:
+        var(--muted);
+
+      font-size:
+        10px;
+
+      margin-top:
+        2px;
+
+    }
+
+
+    .preview-remove {
+
+      width:
+        32px;
+
+      height:
+        32px;
+
+      border-radius:
+        9px;
+
+      background:
+        transparent;
+
+      color:
+        var(--muted);
+
+    }
+
+
+    .preview-remove:hover {
+
+      background:
+        rgba(239,83,80,.1);
+
+      color:
+        var(--danger);
+
+    }
+
+
+    /* =====================================================
+       MODAL
+    ====================================================== */
+
+    .modal-backdrop {
+
+      position:
+        fixed;
+
+      inset:
+        0;
+
+      z-index:
+        200;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      padding:
+        20px;
+
+      background:
+        rgba(0,0,0,.55);
+
+      backdrop-filter:
+        blur(8px);
+
+    }
+
+
+    .modal-backdrop.hidden {
+
+      display:
+        none;
+
+    }
+
+
+    .modal {
+
+      width:
+        min(500px, 100%);
+
+      border:
+        1px solid var(--border-strong);
+
+      border-radius:
+        20px;
+
+      background:
+        var(--panel);
+
+      box-shadow:
+        var(--shadow);
+
+      overflow:
+        hidden;
+
+    }
+
+
+    .modal-header {
+
+      padding:
+        18px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      border-bottom:
+        1px solid var(--border);
+
+    }
+
+
+    .modal-title {
+
+      font-size:
+        16px;
+
+      font-weight:
+        800;
+
+    }
+
+
+    .modal-body {
+
+      padding:
+        18px;
+
+    }
+
+
+    .setting {
+
+      margin-bottom:
+        18px;
+
+    }
+
+
+    .setting:last-child {
+
+      margin-bottom:
+        0;
+
+    }
+
+
+    .setting-label {
+
+      display:
+        block;
+
+      margin-bottom:
+        7px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+
+      font-weight:
+        700;
+
+    }
+
+
+    .setting select {
+
+      width:
+        100%;
+
+      height:
+        45px;
+
+      padding:
+        0 12px;
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        11px;
+
+      outline:
+        0;
+
+      background:
+        var(--panel-2);
+
+      color:
+        var(--text);
+
+      font-size:
+        12px;
+
+    }
+
+
+    /* =====================================================
+       TOAST
+    ====================================================== */
+
+    .toast {
+
+      position:
+        fixed;
+
+      left:
+        50%;
+
+      bottom:
+        30px;
+
+      transform:
+        translate(-50%, 20px);
+
+      padding:
+        11px 17px;
+
+      border:
+        1px solid var(--border-strong);
+
+      border-radius:
+        11px;
+
+      background:
+        var(--panel);
+
+      color:
+        var(--text);
+
+      box-shadow:
+        var(--shadow);
+
+      font-size:
+        12px;
+
+      opacity:
+        0;
+
+      visibility:
+        hidden;
+
+      transition:
+        .2s ease;
+
+      z-index:
+        500;
+
+    }
+
+
+    .toast.show {
+
+      opacity:
+        1;
+
+      visibility:
+        visible;
+
+      transform:
+        translate(-50%, 0);
+
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ====================================================== */
+
+    @media (
+      max-width: 800px
     ) {
 
-      throw new Error(
-        data.error ||
-        "فشل تحليل الصورة."
-      );
+      .sidebar {
 
-    }
+        position:
+          fixed;
 
+        top:
+          0;
 
-    state.messages.push({
+        bottom:
+          0;
 
-      role:
-        "assistant",
+        right:
+          0;
 
-      content:
-        data.message ||
-        data.reply ||
-        "لم يصل تحليل الصورة."
+        transform:
+          translateX(100%);
 
-    });
+        box-shadow:
+          -20px 0 50px rgba(0,0,0,.25);
 
-
-    saveMessages();
-
-    renderMessages();
-
-
-    clearImage();
-
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    showToast(
-      error.message ||
-      "حدث خطأ أثناء تحليل الصورة."
-    );
-
-  } finally {
-
-    setBusy(false);
-
-  }
-
-}
-
-
-/* =========================================================
-   FILE INPUT
-========================================================= */
-
-if (analyzeDocumentButton) {
-
-  analyzeDocumentButton.addEventListener(
-    "click",
-    () => {
-
-      plusMenu?.classList.add(
-        "hidden"
-      );
-
-      documentInput?.click();
-
-    }
-  );
-
-}
-
-
-if (documentInput) {
-
-  documentInput.addEventListener(
-    "change",
-    event => {
-
-      const file =
-        event.target.files?.[0];
-
-
-      if (!file) {
-        return;
       }
 
 
-      state.selectedDocument =
-        file;
+      .sidebar.open {
+
+        transform:
+          translateX(0);
+
+      }
 
 
-      showDocumentPreview(
-        file
-      );
+      .mobile-menu {
 
-    }
-  );
+        display:
+          grid;
 
-}
+      }
 
 
-/* =========================================================
-   DOCUMENT PREVIEW
-========================================================= */
+      .model-selector {
 
-function showDocumentPreview(file) {
+        min-width:
+          145px;
 
-  if (!imagePreviewContainer) {
-    return;
-  }
+      }
 
 
-  imagePreviewContainer
-    .classList
-    .remove(
-      "hidden"
-    );
+      .topbar {
+
+        padding:
+          0 10px;
+
+      }
 
 
-  if (imagePreview) {
+      .chat {
 
-    imagePreview.removeAttribute(
-      "src"
-    );
+        padding:
+          22px 12px 170px;
 
-  }
-
-
-  if (imageFileName) {
-
-    imageFileName.textContent =
-      file.name;
-
-  }
+      }
 
 
-  if (imageModeLabel) {
+      .composer-wrap {
 
-    imageModeLabel.textContent =
-      `ملف للتحليل — ${formatBytes(file.size)}`;
+        padding:
+          10px 10px 14px;
 
-  }
-
-}
+      }
 
 
-/* =========================================================
-   DOCUMENT ANALYSIS
-========================================================= */
+      .welcome {
 
-async function analyzeSelectedDocument(
-  prompt
-) {
+        min-height:
+          calc(100vh - 240px);
 
-  const file =
-    state.selectedDocument;
+      }
 
 
-  if (!file) {
-    return;
-  }
+      .welcome-cards {
+
+        grid-template-columns:
+          1fr;
+
+      }
 
 
-  setBusy(true);
+      .message-bubble {
 
+        max-width:
+          95%;
 
-  try {
-
-    const text =
-      await extractDocument(
-        file
-      );
-
-
-    if (!text.trim()) {
-
-      throw new Error(
-        "لم يتم العثور على نص داخل الملف."
-      );
+      }
 
     }
 
 
-    const request =
-      prompt ||
-      "حلل هذا الملف بالتفصيل، ثم قدم ملخصًا لأهم محتوياته.";
+    @media (
+      max-width: 520px
+    ) {
+
+      .model-selector {
+
+        min-width:
+          120px;
+
+      }
 
 
-    const content =
-      `
-طلب المستخدم:
-${request}
+      .model-selector select {
 
-اسم الملف:
-${file.name}
+        font-size:
+          10px;
 
-محتوى الملف:
-----------------
-${text}
-----------------
-`;
+      }
 
 
-    state.messages.push({
+      .top-actions .icon-button {
 
-      role:
-        "user",
+        width:
+          34px;
 
-      content
+        height:
+          34px;
 
-    });
-
-
-    saveMessages();
-
-    renderMessages();
+      }
 
 
-    clearDocument();
+      .brand-sub {
+
+        display:
+          none;
+
+      }
 
 
-    await requestGroq();
+      .welcome h1 {
+
+        font-size:
+          27px;
+
+      }
 
 
-  } catch (error) {
+      .welcome p {
 
-    console.error(
-      error
-    );
+        font-size:
+          12px;
 
+      }
 
-    showToast(
-      error.message ||
-      "حدث خطأ أثناء تحليل الملف."
-    );
+    }
 
-  } finally {
+  </style>
 
-    setBusy(false);
-
-  }
-
-}
+</head>
 
 
-/* =========================================================
-   EXTRACT DOCUMENT
-========================================================= */
-
-async function extractDocument(file) {
-
-  const name =
-    file.name.toLowerCase();
+<body data-theme="dark">
 
 
-  /*
-   * TXT / MD / JS / JSON / HTML / CSS
-   * PY / CSV / XML / YAML / LOG
-   */
+  <!-- =====================================================
+       APP
+  ====================================================== -->
 
-  const textExtensions = [
-
-    ".txt",
-    ".md",
-    ".js",
-    ".json",
-    ".html",
-    ".htm",
-    ".css",
-    ".py",
-    ".csv",
-    ".xml",
-    ".yaml",
-    ".yml",
-    ".log"
-
-  ];
+  <div class="app">
 
 
-  if (
-    textExtensions.some(
-      ext =>
-        name.endsWith(ext)
-    )
-  ) {
+    <!-- ===================================================
+         SIDEBAR
+    ==================================================== -->
 
-    return await file.text();
-
-  }
+    <aside
+      class="sidebar"
+      id="sidebar"
+    >
 
 
-  /*
-   * PDF
-   */
+      <div class="sidebar-header">
 
-  if (
-    name.endsWith(".pdf")
-  ) {
+        <div class="brand">
 
-    return await extractPDF(
-      file
-    );
+          <div class="brand-logo">
+            T.M.D
+          </div>
 
-  }
+          <div class="brand-info">
 
+            <span class="brand-name">
+              T.M.D AI
+            </span>
 
-  /*
-   * DOCX
-   */
+            <span class="brand-sub">
+              Powered by Groq
+            </span>
 
-  if (
-    name.endsWith(".docx")
-  ) {
+          </div>
 
-    return await extractDOCX(
-      file
-    );
-
-  }
+        </div>
 
 
-  throw new Error(
-    "نوع الملف غير مدعوم."
-  );
+        <button
+          class="icon-button"
+          id="closeSidebar"
+          type="button"
+          aria-label="إغلاق القائمة"
+        >
+          ✕
+        </button>
 
-}
+      </div>
 
 
-/* =========================================================
-   PDF
-========================================================= */
+      <button
+        class="new-chat"
+        id="newChat"
+        type="button"
+      >
 
-async function extractPDF(file) {
+        <span>
+          ＋
+        </span>
 
-  if (
-    window.pdfjsReady
-  ) {
+        محادثة جديدة
+
+      </button>
+
+
+      <div class="history-title">
+        المحادثات
+      </div>
+
+
+      <div
+        class="history"
+        id="history"
+      ></div>
+
+
+      <div class="sidebar-footer">
+
+        <button
+          class="footer-button"
+          id="settingsBtn"
+          type="button"
+        >
+          ⚙ الإعدادات
+        </button>
+
+        <button
+          class="footer-button"
+          id="themeTop"
+          type="button"
+        >
+          ◐ المظهر
+        </button>
+
+      </div>
+
+
+    </aside>
+
+
+    <!-- ===================================================
+         MAIN
+    ==================================================== -->
+
+    <main class="main">
+
+
+      <!-- =================================================
+           TOPBAR
+      ================================================== -->
+
+      <header class="topbar">
+
+
+        <div class="topbar-right">
+
+          <button
+            class="icon-button mobile-menu"
+            id="openSidebar"
+            type="button"
+            aria-label="القائمة"
+          >
+            ☰
+          </button>
+
+
+          <div class="model-selector">
+
+            <span class="model-dot"></span>
+
+            <select
+              id="modelSelect"
+              aria-label="اختيار النموذج"
+            >
+
+              <option
+                value="llama-3.1-8b-instant"
+              >
+                T.M.D Fast
+              </option>
+
+              <option
+                value="llama-3.3-70b-versatile"
+              >
+                T.M.D Pro
+              </option>
+
+              <option
+                value="meta-llama/llama-4-scout-17b-16e-instruct"
+              >
+                T.M.D Vision
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="top-actions">
+
+          <button
+            class="icon-button"
+            id="themeTopDesktop"
+            type="button"
+            aria-label="تغيير المظهر"
+            onclick="document.getElementById('themeTop')?.click()"
+          >
+            ◐
+          </button>
+
+        </div>
+
+
+      </header>
+
+
+      <!-- =================================================
+           CHAT
+      ================================================== -->
+
+      <section
+        class="chat"
+        id="chat"
+      >
+
+        <div class="chat-inner">
+
+
+          <!-- =============================================
+               WELCOME
+          ============================================== -->
+
+          <div
+            class="welcome"
+            id="welcome"
+          >
+
+            <div class="welcome-logo">
+              T.M.D
+            </div>
+
+
+            <h1>
+              كيف يمكنني مساعدتك؟
+            </h1>
+
+
+            <p>
+              مساعدك الذكي للمحادثة وتحليل الملفات
+              وتحليل الصور، مع اتصال مباشر بخدمة Groq.
+            </p>
+
+
+            <div class="welcome-cards">
+
+
+              <div class="welcome-card">
+
+                <div class="welcome-card-icon">
+                  💬
+                </div>
+
+                <strong>
+                  محادثة ذكية
+                </strong>
+
+                <span>
+                  اسأل أي سؤال واحصل على إجابات منظمة.
+                </span>
+
+              </div>
+
+
+              <div class="welcome-card">
+
+                <div class="welcome-card-icon">
+                  📄
+                </div>
+
+                <strong>
+                  تحليل الملفات
+                </strong>
+
+                <span>
+                  PDF و DOCX و TXT والعديد من الملفات النصية.
+                </span>
+
+              </div>
+
+
+              <div class="welcome-card">
+
+                <div class="welcome-card-icon">
+                  🖼️
+                </div>
+
+                <strong>
+                  تحليل الصور
+                </strong>
+
+                <span>
+                  ارفع صورة واطلب من T.M.D AI تحليل محتواها.
+                </span>
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           COMPOSER
+      ================================================== -->
+
+      <div class="composer-wrap">
+
+
+        <div class="composer">
+
+
+          <!-- =============================================
+               FILE / IMAGE PREVIEW
+          ============================================== -->
+
+          <div
+            class="preview hidden"
+            id="imagePreviewContainer"
+          >
+
+            <img
+              class="preview-image"
+              id="imagePreview"
+              alt="معاينة"
+            >
+
+
+            <div class="preview-info">
+
+              <span
+                class="preview-name"
+                id="imageFileName"
+              >
+                الملف
+              </span>
+
+              <span
+                class="preview-mode"
+                id="imageModeLabel"
+              >
+                تحليل الصورة
+              </span>
+
+            </div>
+
+
+            <button
+              class="preview-remove"
+              id="removeImage"
+              type="button"
+              aria-label="إزالة الملف"
+            >
+              ✕
+            </button>
+
+          </div>
+
+
+          <!-- =============================================
+               PLUS MENU
+          ============================================== -->
+
+          <div
+            class="plus-menu hidden"
+            id="plusMenu"
+          >
+
+            <div class="plus-menu-title">
+              إضافة إلى المحادثة
+            </div>
+
+
+            <button
+              class="plus-option"
+              id="analyzeDocumentButton"
+              type="button"
+            >
+
+              <span class="plus-option-icon">
+                📄
+              </span>
+
+              <span class="plus-option-content">
+
+                <span class="plus-option-title">
+                  تحليل ملف
+                </span>
+
+                <span class="plus-option-desc">
+                  PDF · DOCX · TXT · JSON · Code
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <button
+              class="plus-option"
+              id="addImageButton"
+              type="button"
+            >
+
+              <span class="plus-option-icon">
+                🖼️
+              </span>
+
+              <span class="plus-option-content">
+
+                <span class="plus-option-title">
+                  تحليل صورة
+                </span>
+
+                <span class="plus-option-desc">
+                  تحليل الصورة والنصوص الموجودة بداخلها
+                </span>
+
+              </span>
+
+            </button>
+
+
+            <button
+              class="plus-option"
+              id="imageEditButton"
+              type="button"
+            >
+
+              <span class="plus-option-icon">
+                ✨
+              </span>
+
+              <span class="plus-option-content">
+
+                <span class="plus-option-title">
+                  وصف / تجهيز صورة
+                </span>
+
+                <span class="plus-option-desc">
+                  إرسال الصورة مع تعليماتك
+                </span>
+
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <!-- =============================================
+               INPUT
+          ============================================== -->
+
+          <div class="input-shell">
+
+
+            <button
+              class="circle-button"
+              id="plusButton"
+              type="button"
+              aria-label="إضافة"
+              aria-expanded="false"
+            >
+              ＋
+            </button>
+
+
+            <textarea
+              class="input-area"
+              id="input"
+              rows="1"
+              placeholder="اكتب رسالتك هنا..."
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+
+
+            <button
+              class="circle-button send-button"
+              id="send"
+              type="button"
+              aria-label="إرسال"
+            >
+              ↑
+            </button>
+
+
+          </div>
+
+
+          <div class="composer-note">
+
+            T.M.D AI يعمل بواسطة Groq · لا تشارك المعلومات السرية
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+    </main>
+
+
+  </div>
+
+
+  <!-- =====================================================
+       SETTINGS MODAL
+  ====================================================== -->
+
+  <div
+    class="modal-backdrop hidden"
+    id="modalBackdrop"
+  >
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settingsTitle"
+    >
+
+
+      <div class="modal-header">
+
+        <div
+          class="modal-title"
+          id="settingsTitle"
+        >
+          إعدادات T.M.D AI
+        </div>
+
+
+        <button
+          class="icon-button"
+          id="modalClose"
+          type="button"
+          aria-label="إغلاق"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div class="setting">
+
+          <label
+            class="setting-label"
+            for="modelSelectSettings"
+          >
+            نموذج الذكاء الاصطناعي
+          </label>
+
+          <select
+            id="modelSelectSettings"
+            onchange="
+              document.getElementById('modelSelect').value=this.value;
+              document.getElementById('modelSelect').dispatchEvent(new Event('change'));
+            "
+          >
+
+            <option
+              value="llama-3.1-8b-instant"
+            >
+              Llama 3.1 8B — سريع
+            </option>
+
+            <option
+              value="llama-3.3-70b-versatile"
+            >
+              Llama 3.3 70B — احترافي
+            </option>
+
+            <option
+              value="meta-llama/llama-4-scout-17b-16e-instruct"
+            >
+              Llama 4 Scout — رؤية
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="setting">
+
+          <label
+            class="setting-label"
+            for="themeSelect"
+          >
+            المظهر
+          </label>
+
+          <select
+            id="themeSelect"
+          >
+
+            <option value="dark">
+              داكن
+            </option>
+
+            <option value="light">
+              فاتح
+            </option>
+
+          </select>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+  ></div>
+
+
+  <!-- =====================================================
+       HIDDEN FILE INPUTS
+  ====================================================== -->
+
+  <input
+    type="file"
+    id="imageInput"
+    accept="image/*"
+    hidden
+  >
+
+
+  <input
+    type="file"
+    id="documentInput"
+    accept="
+      .pdf,
+      .docx,
+      .txt,
+      .md,
+      .js,
+      .json,
+      .html,
+      .htm,
+      .css,
+      .py,
+      .csv,
+      .xml,
+      .yaml,
+      .yml,
+      .log
+    "
+    hidden
+  >
+
+
+  <!-- =====================================================
+       PDF.JS INITIALIZATION
+  ====================================================== -->
+
+  <script type="module">
 
     try {
 
-      await window.pdfjsReady;
-
-    } catch {}
-
-  }
-
-
-  if (
-    !window.pdfjsLib
-  ) {
-
-    throw new Error(
-      "مكتبة PDF غير متاحة."
-    );
-
-  }
-
-
-  const buffer =
-    await file.arrayBuffer();
-
-
-  const pdf =
-    await window.pdfjsLib
-      .getDocument({
-        data: buffer
-      })
-      .promise;
-
-
-  const pages = [];
-
-
-  for (
-    let i = 1;
-    i <= pdf.numPages;
-    i++
-  ) {
-
-    const page =
-      await pdf.getPage(
-        i
-      );
-
-
-    const content =
-      await page.getTextContent();
-
-
-    const pageText =
-      content.items
-        .map(
-          item =>
-            item.str
-        )
-        .join(" ");
-
-
-    pages.push(
-      `--- الصفحة ${i} ---\n${pageText}`
-    );
-
-  }
-
-
-  return pages.join(
-    "\n\n"
-  );
-
-}
-
-
-/* =========================================================
-   DOCX
-========================================================= */
-
-async function extractDOCX(file) {
-
-  if (
-    !window.mammoth
-  ) {
-
-    throw new Error(
-      "مكتبة DOCX غير متاحة."
-    );
-
-  }
-
-
-  const buffer =
-    await file.arrayBuffer();
-
-
-  const result =
-    await window.mammoth
-      .extractRawText({
-        arrayBuffer:
-          buffer
-      });
-
-
-  return result.value || "";
-
-}
-
-
-/* =========================================================
-   FILE TO DATA URL
-========================================================= */
-
-function fileToDataURL(file) {
-
-  return new Promise(
-    (resolve, reject) => {
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload =
-        () => resolve(
-          reader.result
+      const pdfjs =
+        await import(
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs"
         );
 
+      pdfjs.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs";
 
-      reader.onerror =
-        () => reject(
-          new Error(
-            "تعذر قراءة الصورة."
-          )
+      window.pdfjsLib =
+        pdfjs;
+
+      window.pdfjsReady =
+        Promise.resolve(
+          pdfjs
         );
 
+    } catch (error) {
 
-      reader.readAsDataURL(
-        file
+      console.error(
+        "PDF.js initialization failed:",
+        error
       );
+
+      window.pdfjsReady =
+        Promise.reject(
+          error
+        );
 
     }
-  );
 
-}
-
-
-/* =========================================================
-   CLEAR DOCUMENT
-========================================================= */
-
-function clearDocument() {
-
-  state.selectedDocument =
-    null;
+  </script>
 
 
-  if (documentInput) {
+  <!-- =====================================================
+       APPLICATION
+  ====================================================== -->
 
-    documentInput.value =
-      "";
-
-  }
-
-
-  imagePreviewContainer
-    ?.classList
-    .add(
-      "hidden"
-    );
-
-}
+  <script src="/app.js"></script>
 
 
-/* =========================================================
-   FORMAT BYTES
-========================================================= */
+  <!-- =====================================================
+       SMALL COMPATIBILITY PATCH
+  ====================================================== -->
 
-function formatBytes(bytes) {
+  <script>
 
-  if (
-    bytes < 1024
-  ) {
+    /*
+     * مزامنة اختيار الموديل في الإعدادات
+     */
 
-    return `${bytes} B`;
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
 
-  }
+        const mainModel =
+          document.getElementById(
+            "modelSelect"
+          );
 
-
-  if (
-    bytes < 1024 ** 2
-  ) {
-
-    return `${(
-      bytes / 1024
-    ).toFixed(1)} KB`;
-
-  }
-
-
-  return `${(
-    bytes /
-    (1024 ** 2)
-  ).toFixed(1)} MB`;
-
-}
-
-
-/* =========================================================
-   SEND BUTTON
-========================================================= */
-
-if (sendButton) {
-
-  sendButton.addEventListener(
-    "click",
-    sendCurrentMessage
-  );
-
-}
-
-
-/* =========================================================
-   NEW CHAT
-========================================================= */
-
-if (newChat) {
-
-  newChat.addEventListener(
-    "click",
-    () => {
-
-      if (
-        state.messages.length
-      ) {
-
-        state.conversations.unshift({
-
-          id:
-            Date.now(),
-
-          title:
-            getConversationTitle(),
-
-          messages:
-            state.messages,
-
-          createdAt:
-            new Date().toISOString()
-
-        });
-
-
-        state.conversations =
-          state.conversations.slice(
-            0,
-            50
+        const settingsModel =
+          document.getElementById(
+            "modelSelectSettings"
           );
 
 
-        saveConversations();
+        if (
+          mainModel &&
+          settingsModel
+        ) {
 
-      }
-
-
-      state.messages =
-        [];
-
-
-      saveMessages();
-
-      renderMessages();
-
-      renderHistory();
-
-      clearImage();
-
-      clearDocument();
+          settingsModel.value =
+            mainModel.value;
 
 
-      if (input) {
+          mainModel.addEventListener(
+            "change",
+            () => {
 
-        input.value =
-          "";
+              settingsModel.value =
+                mainModel.value;
 
-      }
-
-
-      closeMobileSidebar();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CONVERSATION TITLE
-========================================================= */
-
-function getConversationTitle() {
-
-  const first =
-    state.messages.find(
-      message =>
-        message.role ===
-        "user"
-    );
-
-
-  if (!first) {
-
-    return "محادثة جديدة";
-
-  }
-
-
-  return String(
-    first.content
-  )
-    .replace(
-      /\s+/g,
-      " "
-    )
-    .slice(
-      0,
-      45
-    );
-
-}
-
-
-/* =========================================================
-   HISTORY
-========================================================= */
-
-function renderHistory() {
-
-  if (!history) {
-    return;
-  }
-
-
-  history.innerHTML =
-    "";
-
-
-  /*
-   * المحادثة الحالية
-   */
-
-  if (
-    state.messages.length
-  ) {
-
-    const item =
-      createHistoryItem(
-        getConversationTitle(),
-        true
-      );
-
-
-    history.appendChild(
-      item
-    );
-
-  }
-
-
-  state.conversations
-    .forEach(
-      conversation => {
-
-        const item =
-          createHistoryItem(
-            conversation.title ||
-            "محادثة",
-            false,
-            conversation
+            }
           );
 
-
-        history.appendChild(
-          item
-        );
+        }
 
       }
     );
 
-}
+  </script>
 
 
-function createHistoryItem(
-  title,
-  current,
-  conversation
-) {
+</body>
 
-  const button =
-    document.createElement(
-      "button"
-    );
-
-
-  button.type =
-    "button";
-
-
-  button.className =
-    "history-item";
-
-
-  if (current) {
-
-    button.classList.add(
-      "active"
-    );
-
-  }
-
-
-  button.textContent =
-    title;
-
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      if (
-        !conversation
-      ) {
-
-        return;
-
-      }
-
-
-      state.messages =
-        conversation.messages ||
-        [];
-
-
-      saveMessages();
-
-      renderMessages();
-
-      closeMobileSidebar();
-
-    }
-  );
-
-
-  return button;
-
-}
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-if (settingsBtn) {
-
-  settingsBtn.addEventListener(
-    "click",
-    openSettings
-  );
-
-}
-
-
-function openSettings() {
-
-  modalBackdrop
-    ?.classList
-    .remove(
-      "hidden"
-    );
-
-}
-
-
-if (modalClose) {
-
-  modalClose.addEventListener(
-    "click",
-    closeSettings
-  );
-
-}
-
-
-if (modalBackdrop) {
-
-  modalBackdrop.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target ===
-        modalBackdrop
-      ) {
-
-        closeSettings();
-
-      }
-
-    }
-  );
-
-}
-
-
-function closeSettings() {
-
-  modalBackdrop
-    ?.classList
-    .add(
-      "hidden"
-    );
-
-}
-
-
-/* =========================================================
-   THEME SELECT
-========================================================= */
-
-if (themeSelect) {
-
-  themeSelect.addEventListener(
-    "change",
-    () => {
-
-      state.theme =
-        themeSelect.value;
-
-
-      localStorage.setItem(
-        "tmd_theme",
-        state.theme
-      );
-
-
-      applyTheme();
-
-    }
-  );
-
-}
-
-
-if (themeTop) {
-
-  themeTop.addEventListener(
-    "click",
-    toggleTheme
-  );
-
-}
-
-
-/* =========================================================
-   MODEL SELECT
-========================================================= */
-
-if (modelSelect) {
-
-  modelSelect.addEventListener(
-    "change",
-    () => {
-
-      state.model =
-        modelSelect.value;
-
-
-      localStorage.setItem(
-        "tmd_model",
-        state.model
-      );
-
-
-      updateModelUI();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   MOBILE SIDEBAR
-========================================================= */
-
-if (openSidebar) {
-
-  openSidebar.addEventListener(
-    "click",
-    () => {
-
-      sidebar?.classList.add(
-        "open"
-      );
-
-    }
-  );
-
-}
-
-
-if (closeSidebar) {
-
-  closeSidebar.addEventListener(
-    "click",
-    closeMobileSidebar
-  );
-
-}
-
-
-function closeMobileSidebar() {
-
-  sidebar?.classList.remove(
-    "open"
-  );
-
-}
-
-
-/* =========================================================
-   GLOBAL ESCAPE
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key === "Escape"
-    ) {
-
-      closeSettings();
-
-      plusMenu?.classList.add(
-        "hidden"
-      );
-
-      closeMobileSidebar();
-
-    }
-
-  }
-);
+</html>
