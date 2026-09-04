@@ -1,53 +1,25 @@
 "use strict";
 
-/*
-============================================================
-T.M.D AI
-Professional Frontend
-Groq Only
-============================================================
-
-المسارات:
-
-المحادثة:
-Browser -> /api/chat -> Groq
-
-الصور:
-Browser -> /api/image -> Groq Vision
-
-الملفات:
-Browser -> قراءة الملف محليًا -> /api/chat -> Groq
-
-لا يوجد OpenAI.
-============================================================
-*/
-
-
 /* =========================================================
-   STATE
-========================================================= */
+   T.M.D AI
+   Frontend - Groq Only
+   ========================================================= */
 
 const state = {
-
-  messages: loadJSON(
-    "tmd_messages",
-    []
+  messages: JSON.parse(
+    localStorage.getItem("tmd_messages") || "[]"
   ),
 
-  conversations: loadJSON(
-    "tmd_conversations",
-    []
+  conversations: JSON.parse(
+    localStorage.getItem("tmd_conversations") || "[]"
   ),
 
   theme:
-    localStorage.getItem(
-      "tmd_theme"
-    ) || "dark",
+    localStorage.getItem("tmd_theme") || "dark",
 
   model:
-    localStorage.getItem(
-      "tmd_model"
-    ) || "llama-3.1-8b-instant",
+    localStorage.getItem("tmd_model") ||
+    "llama-3.1-8b-instant",
 
   busy: false,
 
@@ -58,370 +30,548 @@ const state = {
   selectedDocument: null,
 
   imageMode: "analyze"
-
 };
 
 
 /* =========================================================
-   HELPERS
-========================================================= */
+   MODELS
+   ========================================================= */
 
-function loadJSON(
-  key,
-  fallback
-) {
+const MODELS = {
+  fast: "llama-3.1-8b-instant",
 
-  try {
+  vision: "qwen/qwen3.6-27b",
 
-    const value =
-      localStorage.getItem(
-        key
-      );
+  smart: "qwen/qwen3.6-27b"
+};
 
-    if (!value) {
-      return fallback;
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+let chat;
+let welcome;
+let input;
+let sendButton;
+let plusButton;
+let plusMenu;
+
+let documentInput;
+let imageInput;
+
+let addImageButton;
+let analyzeDocumentButton;
+
+let imageEditButton;
+
+let imagePreviewContainer;
+let imagePreview;
+let imageFileName;
+let imageModeLabel;
+
+let removeImage;
+
+let history;
+let newChat;
+
+let settingsBtn;
+let modalBackdrop;
+let modalClose;
+
+let themeSelect;
+let modelSelect;
+let modelName;
+let toast;
+let sidebar;
+
+let openSidebar;
+let closeSidebar;
+
+
+/* =========================================================
+   INIT
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  init
+);
+
+
+function init() {
+
+  cacheElements();
+
+  applyTheme();
+
+  updateModelUI();
+
+  bindEvents();
+
+  renderHistory();
+
+  renderMessages();
+
+  setupTextarea();
+
+}
+
+
+/* =========================================================
+   CACHE ELEMENTS
+   ========================================================= */
+
+function cacheElements() {
+
+  chat =
+    document.getElementById("chat");
+
+  welcome =
+    document.getElementById("welcome");
+
+  input =
+    document.getElementById("input");
+
+  sendButton =
+    document.getElementById("send");
+
+  plusButton =
+    document.getElementById("plusButton");
+
+  plusMenu =
+    document.getElementById("plusMenu");
+
+  documentInput =
+    document.getElementById("documentInput");
+
+  imageInput =
+    document.getElementById("imageInput");
+
+  addImageButton =
+    document.getElementById("addImageButton");
+
+  analyzeDocumentButton =
+    document.getElementById(
+      "analyzeDocumentButton"
+    );
+
+  imageEditButton =
+    document.getElementById(
+      "imageEditButton"
+    );
+
+  imagePreviewContainer =
+    document.getElementById(
+      "imagePreviewContainer"
+    );
+
+  imagePreview =
+    document.getElementById(
+      "imagePreview"
+    );
+
+  imageFileName =
+    document.getElementById(
+      "imageFileName"
+    );
+
+  imageModeLabel =
+    document.getElementById(
+      "imageModeLabel"
+    );
+
+  removeImage =
+    document.getElementById(
+      "removeImage"
+    );
+
+  history =
+    document.getElementById(
+      "history"
+    );
+
+  newChat =
+    document.getElementById(
+      "newChat"
+    );
+
+  settingsBtn =
+    document.getElementById(
+      "settingsBtn"
+    );
+
+  modalBackdrop =
+    document.getElementById(
+      "modalBackdrop"
+    );
+
+  modalClose =
+    document.getElementById(
+      "modalClose"
+    );
+
+  themeSelect =
+    document.getElementById(
+      "themeSelect"
+    );
+
+  modelSelect =
+    document.getElementById(
+      "modelSelect"
+    );
+
+  modelName =
+    document.getElementById(
+      "modelName"
+    );
+
+  toast =
+    document.getElementById(
+      "toast"
+    );
+
+  sidebar =
+    document.getElementById(
+      "sidebar"
+    );
+
+  openSidebar =
+    document.getElementById(
+      "openSidebar"
+    );
+
+  closeSidebar =
+    document.getElementById(
+      "closeSidebar"
+    );
+
+}
+
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+
+function bindEvents() {
+
+  if (sendButton) {
+
+    sendButton.addEventListener(
+      "click",
+      sendMessage
+    );
+
+  }
+
+
+  if (input) {
+
+    input.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  if (plusButton) {
+
+    plusButton.addEventListener(
+      "click",
+      function (event) {
+
+        event.stopPropagation();
+
+        togglePlusMenu();
+
+      }
+    );
+
+  }
+
+
+  document.addEventListener(
+    "click",
+    function (event) {
+
+      if (
+        plusMenu &&
+        !plusMenu.contains(event.target) &&
+        event.target !== plusButton
+      ) {
+
+        closePlusMenu();
+
+      }
+
     }
+  );
 
-    const parsed =
-      JSON.parse(value);
 
-    return parsed ?? fallback;
+  if (addImageButton) {
 
-  } catch {
+    addImageButton.addEventListener(
+      "click",
+      function () {
 
-    return fallback;
+        closePlusMenu();
+
+        if (imageInput) {
+          imageInput.click();
+        }
+
+      }
+    );
+
+  }
+
+
+  if (imageInput) {
+
+    imageInput.addEventListener(
+      "change",
+      handleImageSelection
+    );
+
+  }
+
+
+  if (documentInput) {
+
+    documentInput.addEventListener(
+      "change",
+      handleDocumentSelection
+    );
+
+  }
+
+
+  if (analyzeDocumentButton) {
+
+    analyzeDocumentButton.addEventListener(
+      "click",
+      function () {
+
+        closePlusMenu();
+
+        if (documentInput) {
+          documentInput.click();
+        }
+
+      }
+    );
+
+  }
+
+
+  if (removeImage) {
+
+    removeImage.addEventListener(
+      "click",
+      removeSelectedImage
+    );
+
+  }
+
+
+  if (imageEditButton) {
+
+    imageEditButton.addEventListener(
+      "click",
+      function () {
+
+        state.imageMode = "edit";
+
+        updateImageMode();
+
+      }
+    );
+
+  }
+
+
+  if (newChat) {
+
+    newChat.addEventListener(
+      "click",
+      createNewChat
+    );
+
+  }
+
+
+  if (settingsBtn) {
+
+    settingsBtn.addEventListener(
+      "click",
+      openSettings
+    );
+
+  }
+
+
+  if (modalClose) {
+
+    modalClose.addEventListener(
+      "click",
+      closeSettings
+    );
+
+  }
+
+
+  if (modalBackdrop) {
+
+    modalBackdrop.addEventListener(
+      "click",
+      function (event) {
+
+        if (
+          event.target === modalBackdrop
+        ) {
+
+          closeSettings();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  if (themeSelect) {
+
+    themeSelect.addEventListener(
+      "change",
+      function () {
+
+        state.theme =
+          themeSelect.value;
+
+        localStorage.setItem(
+          "tmd_theme",
+          state.theme
+        );
+
+        applyTheme();
+
+      }
+    );
+
+  }
+
+
+  if (modelSelect) {
+
+    modelSelect.addEventListener(
+      "change",
+      function () {
+
+        const value =
+          modelSelect.value;
+
+        if (
+          value === MODELS.fast ||
+          value === MODELS.vision
+        ) {
+
+          state.model = value;
+
+        } else {
+
+          state.model =
+            MODELS.fast;
+
+        }
+
+        localStorage.setItem(
+          "tmd_model",
+          state.model
+        );
+
+        updateModelUI();
+
+      }
+    );
+
+  }
+
+
+  if (openSidebar) {
+
+    openSidebar.addEventListener(
+      "click",
+      function () {
+
+        if (sidebar) {
+          sidebar.classList.add(
+            "open"
+          );
+        }
+
+      }
+    );
+
+  }
+
+
+  if (closeSidebar) {
+
+    closeSidebar.addEventListener(
+      "click",
+      function () {
+
+        if (sidebar) {
+          sidebar.classList.remove(
+            "open"
+          );
+        }
+
+      }
+    );
 
   }
 
 }
 
 
-function $(id) {
-
-  return document.getElementById(
-    id
-  );
-
-}
-
-
 /* =========================================================
-   ELEMENTS
-========================================================= */
+   TEXTAREA
+   ========================================================= */
 
-const chat =
-  $("chat");
+function setupTextarea() {
 
-const welcome =
-  $("welcome");
-
-const input =
-  $("input");
-
-const send =
-  $("send");
-
-const sidebar =
-  $("sidebar");
-
-const historyList =
-  $("history");
-
-const plusButton =
-  $("plusButton");
-
-const plusMenu =
-  $("plusMenu");
-
-const analyzeDocumentButton =
-  $("analyzeDocumentButton");
-
-const addImageButton =
-  $("addImageButton");
-
-const imageEditButton =
-  $("imageEditButton");
-
-const imageInput =
-  $("imageInput");
-
-const documentInput =
-  $("documentInput");
-
-const attachmentPreview =
-  $("attachmentPreview");
-
-const attachmentIcon =
-  $("attachmentIcon");
-
-const attachmentName =
-  $("attachmentName");
-
-const attachmentMeta =
-  $("attachmentMeta");
-
-const removeAttachment =
-  $("removeAttachment");
-
-const newChat =
-  $("newChat");
-
-const openSidebar =
-  $("openSidebar");
-
-const closeSidebar =
-  $("closeSidebar");
-
-const settingsBtn =
-  $("settingsBtn");
-
-const modalBackdrop =
-  $("modalBackdrop");
-
-const modalClose =
-  $("modalClose");
-
-const modelSelect =
-  $("modelSelect");
-
-const modelSelectSettings =
-  $("modelSelectSettings");
-
-const themeSelect =
-  $("themeSelect");
-
-const themeTop =
-  $("themeTop");
-
-const themeTopDesktop =
-  $("themeTopDesktop");
-
-const toastElement =
-  $("toast");
-
-
-/* =========================================================
-   CONSTANTS
-========================================================= */
-
-const DEFAULT_MODEL =
-  "llama-3.1-8b-instant";
-
-const ALLOWED_MODELS = [
-  "llama-3.1-8b-instant",
-  "llama-3.3-70b-versatile"
-];
-
-const MAX_DOCUMENT_SIZE =
-  15 * 1024 * 1024;
-
-const MAX_IMAGE_SIZE =
-  20 * 1024 * 1024;
-
-
-/* =========================================================
-   SAVE
-========================================================= */
-
-function save() {
-
-  localStorage.setItem(
-    "tmd_messages",
-    JSON.stringify(
-      state.messages
-    )
-  );
-
-  localStorage.setItem(
-    "tmd_conversations",
-    JSON.stringify(
-      state.conversations
-    )
-  );
-
-  localStorage.setItem(
-    "tmd_theme",
-    state.theme
-  );
-
-  localStorage.setItem(
-    "tmd_model",
-    state.model
-  );
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimer = null;
-
-
-function toast(
-  message
-) {
-
-  if (!toastElement) {
+  if (!input) {
     return;
   }
 
-  toastElement.textContent =
-    message;
+  input.addEventListener(
+    "input",
+    function () {
 
-  toastElement.classList.add(
-    "show"
-  );
+      input.style.height =
+        "auto";
 
-  clearTimeout(
-    toastTimer
-  );
-
-  toastTimer =
-    setTimeout(
-      () => {
-
-        toastElement.classList.remove(
-          "show"
-        );
-
-      },
-      3000
-    );
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ""
-  ).replace(
-    /[&<>"']/g,
-    character => {
-
-      const map = {
-
-        "&":
-          "&amp;",
-
-        "<":
-          "&lt;",
-
-        ">":
-          "&gt;",
-
-        '"':
-          "&quot;",
-
-        "'":
-          "&#039;"
-
-      };
-
-      return map[
-        character
-      ];
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FORMAT MESSAGE
-========================================================= */
-
-function formatMessage(
-  text
-) {
-
-  let value =
-    escapeHTML(
-      text
-    );
-
-
-  /*
-   * Code blocks
-   */
-
-  value =
-    value.replace(
-      /```(?:[\w+-]+)?\n?([\s\S]*?)```/g,
-      (_, code) => {
-
-        return `
-          <pre class="code-block">
-            <code>${code}</code>
-          </pre>
-        `;
-
-      }
-    );
-
-
-  /*
-   * Inline code
-   */
-
-  value =
-    value.replace(
-      /`([^`]+)`/g,
-      '<code class="inline-code">$1</code>'
-    );
-
-
-  /*
-   * Bold
-   */
-
-  value =
-    value.replace(
-      /\*\*(.*?)\*\*/g,
-      "<strong>$1</strong>"
-    );
-
-
-  /*
-   * Line breaks
-   */
-
-  value =
-    value.replace(
-      /\n/g,
-      "<br>"
-    );
-
-
-  return value;
-
-}
-
-
-/* =========================================================
-   SCROLL
-========================================================= */
-
-function scrollBottom() {
-
-  requestAnimationFrame(
-    () => {
-
-      if (chat) {
-
-        chat.scrollTop =
-          chat.scrollHeight;
-
-      }
+      input.style.height =
+        Math.min(
+          input.scrollHeight,
+          180
+        ) + "px";
 
     }
   );
@@ -431,126 +581,71 @@ function scrollBottom() {
 
 /* =========================================================
    THEME
-========================================================= */
+   ========================================================= */
 
-function setTheme(
-  theme
-) {
-
-  if (
-    theme !== "light" &&
-    theme !== "dark"
-  ) {
-
-    theme =
-      "dark";
-
-  }
-
-
-  state.theme =
-    theme;
-
+function applyTheme() {
 
   document.documentElement.dataset.theme =
-    theme;
+    state.theme;
 
   document.body.dataset.theme =
-    theme;
-
+    state.theme;
 
   if (themeSelect) {
-
     themeSelect.value =
-      theme;
-
+      state.theme;
   }
-
-
-  save();
 
 }
 
 
 /* =========================================================
-   THEME BUTTON
-========================================================= */
+   MODEL UI
+   ========================================================= */
 
-function toggleTheme() {
-
-  setTheme(
-
-    state.theme === "dark"
-      ? "light"
-      : "dark"
-
-  );
-
-}
-
-
-/* =========================================================
-   MODEL
-========================================================= */
-
-function setModel(
-  model
-) {
-
-  if (
-    !ALLOWED_MODELS.includes(
-      model
-    )
-  ) {
-
-    model =
-      DEFAULT_MODEL;
-
-  }
-
-
-  state.model =
-    model;
-
+function updateModelUI() {
 
   if (modelSelect) {
 
     modelSelect.value =
-      model;
+      state.model;
 
   }
 
-
-  if (modelSelectSettings) {
-
-    modelSelectSettings.value =
-      model;
-
+  if (!modelName) {
+    return;
   }
 
+  if (
+    state.model ===
+    MODELS.vision
+  ) {
 
-  save();
+    modelName.textContent =
+      "T.M.D Vision";
+
+  } else {
+
+    modelName.textContent =
+      "T.M.D Fast";
+
+  }
 
 }
 
 
 /* =========================================================
    PLUS MENU
-========================================================= */
+   ========================================================= */
 
-function openPlusMenu() {
+function togglePlusMenu() {
 
   if (!plusMenu) {
     return;
   }
 
-  plusMenu.classList.remove(
-    "hidden"
-  );
-
-  plusButton?.setAttribute(
-    "aria-expanded",
-    "true"
+  plusMenu.classList.toggle(
+    "open"
   );
 
 }
@@ -562,51 +657,182 @@ function closePlusMenu() {
     return;
   }
 
-  plusMenu.classList.add(
-    "hidden"
-  );
-
-  plusButton?.setAttribute(
-    "aria-expanded",
-    "false"
+  plusMenu.classList.remove(
+    "open"
   );
 
 }
 
 
 /* =========================================================
-   ATTACHMENT
-========================================================= */
+   IMAGE
+   ========================================================= */
 
-function clearAttachment() {
+async function handleImageSelection(
+  event
+) {
+
+  const file =
+    event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  if (
+    !file.type.startsWith(
+      "image/"
+    )
+  ) {
+
+    showToast(
+      "الملف المحدد ليس صورة."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    file.size >
+    20 * 1024 * 1024
+  ) {
+
+    showToast(
+      "حجم الصورة أكبر من 20MB."
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const dataURL =
+      await fileToDataURL(
+        file
+      );
+
+    state.selectedImage = {
+      file,
+      dataURL,
+      name: file.name,
+      type: file.type
+    };
+
+    state.imageMode =
+      "analyze";
+
+    showImagePreview();
+
+    updateImageMode();
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    showToast(
+      "تعذر قراءة الصورة."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW IMAGE
+   ========================================================= */
+
+function showImagePreview() {
+
+  if (!state.selectedImage) {
+    return;
+  }
+
+  if (imagePreview) {
+
+    imagePreview.src =
+      state.selectedImage.dataURL;
+
+  }
+
+  if (imageFileName) {
+
+    imageFileName.textContent =
+      state.selectedImage.name;
+
+  }
+
+  if (imagePreviewContainer) {
+
+    imagePreviewContainer.classList.add(
+      "show"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   IMAGE MODE
+   ========================================================= */
+
+function updateImageMode() {
+
+  if (!imageModeLabel) {
+    return;
+  }
+
+  if (
+    state.imageMode ===
+    "edit"
+  ) {
+
+    imageModeLabel.textContent =
+      "تعديل الصورة";
+
+  } else {
+
+    imageModeLabel.textContent =
+      "تحليل الصورة";
+
+  }
+
+}
+
+
+/* =========================================================
+   REMOVE IMAGE
+   ========================================================= */
+
+function removeSelectedImage() {
 
   state.selectedImage =
     null;
 
-  state.selectedDocument =
-    null;
-
+  state.imageMode =
+    "analyze";
 
   if (imageInput) {
-
-    imageInput.value =
-      "";
-
+    imageInput.value = "";
   }
 
-
-  if (documentInput) {
-
-    documentInput.value =
-      "";
-
+  if (imagePreview) {
+    imagePreview.removeAttribute(
+      "src"
+    );
   }
 
+  if (imagePreviewContainer) {
 
-  if (attachmentPreview) {
-
-    attachmentPreview.classList.add(
-      "hidden"
+    imagePreviewContainer.classList.remove(
+      "show"
     );
 
   }
@@ -614,637 +840,156 @@ function clearAttachment() {
 }
 
 
-function formatBytes(
-  bytes
+/* =========================================================
+   DOCUMENT
+   ========================================================= */
+
+async function handleDocumentSelection(
+  event
 ) {
 
-  if (
-    !bytes ||
-    bytes < 1024
-  ) {
+  const file =
+    event.target.files?.[0];
 
-    return `${bytes || 0} B`;
-
-  }
-
-
-  if (
-    bytes <
-    1024 * 1024
-  ) {
-
-    return `${(
-      bytes / 1024
-    ).toFixed(1)} KB`;
-
-  }
-
-
-  return `${(
-    bytes /
-    (1024 * 1024)
-  ).toFixed(1)} MB`;
-
-}
-
-
-function showAttachment(
-  file,
-  type
-) {
-
-  if (!attachmentPreview) {
+  if (!file) {
     return;
   }
 
 
-  attachmentPreview.classList.remove(
-    "hidden"
-  );
-
-
-  if (attachmentIcon) {
-
-    attachmentIcon.textContent =
-      type === "image"
-        ? "🖼️"
-        : "📄";
-
-  }
-
-
-  if (attachmentName) {
-
-    attachmentName.textContent =
-      file.name;
-
-  }
-
-
-  if (attachmentMeta) {
-
-    attachmentMeta.textContent =
-      `${type === "image" ? "صورة" : "ملف"} • ${formatBytes(file.size)}`;
-
-  }
-
-}
-
-
-/* =========================================================
-   ADD MESSAGE
-========================================================= */
-
-function addMessage(
-  role,
-  content,
-  meta = ""
-) {
-
-  if (!chat) {
-    return null;
-  }
-
-
-  if (welcome) {
-
-    welcome.style.display =
-      "none";
-
-  }
-
-
-  const article =
-    document.createElement(
-      "article"
-    );
-
-
-  article.className =
-    `message ${role}`;
-
-
-  article.innerHTML = `
-
-    <div class="msg-avatar">
-
-      ${
-        role === "user"
-          ? "أنت"
-          : "T"
-      }
-
-    </div>
-
-
-    <div class="msg-body">
-
-      <div class="msg-label">
-
-        ${
-          role === "user"
-            ? "أنت"
-            : "T.M.D AI"
-        }
-
-        ${
-          meta
-            ? `<span>${escapeHTML(meta)}</span>`
-            : ""
-        }
-
-      </div>
-
-
-      <div class="msg-content">
-
-        ${formatMessage(content)}
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  chat.appendChild(
-    article
-  );
-
-
-  scrollBottom();
-
-
-  return article;
-
-}
-
-
-/* =========================================================
-   GROQ CHAT
-========================================================= */
-
-async function sendText(
-  messages
-) {
-
-  const controller =
-    new AbortController();
-
-
-  state.controller =
-    controller;
-
-
-  const response =
-    await fetch(
-      "/api/chat",
-      {
-
-        method:
-          "POST",
-
-        headers: {
-
-          "Content-Type":
-            "application/json",
-
-          "Accept":
-            "application/json"
-
-        },
-
-        body:
-          JSON.stringify({
-
-            model:
-              state.model,
-
-            messages:
-              messages
-
-          }),
-
-        signal:
-          controller.signal
-
-      }
-    );
-
-
-  const data =
-    await response
-      .json()
-      .catch(
-        () => ({})
+  try {
+
+    const result =
+      await readDocument(
+        file
       );
 
+    state.selectedDocument = {
+      file,
+      name: file.name,
+      type: file.type,
+      text: result
+    };
 
-  if (!response.ok) {
-
-    throw new Error(
-
-      data?.error ||
-
-      `خطأ من الخادم: ${response.status}`
-
+    showToast(
+      `تم تجهيز الملف: ${file.name}`
     );
 
-  }
+    if (input) {
 
+      if (!input.value.trim()) {
 
-  if (
-    data?.ok !== true
-  ) {
-
-    throw new Error(
-
-      data?.error ||
-
-      "فشل الاتصال بـ Groq."
-
-    );
-
-  }
-
-
-  const reply =
-    data?.reply ||
-    data?.message;
-
-
-  if (
-    typeof reply !== "string" ||
-    !reply.trim()
-  ) {
-
-    throw new Error(
-      "لم يرجع Groq أي إجابة."
-    );
-
-  }
-
-
-  return reply.trim();
-
-}
-
-
-/* =========================================================
-   GROQ VISION
-========================================================= */
-
-async function analyzeImage(
-  dataUrl,
-  prompt
-) {
-
-  const response =
-    await fetch(
-      "/api/image",
-      {
-
-        method:
-          "POST",
-
-        headers: {
-
-          "Content-Type":
-            "application/json",
-
-          "Accept":
-            "application/json"
-
-        },
-
-        body:
-          JSON.stringify({
-
-            image:
-              dataUrl,
-
-            prompt:
-              prompt ||
-              "حلل هذه الصورة بالتفصيل."
-
-          })
+        input.value =
+          `حلل هذا الملف واذكر أهم المعلومات الموجودة فيه.`;
 
       }
+
+      input.focus();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      error
     );
 
+    state.selectedDocument =
+      null;
 
-  const data =
-    await response
-      .json()
-      .catch(
-        () => ({})
-      );
-
-
-  if (!response.ok) {
-
-    throw new Error(
-
-      data?.error ||
-
-      `خطأ في تحليل الصورة: ${response.status}`
-
-    );
-
-  }
-
-
-  if (
-    data?.ok !== true
-  ) {
-
-    throw new Error(
-
-      data?.error ||
-
-      "فشل تحليل الصورة."
-
+    showToast(
+      error.message ||
+      "تعذر قراءة الملف."
     );
 
   }
 
 
-  const reply =
-    data?.reply ||
-    data?.message;
-
-
-  if (
-    typeof reply !== "string" ||
-    !reply.trim()
-  ) {
-
-    throw new Error(
-      "لم يرجع Groq نتيجة للصورة."
-    );
-
-  }
-
-
-  return reply.trim();
+  event.target.value = "";
 
 }
 
 
 /* =========================================================
-   FILE -> TEXT
-========================================================= */
+   READ DOCUMENT
+   ========================================================= */
 
-async function readFileAsText(
+async function readDocument(
   file
 ) {
+
+  const maxSize =
+    10 * 1024 * 1024;
+
+  if (
+    file.size >
+    maxSize
+  ) {
+
+    throw new Error(
+      "حجم الملف أكبر من 10MB."
+    );
+
+  }
+
 
   const name =
     file.name.toLowerCase();
 
-
-  /*
-   * Text / Code
-   */
-
-  if (
-    /\.(txt|md|js|jsx|ts|tsx|json|html|htm|css|scss|py|java|c|cpp|h|hpp|php|sql|xml|csv|yaml|yml|log)$/i
-      .test(name)
-  ) {
-
-    return await file.text();
-
-  }
-
-
-  /*
-   * DOCX
-   */
-
-  if (
-    name.endsWith(
-      ".docx"
-    )
-  ) {
-
-    if (
-      typeof window.mammoth ===
-      "undefined"
-    ) {
-
-      throw new Error(
-        "مكتبة قراءة Word غير محملة."
-      );
-
-    }
+  const supported =
+    [
+      ".txt",
+      ".md",
+      ".csv",
+      ".json",
+      ".html",
+      ".htm",
+      ".css",
+      ".js",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".xml",
+      ".log"
+    ];
 
 
-    const result =
-      await window.mammoth.extractRawText({
-
-        arrayBuffer:
-          await file.arrayBuffer()
-
-      });
-
-
-    return result.value || "";
-
-  }
-
-
-  /*
-   * PDF
-   */
-
-  if (
-    name.endsWith(
-      ".pdf"
-    )
-  ) {
-
-    return await readPDF(
-      file
+  const extension =
+    supported.find(
+      ext =>
+        name.endsWith(ext)
     );
 
-  }
 
-
-  throw new Error(
-    "صيغة الملف غير مدعومة حاليًا."
-  );
-
-}
-
-
-/* =========================================================
-   PDF READER
-========================================================= */
-
-async function readPDF(
-  file
-) {
-
-  /*
-   * PDF.js قد يكون محملًا
-   * من index.html.
-   */
-
-  if (
-    typeof window.pdfjsLib ===
-    "undefined"
-  ) {
+  if (!extension) {
 
     throw new Error(
-      "قارئ PDF غير محمل. أضف PDF.js إلى index.html."
+      "هذه النسخة تدعم الملفات النصية مثل TXT وMD وCSV وJSON وHTML وCSS وJS."
     );
 
   }
 
 
-  const bytes =
-    new Uint8Array(
-      await file.arrayBuffer()
-    );
-
-
-  const pdf =
-    await window.pdfjsLib
-      .getDocument({
-        data: bytes
-      })
-      .promise;
-
-
-  const pages = [];
-
-
-  for (
-    let pageNumber = 1;
-    pageNumber <= pdf.numPages;
-    pageNumber++
-  ) {
-
-    const page =
-      await pdf.getPage(
-        pageNumber
-      );
-
-
-    const content =
-      await page.getTextContent();
-
-
-    const text =
-      content.items
-        .map(
-          item =>
-            item.str || ""
-        )
-        .join(" ");
-
-
-    pages.push(
-      `### الصفحة ${pageNumber}\n${text}`
-    );
-
-  }
-
-
-  return pages.join(
-    "\n\n"
-  );
-
-}
-
-
-/* =========================================================
-   DOCUMENT PROMPT
-========================================================= */
-
-function createDocumentPrompt(
-  file,
-  text,
-  userRequest
-) {
-
-  const MAX_TEXT =
-    45000;
-
-
-  let content =
-    text;
-
-
-  if (
-    content.length >
-    MAX_TEXT
-  ) {
-
-    content =
-      content.slice(
-        0,
-        MAX_TEXT
-      ) +
-
-      "\n\n[تم اختصار جزء من الملف بسبب حجمه.]";
-
-  }
-
-
-  return `
-
-أنت تقوم بتحليل ملف أرسله المستخدم إلى T.M.D AI.
-
-اسم الملف:
-${file.name}
-
-نوع الملف:
-${file.type || "غير محدد"}
-
-محتوى الملف:
-----------------------------
-
-${content}
-
-----------------------------
-
-طلب المستخدم:
-${
-  userRequest ||
-  "حلل الملف واذكر أهم المعلومات الموجودة فيه."
-}
-
-قواعد مهمة:
-- اعتمد على محتوى الملف.
-- لا تخترع معلومات غير موجودة.
-- إذا لم تجد الإجابة في الملف، قل ذلك بوضوح.
-- إذا طلب المستخدم تلخيصًا، قدم تلخيصًا منظمًا.
-- إذا طلب استخراج معلومات، استخرجها بوضوح.
-- أجب بالعربية إذا كان المستخدم يتحدث بالعربية.
-
-`;
+  return await file.text();
 
 }
 
 
 /* =========================================================
    FILE -> DATA URL
-========================================================= */
+   ========================================================= */
 
 function fileToDataURL(
   file
 ) {
 
   return new Promise(
-    (
+    function (
       resolve,
       reject
-    ) => {
+    ) {
 
       const reader =
         new FileReader();
-
 
       reader.onload =
         () =>
@@ -1252,15 +997,13 @@ function fileToDataURL(
             reader.result
           );
 
-
       reader.onerror =
         () =>
           reject(
             new Error(
-              "تعذر قراءة الصورة."
+              "FileReader error"
             )
           );
-
 
       reader.readAsDataURL(
         file
@@ -1273,110 +1016,19 @@ function fileToDataURL(
 
 
 /* =========================================================
-   AUTO RESIZE INPUT
-========================================================= */
+   SEND MESSAGE
+   ========================================================= */
 
-function autoResize() {
-
-  if (!input) {
-    return;
-  }
-
-
-  input.style.height =
-    "auto";
-
-
-  input.style.height =
-    Math.min(
-      input.scrollHeight,
-      180
-    ) + "px";
-
-}
-
-
-/* =========================================================
-   SEND BUTTON STATE
-========================================================= */
-
-function setSendingState(
-  sending
-) {
-
-  if (!send) {
-    return;
-  }
-
-
-  if (sending) {
-
-    send.classList.add(
-      "stop"
-    );
-
-    send.setAttribute(
-      "aria-label",
-      "إيقاف"
-    );
-
-    send.textContent =
-      "■";
-
-  } else {
-
-    send.classList.remove(
-      "stop"
-    );
-
-    send.setAttribute(
-      "aria-label",
-      "إرسال"
-    );
-
-    send.textContent =
-      "↑";
-
-  }
-
-}
-
-
-/* =========================================================
-   HANDLE SEND
-========================================================= */
-
-async function handleSend() {
-
-  /*
-   * إذا كان يرسل بالفعل
-   * الضغط يصبح إيقاف.
-   */
+async function sendMessage() {
 
   if (state.busy) {
-
-    if (
-      state.controller
-    ) {
-
-      state.controller.abort();
-
-    }
-
     return;
-
   }
 
-
   const text =
-    input
-      ? input.value.trim()
-      : "";
+    input?.value?.trim() ||
+    "";
 
-
-  /*
-   * لا يوجد محتوى.
-   */
 
   if (
     !text &&
@@ -1392,332 +1044,240 @@ async function handleSend() {
   state.busy =
     true;
 
+  state.controller =
+    new AbortController();
+
 
   setSendingState(
     true
   );
 
 
-  const userText =
-    text ||
-
-    (
-      state.selectedImage
-        ? "حلل هذه الصورة."
-        : "حلل هذا الملف."
-    );
-
-
-  /*
-   * إظهار رسالة المستخدم.
-   */
-
-  addMessage(
-
-    "user",
-
-    userText,
-
-    state.selectedImage?.name ||
-    state.selectedDocument?.name ||
-    ""
-
-  );
-
-
-  /*
-   * تنظيف خانة الكتابة
-   * فورًا حتى لا تبقى الرسالة معلقة.
-   */
-
-  if (input) {
-
-    input.value =
-      "";
-
-    autoResize();
-
-  }
-
-
-  /*
-   * رسالة انتظار.
-   */
-
-  const assistantMessage =
-    addMessage(
-      "assistant",
-      "جاري المعالجة…"
-    );
-
-
   try {
 
-    let reply = "";
+    /*
+     * إنشاء رسالة المستخدم محليًا.
+     *
+     * مهم:
+     * لا نرسل imagePreview
+     * ولا file object
+     * ولا أي بيانات خاصة بالواجهة
+     * إلى Groq.
+     */
+
+    const userMessage = {
+      role: "user",
+      content: text
+    };
 
 
-    /* =====================================================
-       IMAGE
-    ===================================================== */
+    /*
+     * حفظ الصورة والملف محليًا
+     * لعرضهما في المحادثة.
+     */
 
     if (
       state.selectedImage
     ) {
 
-      const file =
-        state.selectedImage;
+      userMessage.image =
+        state.selectedImage.dataURL;
 
-
-      if (
-        file.size >
-        MAX_IMAGE_SIZE
-      ) {
-
-        throw new Error(
-          "حجم الصورة أكبر من 20MB."
-        );
-
-      }
-
-
-      const dataUrl =
-        await fileToDataURL(
-          file
-        );
-
-
-      reply =
-        await analyzeImage(
-          dataUrl,
-          userText
-        );
-
-
-      state.messages.push(
-
-        {
-
-          role:
-            "user",
-
-          content:
-            userText
-
-        },
-
-        {
-
-          role:
-            "assistant",
-
-          content:
-            reply
-
-        }
-
-      );
+      userMessage.imageName =
+        state.selectedImage.name;
 
     }
 
 
-    /* =====================================================
-       DOCUMENT
-    ===================================================== */
-
-    else if (
+    if (
       state.selectedDocument
     ) {
 
-      const file =
-        state.selectedDocument;
+      userMessage.fileName =
+        state.selectedDocument.name;
+
+      userMessage.fileText =
+        state.selectedDocument.text;
+
+    }
 
 
-      if (
-        file.size >
-        MAX_DOCUMENT_SIZE
-      ) {
-
-        throw new Error(
-          "حجم الملف أكبر من 15MB."
-        );
-
-      }
+    state.messages.push(
+      userMessage
+    );
 
 
-      const extractedText =
-        await readFileAsText(
-          file
-        );
+    saveMessages();
+
+    renderMessages();
 
 
-      if (
-        !extractedText.trim()
-      ) {
+    /*
+     * مسح صندوق الكتابة
+     */
 
-        throw new Error(
-          "لم أستطع استخراج نص من الملف."
-        );
+    if (input) {
 
-      }
+      input.value =
+        "";
 
+      input.style.height =
+        "auto";
 
-      const prompt =
-        createDocumentPrompt(
-          file,
-          extractedText,
-          userText
-        );
+    }
 
 
-      const messages = [
+    /*
+     * تجهيز الرسائل التي سيتم إرسالها
+     * إلى Backend.
+     */
 
-        ...state.messages,
+    const apiMessages =
+      buildApiMessages();
 
+
+    /*
+     * تحديد الموديل.
+     *
+     * إذا توجد صورة:
+     * نستخدم موديل Vision.
+     */
+
+    const hasImage =
+      Boolean(
+        state.selectedImage
+      );
+
+
+    const model =
+      hasImage
+        ? MODELS.vision
+        : state.model;
+
+
+    /*
+     * إظهار رسالة انتظار
+     */
+
+    const loadingId =
+      addLoadingMessage();
+
+
+    /*
+     * إرسال الطلب إلى:
+     *
+     * /api/chat
+     *
+     * وليس مباشرة إلى Groq.
+     *
+     * مفتاح GROQ_API_KEY يبقى في Vercel.
+     */
+
+    const response =
+      await fetch(
+        "/api/chat",
         {
+          method: "POST",
 
-          role:
-            "user",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-          content:
-            prompt
+          body:
+            JSON.stringify({
+              model,
+              messages:
+                apiMessages
+            }),
 
+          signal:
+            state.controller.signal
         }
+      );
 
-      ];
 
-
-      reply =
-        await sendText(
-          messages
+    const data =
+      await response
+        .json()
+        .catch(
+          () => ({})
         );
 
 
-      state.messages.push(
+    removeLoadingMessage(
+      loadingId
+    );
 
-        {
 
-          role:
-            "user",
+    if (!response.ok) {
 
-          content:
-            userText
-
-        },
-
-        {
-
-          role:
-            "assistant",
-
-          content:
-            reply
-
-        }
-
+      throw new Error(
+        data?.error ||
+        `خطأ من الخادم: ${response.status}`
       );
 
     }
 
 
-    /* =====================================================
-       NORMAL CHAT
-    ===================================================== */
+    if (
+      !data?.ok
+    ) {
 
-    else {
+      throw new Error(
+        data?.error ||
+        "لم يتم الحصول على رد من Groq."
+      );
 
-      state.messages.push({
-
-        role:
-          "user",
-
-        content:
-          userText
-
-      });
+    }
 
 
-      reply =
-        await sendText(
-          state.messages
-        );
+    let reply =
+      typeof data.reply ===
+      "string"
+        ? data.reply
+        : "";
 
 
-      state.messages.push({
+    /*
+     * حماية إضافية:
+     * إزالة أي reasoning ظهر
+     * بالخطأ داخل النص.
+     */
 
-        role:
-          "assistant",
+    reply =
+      cleanAssistantReply(
+        reply
+      );
 
-        content:
-          reply
 
-      });
+    if (!reply) {
+
+      throw new Error(
+        "Groq لم يرجع إجابة نصية."
+      );
 
     }
 
 
     /*
-     * عرض الرد.
+     * حفظ رد المساعد.
      */
 
-    if (
-      assistantMessage
-    ) {
-
-      const content =
-        assistantMessage.querySelector(
-          ".msg-content"
-        );
+    state.messages.push({
+      role: "assistant",
+      content: reply
+    });
 
 
-      if (content) {
+    saveMessages();
 
-        content.innerHTML =
-          formatMessage(
-            reply
-          );
+    renderMessages();
 
-      }
-
-    }
-
-
-    save();
+    saveConversation();
 
 
   } catch (error) {
-
-    /*
-     * إلغاء الطلب.
-     */
-
-    if (
-      error?.name ===
-      "AbortError"
-    ) {
-
-      if (
-        assistantMessage
-      ) {
-
-        const content =
-          assistantMessage.querySelector(
-            ".msg-content"
-          );
-
-
-        if (content) {
-
-          content.textContent =
-            "تم إيقاف الطلب.";
-
-        }
-
-      }
-
-      return;
-
-    }
-
 
     console.error(
       "T.M.D AI Error:",
@@ -1725,61 +1285,50 @@ async function handleSend() {
     );
 
 
-    const message =
-      error?.message ||
-      "حدث خطأ غير متوقع.";
-
-
     if (
-      assistantMessage
+      error.name ===
+      "AbortError"
     ) {
 
-      const content =
-        assistantMessage.querySelector(
-          ".msg-content"
-        );
+      showToast(
+        "تم إيقاف الطلب."
+      );
 
+    } else {
 
-      if (content) {
+      showToast(
+        error.message ||
+        "حدث خطأ أثناء إرسال الرسالة."
+      );
 
-        content.innerHTML = `
-
-          <span class="error-text">
-
-            ${escapeHTML(message)}
-
-          </span>
-
-        `;
-
-      }
+      addErrorMessage(
+        error.message ||
+        "حدث خطأ أثناء الاتصال بـ Groq."
+      );
 
     }
 
-
-    toast(
-      message
-    );
-
   } finally {
-
-    clearAttachment();
-
 
     state.busy =
       false;
 
-
     state.controller =
       null;
-
 
     setSendingState(
       false
     );
 
 
-    scrollBottom();
+    /*
+     * حذف الصورة والملف بعد الإرسال.
+     */
+
+    removeSelectedImage();
+
+    state.selectedDocument =
+      null;
 
   }
 
@@ -1787,110 +1336,276 @@ async function handleSend() {
 
 
 /* =========================================================
-   RENDER HISTORY
-========================================================= */
+   BUILD API MESSAGES
+   ========================================================= */
 
-function renderHistory() {
+function buildApiMessages() {
 
-  if (!historyList) {
-    return;
-  }
+  const result = [];
 
 
-  historyList.innerHTML =
-    "";
+  /*
+   * نرسل آخر رسائل المحادثة فقط
+   * لتقليل الحجم.
+   */
+
+  const historyMessages =
+    state.messages
+      .slice(-30);
 
 
-  const conversations =
-    [
-      ...state.conversations
-    ].reverse();
-
-
-  if (
-    !conversations.length
+  for (
+    const message
+    of historyMessages
   ) {
 
-    historyList.innerHTML = `
+    if (
+      message.role !==
+        "user" &&
+      message.role !==
+        "assistant"
+    ) {
 
-      <div class="empty-history">
+      continue;
 
-        لا توجد محادثات محفوظة
-
-      </div>
-
-    `;
-
-    return;
-
-  }
+    }
 
 
-  conversations.forEach(
-    conversation => {
+    /*
+     * رسالة المستخدم تحتوي على صورة
+     */
 
-      const button =
-        document.createElement(
-          "button"
+    if (
+      message.role ===
+        "user" &&
+      message.image
+    ) {
+
+      result.push({
+
+        role: "user",
+
+        content: [
+
+          {
+            type: "text",
+
+            text:
+              message.content ||
+              "حلل هذه الصورة."
+          },
+
+          {
+            type:
+              "image_url",
+
+            image_url: {
+              url:
+                message.image
+            }
+
+          }
+
+        ]
+
+      });
+
+      continue;
+
+    }
+
+
+    /*
+     * رسالة المستخدم تحتوي على ملف
+     */
+
+    if (
+      message.role ===
+        "user" &&
+      message.fileText
+    ) {
+
+      const fileText =
+        truncateText(
+          message.fileText,
+          100000
         );
 
 
-      button.type =
-        "button";
+      result.push({
 
+        role: "user",
 
-      button.className =
-        "history-item";
+        content:
+          `${message.content || "حلل الملف."}
 
+اسم الملف:
+${message.fileName || "file"}
 
-      button.textContent =
-        conversation.title ||
-        "محادثة جديدة";
+محتوى الملف:
+--- BEGIN FILE ---
+${fileText}
+--- END FILE ---`
 
+      });
 
-      button.addEventListener(
-        "click",
-        () => {
-
-          loadConversation(
-            conversation
-          );
-
-        }
-      );
-
-
-      historyList.appendChild(
-        button
-      );
+      continue;
 
     }
-  );
+
+
+    /*
+     * الرسائل العادية
+     */
+
+    result.push({
+
+      role:
+        message.role,
+
+      content:
+        typeof message.content ===
+        "string"
+          ? message.content
+          : ""
+
+    });
+
+  }
+
+
+  return result;
 
 }
 
 
 /* =========================================================
-   LOAD CONVERSATION
-========================================================= */
+   CLEAN REPLY
+   ========================================================= */
 
-function loadConversation(
-  conversation
+function cleanAssistantReply(
+  text
 ) {
+
+  if (
+    typeof text !==
+    "string"
+  ) {
+
+    return "";
+
+  }
+
+
+  let result =
+    text;
+
+
+  /*
+   * إزالة <think>...</think>
+   */
+
+  result =
+    result.replace(
+      /<think>[\s\S]*?<\/think>/gi,
+      ""
+    );
+
+
+  /*
+   * إزالة أي think غير مغلق
+   */
+
+  result =
+    result.replace(
+      /<think>[\s\S]*$/gi,
+      ""
+    );
+
+
+  /*
+   * إزالة علامات reasoning
+   */
+
+  result =
+    result.replace(
+      /^\s*reasoning\s*:\s*/i,
+      ""
+    );
+
+
+  result =
+    result.replace(
+      /^\s*analysis\s*:\s*/i,
+      ""
+    );
+
+
+  /*
+   * إزالة عناوين التفكير التي قد تظهر
+   * من نموذج غير مضبوط.
+   */
+
+  result =
+    result.replace(
+      /^\s*here's a thinking process\s*:?\s*/i,
+      ""
+    );
+
+
+  result =
+    result.replace(
+      /^\s*let me think\s*:?\s*/i,
+      ""
+    );
+
+
+  /*
+   * إزالة المسافات الزائدة.
+   */
+
+  result =
+    result.trim();
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   RENDER MESSAGES
+   ========================================================= */
+
+function renderMessages() {
 
   if (!chat) {
     return;
   }
 
 
-  chat
-    .querySelectorAll(
-      ".message"
-    )
-    .forEach(
-      element =>
-        element.remove()
-    );
+  chat.innerHTML =
+    "";
+
+
+  if (
+    !state.messages.length
+  ) {
+
+    if (welcome) {
+
+      welcome.style.display =
+        "";
+
+      chat.appendChild(
+        welcome
+      );
+
+    }
+
+    return;
+
+  }
 
 
   if (welcome) {
@@ -1901,7 +1616,856 @@ function loadConversation(
   }
 
 
-  const messages =
+  for (
+    const message
+    of state.messages
+  ) {
+
+    renderMessage(
+      message
+    );
+
+  }
+
+
+  scrollToBottom();
+
+}
+
+
+/* =========================================================
+   RENDER MESSAGE
+   ========================================================= */
+
+function renderMessage(
+  message
+) {
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+
+  wrapper.className =
+    `message ${
+      message.role
+    }`;
+
+
+  const avatar =
+    document.createElement(
+      "div"
+    );
+
+
+  avatar.className =
+    "message-avatar";
+
+
+  avatar.textContent =
+    message.role ===
+    "user"
+      ? "أنت"
+      : "T";
+
+
+  const content =
+    document.createElement(
+      "div"
+    );
+
+
+  content.className =
+    "message-content";
+
+
+  /*
+   * صورة المستخدم
+   */
+
+  if (
+    message.image
+  ) {
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.src =
+      message.image;
+
+    img.alt =
+      message.imageName ||
+      "صورة";
+
+    img.className =
+      "message-image";
+
+    content.appendChild(
+      img
+    );
+
+  }
+
+
+  /*
+   * اسم الملف
+   */
+
+  if (
+    message.fileName
+  ) {
+
+    const fileBox =
+      document.createElement(
+        "div"
+      );
+
+    fileBox.className =
+      "message-file";
+
+    fileBox.textContent =
+      `📎 ${message.fileName}`;
+
+    content.appendChild(
+      fileBox
+    );
+
+  }
+
+
+  /*
+   * النص
+   */
+
+  if (
+    message.content
+  ) {
+
+    const text =
+      document.createElement(
+        "div"
+      );
+
+    text.className =
+      "message-text";
+
+    text.innerHTML =
+      renderMarkdown(
+        message.content
+      );
+
+    content.appendChild(
+      text
+    );
+
+  }
+
+
+  wrapper.appendChild(
+    avatar
+  );
+
+  wrapper.appendChild(
+    content
+  );
+
+
+  chat.appendChild(
+    wrapper
+  );
+
+}
+
+
+/* =========================================================
+   MARKDOWN
+   ========================================================= */
+
+function renderMarkdown(
+  text
+) {
+
+  let html =
+    escapeHTML(
+      text
+    );
+
+
+  /*
+   * Code blocks
+   */
+
+  html =
+    html.replace(
+      /```([\s\S]*?)```/g,
+      function (
+        match,
+        code
+      ) {
+
+        return (
+          "<pre><code>" +
+          code.trim() +
+          "</code></pre>"
+        );
+
+      }
+    );
+
+
+  /*
+   * Inline code
+   */
+
+  html =
+    html.replace(
+      /`([^`]+)`/g,
+      "<code>$1</code>"
+    );
+
+
+  /*
+   * Bold
+   */
+
+  html =
+    html.replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+
+  /*
+   * Headings
+   */
+
+  html =
+    html.replace(
+      /^### (.*)$/gm,
+      "<h3>$1</h3>"
+    );
+
+  html =
+    html.replace(
+      /^## (.*)$/gm,
+      "<h2>$1</h2>"
+    );
+
+  html =
+    html.replace(
+      /^# (.*)$/gm,
+      "<h1>$1</h1>"
+    );
+
+
+  /*
+   * Lists
+   */
+
+  html =
+    html.replace(
+      /^\s*[-*] (.*)$/gm,
+      "<li>$1</li>"
+    );
+
+
+  /*
+   * Line breaks
+   */
+
+  html =
+    html.replace(
+      /\n/g,
+      "<br>"
+    );
+
+
+  return html;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(
+  text
+) {
+
+  return String(text)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   LOADING MESSAGE
+   ========================================================= */
+
+let loadingCounter =
+  0;
+
+
+function addLoadingMessage() {
+
+  if (!chat) {
+    return null;
+  }
+
+
+  const id =
+    `loading-${++loadingCounter}`;
+
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+
+  wrapper.id =
+    id;
+
+
+  wrapper.className =
+    "message assistant loading";
+
+
+  const avatar =
+    document.createElement(
+      "div"
+    );
+
+
+  avatar.className =
+    "message-avatar";
+
+  avatar.textContent =
+    "T";
+
+
+  const content =
+    document.createElement(
+      "div"
+    );
+
+
+  content.className =
+    "message-content";
+
+
+  content.innerHTML =
+    `
+      <div class="typing">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+
+
+  wrapper.appendChild(
+    avatar
+  );
+
+  wrapper.appendChild(
+    content
+  );
+
+
+  chat.appendChild(
+    wrapper
+  );
+
+
+  scrollToBottom();
+
+
+  return id;
+
+}
+
+
+function removeLoadingMessage(
+  id
+) {
+
+  if (!id) {
+    return;
+  }
+
+
+  const element =
+    document.getElementById(
+      id
+    );
+
+
+  if (element) {
+    element.remove();
+  }
+
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+function addErrorMessage(
+  message
+) {
+
+  if (!chat) {
+    return;
+  }
+
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+
+  wrapper.className =
+    "message assistant error";
+
+
+  const avatar =
+    document.createElement(
+      "div"
+    );
+
+
+  avatar.className =
+    "message-avatar";
+
+  avatar.textContent =
+    "T";
+
+
+  const content =
+    document.createElement(
+      "div"
+    );
+
+
+  content.className =
+    "message-content";
+
+
+  content.textContent =
+    message;
+
+
+  wrapper.appendChild(
+    avatar
+  );
+
+  wrapper.appendChild(
+    content
+  );
+
+
+  chat.appendChild(
+    wrapper
+  );
+
+
+  scrollToBottom();
+
+}
+
+
+/* =========================================================
+   SEND STATE
+   ========================================================= */
+
+function setSendingState(
+  sending
+) {
+
+  if (sendButton) {
+
+    sendButton.disabled =
+      sending;
+
+  }
+
+
+  if (input) {
+
+    input.disabled =
+      sending;
+
+  }
+
+
+  if (
+    sending &&
+    sendButton
+  ) {
+
+    sendButton.dataset.oldText =
+      sendButton.textContent;
+
+    sendButton.textContent =
+      "…";
+
+  }
+
+
+  if (
+    !sending &&
+    sendButton
+  ) {
+
+    sendButton.textContent =
+      sendButton.dataset.oldText ||
+      "↑";
+
+  }
+
+}
+
+
+/* =========================================================
+   STOP REQUEST
+   ========================================================= */
+
+function stopRequest() {
+
+  if (
+    state.controller
+  ) {
+
+    state.controller.abort();
+
+  }
+
+}
+
+
+/* =========================================================
+   SCROLL
+   ========================================================= */
+
+function scrollToBottom() {
+
+  requestAnimationFrame(
+    function () {
+
+      window.scrollTo({
+        top:
+          document.body.scrollHeight,
+
+        behavior:
+          "smooth"
+      });
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   STORAGE
+   ========================================================= */
+
+function saveMessages() {
+
+  /*
+   * لا نخزن fileText الطويل جدًا
+   * في localStorage.
+   */
+
+  const clean =
+    state.messages.map(
+      message => {
+
+        const copy =
+          {
+            ...message
+          };
+
+
+        if (
+          copy.fileText
+        ) {
+
+          delete copy.fileText;
+
+        }
+
+
+        return copy;
+
+      }
+    );
+
+
+  localStorage.setItem(
+    "tmd_messages",
+    JSON.stringify(
+      clean
+    )
+  );
+
+}
+
+
+/* =========================================================
+   CONVERSATIONS
+   ========================================================= */
+
+function saveConversation() {
+
+  if (
+    !state.messages.length
+  ) {
+
+    return;
+
+  }
+
+
+  const firstUserMessage =
+    state.messages.find(
+      message =>
+        message.role ===
+        "user"
+    );
+
+
+  if (
+    !firstUserMessage
+  ) {
+
+    return;
+
+  }
+
+
+  const title =
+    (
+      firstUserMessage.content ||
+      "محادثة جديدة"
+    )
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .slice(
+        0,
+        60
+      );
+
+
+  const conversation = {
+    id:
+      Date.now(),
+
+    title,
+
+    messages:
+      state.messages.map(
+        message => ({
+          role:
+            message.role,
+
+          content:
+            message.content ||
+            "",
+
+          image:
+            message.image ||
+            null,
+
+          imageName:
+            message.imageName ||
+            null,
+
+          fileName:
+            message.fileName ||
+            null
+        })
+      ),
+
+    updatedAt:
+      new Date().toISOString()
+
+  };
+
+
+  /*
+   * تحديث آخر محادثة بدل إنشاء
+   * نسخة جديدة مع كل رسالة.
+   */
+
+  const last =
+    state.conversations[0];
+
+
+  if (
+    last &&
+    !last.messages.length
+  ) {
+
+    state.conversations[0] =
+      conversation;
+
+  } else {
+
+    state.conversations =
+      [
+        conversation,
+        ...state.conversations
+      ].slice(
+        0,
+        50
+      );
+
+  }
+
+
+  localStorage.setItem(
+    "tmd_conversations",
+    JSON.stringify(
+      state.conversations
+    )
+  );
+
+
+  renderHistory();
+
+}
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function renderHistory() {
+
+  if (!history) {
+    return;
+  }
+
+
+  history.innerHTML =
+    "";
+
+
+  if (
+    !state.conversations.length
+  ) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "history-empty";
+
+    empty.textContent =
+      "لا توجد محادثات محفوظة";
+
+    history.appendChild(
+      empty
+    );
+
+    return;
+
+  }
+
+
+  for (
+    const conversation
+    of state.conversations
+  ) {
+
+    const item =
+      document.createElement(
+        "button"
+      );
+
+
+    item.className =
+      "history-item";
+
+
+    item.textContent =
+      conversation.title ||
+      "محادثة";
+
+
+    item.addEventListener(
+      "click",
+      function () {
+
+        loadConversation(
+          conversation.id
+        );
+
+      }
+    );
+
+
+    history.appendChild(
+      item
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD CONVERSATION
+   ========================================================= */
+
+function loadConversation(
+  id
+) {
+
+  const conversation =
+    state.conversations.find(
+      item =>
+        item.id === id
+    );
+
+
+  if (!conversation) {
+    return;
+  }
+
+
+  state.messages =
     Array.isArray(
       conversation.messages
     )
@@ -1909,80 +2473,33 @@ function loadConversation(
       : [];
 
 
-  state.messages =
-    [
-      ...messages
-    ];
+  saveMessages();
+
+  renderMessages();
 
 
-  messages.forEach(
-    message => {
+  if (sidebar) {
 
-      addMessage(
-        message.role,
-        message.content
-      );
+    sidebar.classList.remove(
+      "open"
+    );
 
-    }
-  );
-
-
-  save();
-
-
-  sidebar?.classList.remove(
-    "open"
-  );
+  }
 
 }
 
 
 /* =========================================================
    NEW CHAT
-========================================================= */
+   ========================================================= */
 
-function startNewChat() {
-
-  /*
-   * حفظ المحادثة الحالية.
-   */
+function createNewChat() {
 
   if (
-    state.messages.length
+    state.busy
   ) {
 
-    const firstUser =
-      state.messages.find(
-        message =>
-          message.role ===
-          "user"
-      );
-
-
-    const title =
-      String(
-        firstUser?.content ||
-        "محادثة جديدة"
-      ).slice(
-        0,
-        60
-      );
-
-
-    state.conversations.push({
-
-      id:
-        Date.now(),
-
-      title:
-        title,
-
-      messages:
-        [
-          ...state.messages
-        ]
-
-    });
+    stopRequest();
 
   }
 
@@ -1991,556 +2508,193 @@ function startNewChat() {
     [];
 
 
-  if (chat) {
-
-    chat
-      .querySelectorAll(
-        ".message"
-      )
-      .forEach(
-        element =>
-          element.remove()
-      );
-
-  }
+  state.selectedImage =
+    null;
 
 
-  if (welcome) {
+  state.selectedDocument =
+    null;
 
-    welcome.style.display =
+
+  localStorage.removeItem(
+    "tmd_messages"
+  );
+
+
+  removeSelectedImage();
+
+  renderMessages();
+
+
+  if (input) {
+
+    input.value =
       "";
 
+    input.focus();
+
   }
-
-
-  clearAttachment();
-
-  renderHistory();
-
-  save();
-
-
-  input?.focus();
 
 }
-
-
-/* =========================================================
-   EVENT: SEND
-========================================================= */
-
-send?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    handleSend();
-
-  }
-);
-
-
-/* =========================================================
-   EVENT: ENTER
-========================================================= */
-
-input?.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key ===
-        "Enter" &&
-      !event.shiftKey
-    ) {
-
-      event.preventDefault();
-
-      handleSend();
-
-    }
-
-  }
-);
-
-
-input?.addEventListener(
-  "input",
-  autoResize
-);
-
-
-/* =========================================================
-   EVENT: PLUS
-========================================================= */
-
-plusButton?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-
-    if (
-      plusMenu?.classList.contains(
-        "hidden"
-      )
-    ) {
-
-      openPlusMenu();
-
-    } else {
-
-      closePlusMenu();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   CLOSE PLUS OUTSIDE
-========================================================= */
-
-document.addEventListener(
-  "click",
-  event => {
-
-    if (
-      !event.target.closest(
-        ".plus-menu-wrapper"
-      )
-    ) {
-
-      closePlusMenu();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   DOCUMENT BUTTON
-========================================================= */
-
-analyzeDocumentButton?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    closePlusMenu();
-
-    documentInput?.click();
-
-  }
-);
-
-
-/* =========================================================
-   DOCUMENT INPUT
-========================================================= */
-
-documentInput?.addEventListener(
-  "change",
-  () => {
-
-    const file =
-      documentInput.files?.[0];
-
-
-    if (!file) {
-      return;
-    }
-
-
-    state.selectedDocument =
-      file;
-
-
-    state.selectedImage =
-      null;
-
-
-    showAttachment(
-      file,
-      "document"
-    );
-
-
-    toast(
-      `تم إرفاق الملف: ${file.name}`
-    );
-
-  }
-);
-
-
-/* =========================================================
-   IMAGE ANALYSIS BUTTON
-========================================================= */
-
-addImageButton?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    state.imageMode =
-      "analyze";
-
-    closePlusMenu();
-
-    imageInput?.click();
-
-  }
-);
-
-
-/* =========================================================
-   IMAGE EDIT BUTTON
-========================================================= */
-
-imageEditButton?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    state.imageMode =
-      "edit";
-
-    closePlusMenu();
-
-    imageInput?.click();
-
-  }
-);
-
-
-/* =========================================================
-   IMAGE INPUT
-========================================================= */
-
-imageInput?.addEventListener(
-  "change",
-  () => {
-
-    const file =
-      imageInput.files?.[0];
-
-
-    if (!file) {
-      return;
-    }
-
-
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
-
-      toast(
-        "الملف المحدد ليس صورة."
-      );
-
-      imageInput.value =
-        "";
-
-      return;
-
-    }
-
-
-    if (
-      file.size >
-      MAX_IMAGE_SIZE
-    ) {
-
-      toast(
-        "حجم الصورة أكبر من 20MB."
-      );
-
-      imageInput.value =
-        "";
-
-      return;
-
-    }
-
-
-    state.selectedImage =
-      file;
-
-
-    state.selectedDocument =
-      null;
-
-
-    showAttachment(
-      file,
-      "image"
-    );
-
-
-    toast(
-      "تم إرفاق الصورة. اكتب طلبك ثم اضغط إرسال."
-    );
-
-  }
-);
-
-
-/* =========================================================
-   REMOVE ATTACHMENT
-========================================================= */
-
-removeAttachment?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    clearAttachment();
-
-  }
-);
-
-
-/* =========================================================
-   NEW CHAT BUTTON
-========================================================= */
-
-newChat?.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    startNewChat();
-
-  }
-);
-
-
-/* =========================================================
-   SIDEBAR OPEN
-========================================================= */
-
-openSidebar?.addEventListener(
-  "click",
-  () => {
-
-    sidebar?.classList.add(
-      "open"
-    );
-
-  }
-);
-
-
-/* =========================================================
-   SIDEBAR CLOSE
-========================================================= */
-
-closeSidebar?.addEventListener(
-  "click",
-  () => {
-
-    sidebar?.classList.remove(
-      "open"
-    );
-
-  }
-);
 
 
 /* =========================================================
    SETTINGS
-========================================================= */
+   ========================================================= */
 
-settingsBtn?.addEventListener(
-  "click",
-  event => {
+function openSettings() {
 
-    event.preventDefault();
-
-    modalBackdrop?.classList.remove(
-      "hidden"
-    );
-
+  if (!modalBackdrop) {
+    return;
   }
-);
 
-
-/* =========================================================
-   CLOSE SETTINGS
-========================================================= */
-
-modalClose?.addEventListener(
-  "click",
-  () => {
-
-    modalBackdrop?.classList.add(
-      "hidden"
-    );
-
-  }
-);
-
-
-modalBackdrop?.addEventListener(
-  "click",
-  event => {
-
-    if (
-      event.target ===
-      modalBackdrop
-    ) {
-
-      modalBackdrop.classList.add(
-        "hidden"
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   MODEL SELECT
-========================================================= */
-
-modelSelect?.addEventListener(
-  "change",
-  event => {
-
-    setModel(
-      event.target.value
-    );
-
-  }
-);
-
-
-modelSelectSettings?.addEventListener(
-  "change",
-  event => {
-
-    setModel(
-      event.target.value
-    );
-
-  }
-);
-
-
-/* =========================================================
-   THEME
-========================================================= */
-
-themeSelect?.addEventListener(
-  "change",
-  event => {
-
-    setTheme(
-      event.target.value
-    );
-
-  }
-);
-
-
-themeTop?.addEventListener(
-  "click",
-  toggleTheme
-);
-
-
-themeTopDesktop?.addEventListener(
-  "click",
-  toggleTheme
-);
-
-
-/* =========================================================
-   INITIALIZE MODEL
-========================================================= */
-
-if (
-  !ALLOWED_MODELS.includes(
-    state.model
-  )
-) {
-
-  state.model =
-    DEFAULT_MODEL;
+  modalBackdrop.classList.add(
+    "show"
+  );
 
 }
 
 
-/* =========================================================
-   INITIALIZE UI
-========================================================= */
+function closeSettings() {
 
-setTheme(
-  state.theme
-);
-
-
-setModel(
-  state.model
-);
-
-
-renderHistory();
-
-
-autoResize();
-
-
-/* =========================================================
-   RESTORE CURRENT CHAT
-========================================================= */
-
-if (
-  state.messages.length &&
-  chat
-) {
-
-  if (welcome) {
-
-    welcome.style.display =
-      "none";
-
+  if (!modalBackdrop) {
+    return;
   }
 
-
-  state.messages.forEach(
-    message => {
-
-      addMessage(
-        message.role,
-        message.content
-      );
-
-    }
+  modalBackdrop.classList.remove(
+    "show"
   );
 
 }
 
 
 /* =========================================================
-   READY
-========================================================= */
+   TOAST
+   ========================================================= */
 
-console.log(
-  "T.M.D AI loaded successfully — Groq Only"
-);
+function showToast(
+  message
+) {
+
+  if (!toast) {
+
+    console.log(
+      message
+    );
+
+    return;
+
+  }
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
+
+  clearTimeout(
+    showToast.timer
+  );
+
+
+  showToast.timer =
+    setTimeout(
+      function () {
+
+        toast.classList.remove(
+          "show"
+        );
+
+      },
+      3500
+    );
+
+}
+
+
+/* =========================================================
+   TRUNCATE
+   ========================================================= */
+
+function truncateText(
+  text,
+  max
+) {
+
+  if (
+    typeof text !==
+    "string"
+  ) {
+
+    return "";
+
+  }
+
+
+  if (
+    text.length <= max
+  ) {
+
+    return text;
+
+  }
+
+
+  return (
+    text.slice(
+      0,
+      max
+    ) +
+    "\n\n[تم اختصار الملف بسبب الحجم]"
+  );
+
+}
+
+
+/* =========================================================
+   OPTIONAL GLOBAL FUNCTIONS
+   ========================================================= */
+
+window.TMDAI = {
+
+  sendMessage,
+
+  stopRequest,
+
+  newChat:
+    createNewChat,
+
+  removeImage:
+    removeSelectedImage,
+
+  togglePlusMenu,
+
+  loadConversation
+
+};
+
+
+/* =========================================================
+   INITIAL MODEL SAFETY
+   ========================================================= */
+
+if (
+  state.model !==
+    MODELS.fast &&
+  state.model !==
+    MODELS.vision
+) {
+
+  state.model =
+    MODELS.fast;
+
+  localStorage.setItem(
+    "tmd_model",
+    state.model
+  );
+
+}
