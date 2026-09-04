@@ -1,40 +1,79 @@
+/* ================= GROQ CHAT ================= */
+
 async function sendText(messages) {
 
-  const controller = new AbortController();
+  const controller =
+    new AbortController();
 
-  state.controller = controller;
+  state.controller =
+    controller;
 
-  const response = await fetch("/api/chat", {
-    method: "POST",
+  const model =
+    state.model ||
+    "llama-3.1-8b-instant";
 
-    headers: {
-      "Content-Type": "application/json"
-    },
+  const response =
+    await fetch(
+      "/api/chat",
+      {
+        method: "POST",
 
-    body: JSON.stringify({
-      model: state.model || "llama-3.1-8b-instant",
-      messages: messages
-    }),
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
 
-    signal: controller.signal
-  });
+        body:
+          JSON.stringify({
 
-  const data = await response
-    .json()
-    .catch(() => ({}));
+            model:
 
-  if (!response.ok || !data.ok) {
+              model,
+
+            messages:
+
+              messages
+
+          }),
+
+        signal:
+          controller.signal
+      }
+    );
+
+
+  const data =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+
+  if (
+    !response.ok ||
+    !data.ok
+  ) {
 
     throw new Error(
+
       data.error ||
+
       `تعذر الاتصال بـ Groq (${response.status})`
+
     );
 
   }
 
+
   return (
+
     data.reply ||
+
     data.message ||
+
     "لم تصل نتيجة من النموذج."
+
   );
+
 }
