@@ -1,68 +1,176 @@
 "use strict";
 
+/*
+ * ============================================================
+ * T.M.D AI
+ * Groq Vision API
+ *
+ * T.M.D AI -> /api/image -> Groq Vision
+ *
+ * لا يوجد OpenAI API Key
+ * ============================================================
+ */
 
 const GROQ_URL =
   "https://api.groq.com/openai/v1/chat/completions";
 
 
 const VISION_MODEL =
+  process.env.GROQ_VISION_MODEL ||
   "meta-llama/llama-4-scout-17b-16e-instruct";
 
 
-module.exports =
-  async function handler(
-    req,
-    res
-  ) {
+module.exports = async function handler(req, res) {
+
+  /*
+   * ==========================================================
+   * CORS
+   * ==========================================================
+   */
+
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "*"
+  );
+
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, OPTIONS"
+  );
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type"
+  );
+
+  res.setHeader(
+    "Cache-Control",
+    "no-store"
+  );
 
 
-    res.setHeader(
-      "Cache-Control",
-      "no-store"
+  /*
+   * ==========================================================
+   * OPTIONS
+   * ==========================================================
+   */
+
+  if (req.method === "OPTIONS") {
+
+    return res
+      .status(204)
+      .end();
+
+  }
+
+
+  /*
+   * ==========================================================
+   * POST ONLY
+   * ==========================================================
+   */
+
+  if (req.method !== "POST") {
+
+    return res
+      .status(405)
+      .json({
+
+        ok: false,
+
+        error:
+          "Method Not Allowed"
+
+      });
+
+  }
+
+
+  /*
+   * ==========================================================
+   * GROQ KEY
+   * ==========================================================
+   */
+
+  const apiKey =
+    process.env.GROQ_API_KEY;
+
+
+  if (!apiKey) {
+
+    console.error(
+      "GROQ_API_KEY is missing."
     );
 
 
-    res.setHeader(
-      "Access-Control-Allow-Origin",
-      "*"
-    );
+    return res
+      .status(500)
+      .json({
+
+        ok: false,
+
+        error:
+          "GROQ_API_KEY غير موجود في Vercel."
+
+      });
+
+  }
 
 
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "POST, OPTIONS"
-    );
+  try {
+
+    /*
+     * ========================================================
+     * BODY
+     * ========================================================
+     */
+
+    const body =
+      typeof req.body === "string"
+
+        ? JSON.parse(
+            req.body || "{}"
+          )
+
+        : (
+            req.body || {}
+          );
 
 
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type"
-    );
+    const image =
+      body.image ||
+      body.imageUrl ||
+      body.dataUrl;
 
+
+    const prompt =
+      typeof body.prompt === "string" &&
+      body.prompt.trim()
+
+        ? body.prompt.trim()
+
+        : "حلل هذه الصورة بالتفصيل، واشرح العناصر والنصوص والمعلومات المهمة الموجودة فيها.";
+
+
+    /*
+     * ========================================================
+     * VALIDATE IMAGE
+     * ========================================================
+     */
 
     if (
-      req.method === "OPTIONS"
+      typeof image !== "string" ||
+      !image.trim()
     ) {
 
       return res
-        .status(204)
-        .end();
-
-    }
-
-
-    if (
-      req.method !== "POST"
-    ) {
-
-      return res
-        .status(405)
+        .status(400)
         .json({
 
           ok: false,
 
           error:
-            "استخدم POST."
+            "لم يتم إرسال صورة."
 
         });
 
@@ -70,289 +178,321 @@ module.exports =
 
 
     /*
-     * GROQ ONLY
+     * ========================================================
+     * VALIDATE DATA URL
+     * ========================================================
      */
 
-    const apiKey =
-      process.env.GROQ_API_KEY;
-
-
-    if (!apiKey) {
+    if (
+      !image.startsWith(
+        "data:image/"
+      )
+    ) {
 
       return res
-        .status(500)
+        .status(400)
         .json({
 
           ok: false,
 
           error:
-            "GROQ_API_KEY غير موجود في Vercel."
+            "صيغة الصورة غير صحيحة. يجب إرسال Data URL للصورة."
 
         });
 
     }
 
 
-    try {
+    /*
+     * ========================================================
+     * LIMIT IMAGE SIZE
+     * ========================================================
+     */
 
-      const body =
-        typeof req.body === "string"
-
-          ? JSON.parse(
-              req.body || "{}"
-            )
-
-          : (
-              req.body || {}
-            );
-
-
-      const image =
-        String(
-          body.image || ""
-        );
+    const approximateBytes =
+      Math.floor(
+        (
+          image.length *
+          3
+        ) / 4
+      );
 
 
-      const prompt =
-        String(
-          body.prompt || ""
-        ).trim() ||
+    if (
+      approximateBytes >
+      12 * 1024 * 1024
+    ) {
 
-        "حلل هذه الصورة بالتفصيل، واشرح ما يظهر فيها واقرأ النصوص الواضحة داخلها.";
+      return res
+        .status(413)
+        .json({
 
+          ok: false,
 
-      if (
-        !image.startsWith(
-          "data:image/"
-        )
-      ) {
+          error:
+            "حجم الصورة كبير جدًا. حاول إرسال صورة أصغر."
 
-        return res
-          .status(400)
-          .json({
+        });
 
-            ok: false,
-
-            error:
-              "لم يتم إرسال صورة صحيحة."
-
-          });
-
-      }
+    }
 
 
-      if (
-        image.length >
-        20 * 1024 * 1024
-      ) {
+    /*
+     * ========================================================
+     * GROQ VISION MESSAGE
+     * ========================================================
+     */
 
-        return res
-          .status(413)
-          .json({
+    const messages = [
 
-            ok: false,
+      {
 
-            error:
-              "الصورة كبيرة جدًا. استخدم صورة أصغر."
+        role:
+          "system",
 
-          });
+        content:
+          `
+أنت T.M.D AI Vision، مساعد متخصص في تحليل الصور.
 
-      }
+تعليماتك:
 
+- حلل الصورة المرسلة فقط.
+- لا تدّعي رؤية شيء غير موجود في الصورة.
+- اذكر النصوص الظاهرة إذا كان من الممكن قراءتها.
+- صف العناصر المهمة بوضوح.
+- إذا طلب المستخدم استخراج معلومات من الصورة، حاول استخراجها بدقة.
+- إذا كانت الصورة غير واضحة، أخبر المستخدم بذلك.
+- أجب بالعربية إذا كان المستخدم يتحدث بالعربية.
+          `.trim()
 
-      const response =
-        await fetch(
-          GROQ_URL,
+      },
+
+      {
+
+        role:
+          "user",
+
+        content: [
+
           {
 
-            method:
-              "POST",
+            type:
+              "text",
 
-            headers: {
+            text:
+              prompt
 
-              "Content-Type":
-                "application/json",
+          },
 
-              "Authorization":
-                `Bearer ${apiKey}`
+          {
 
-            },
+            type:
+              "image_url",
 
-            body:
-              JSON.stringify({
+            image_url: {
 
-                model:
-                  VISION_MODEL,
+              url:
+                image
 
-                messages: [
-
-                  {
-
-                    role:
-                      "system",
-
-                    content:
-                      `
-أنت T.M.D AI ومتخصص في تحليل الصور.
-
-حلل الصورة بدقة.
-
-اقرأ النصوص الظاهرة بقدر الإمكان.
-
-أجب عن طلب المستخدم.
-
-لا تخترع معلومات غير موجودة في الصورة.
-
-الإجابة تكون نصية ومنظمة.
-                      `.trim()
-
-                  },
-
-                  {
-
-                    role:
-                      "user",
-
-                    content: [
-
-                      {
-
-                        type:
-                          "text",
-
-                        text:
-                          prompt
-
-                      },
-
-                      {
-
-                        type:
-                          "image_url",
-
-                        image_url: {
-
-                          url:
-                            image
-
-                        }
-
-                      }
-
-                    ]
-
-                  }
-
-                ],
-
-                temperature:
-                  0.3,
-
-                max_tokens:
-                  2048
-
-              })
+            }
 
           }
-        );
 
-
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-
-      if (
-        !response.ok
-      ) {
-
-        console.error(
-          "GROQ VISION ERROR:",
-          data
-        );
-
-
-        return res
-          .status(
-            response.status
-          )
-          .json({
-
-            ok: false,
-
-            error:
-              data?.error?.message ||
-              "فشل تحليل الصورة."
-
-          });
+        ]
 
       }
 
-
-      const text =
-        data?.choices?.[0]
-          ?.message
-          ?.content;
+    ];
 
 
-      if (
-        typeof text !==
-          "string" ||
-        !text.trim()
-      ) {
+    /*
+     * ========================================================
+     * REQUEST GROQ
+     * ========================================================
+     */
 
-        return res
-          .status(502)
-          .json({
+    const response =
+      await fetch(
+        GROQ_URL,
+        {
 
-            ok: false,
+          method:
+            "POST",
 
-            error:
-              "لم يرجع Groq تحليلًا للصورة."
+          headers: {
 
-          });
+            "Content-Type":
+              "application/json",
 
-      }
+            "Authorization":
+              `Bearer ${apiKey}`
+
+          },
+
+          body:
+            JSON.stringify({
+
+              model:
+                VISION_MODEL,
+
+              messages:
+                messages,
+
+              temperature:
+                0.3,
+
+              max_tokens:
+                4096
+
+            })
+
+        }
+      );
+
+
+    /*
+     * ========================================================
+     * READ RESPONSE
+     * ========================================================
+     */
+
+    const data =
+      await response
+        .json()
+        .catch(
+          () => ({})
+        );
+
+
+    /*
+     * ========================================================
+     * GROQ ERROR
+     * ========================================================
+     */
+
+    if (!response.ok) {
+
+      console.error(
+        "Groq Vision Error:",
+        data
+      );
 
 
       return res
-        .status(200)
+        .status(
+          response.status
+        )
         .json({
 
-          ok: true,
+          ok: false,
 
-          message:
-            text.trim(),
+          error:
+            data?.error?.message ||
+
+            "حدث خطأ أثناء تحليل الصورة بواسطة Groq.",
 
           model:
             VISION_MODEL
 
         });
 
+    }
 
-    } catch (error) {
+
+    /*
+     * ========================================================
+     * REPLY
+     * ========================================================
+     */
+
+    const reply =
+      data
+        ?.choices
+        ?.[0]
+        ?.message
+        ?.content;
+
+
+    /*
+     * ========================================================
+     * EMPTY RESPONSE
+     * ========================================================
+     */
+
+    if (
+      typeof reply !== "string" ||
+      !reply.trim()
+    ) {
 
       console.error(
-        "TMD IMAGE ERROR:",
-        error
+        "Groq Vision returned no text:",
+        data
       );
 
 
       return res
-        .status(500)
+        .status(502)
         .json({
 
           ok: false,
 
           error:
-            error?.message ||
-            "حدث خطأ أثناء تحليل الصورة."
+            "لم يرجع Groq نتيجة لتحليل الصورة."
 
         });
 
     }
 
-  };
+
+    /*
+     * ========================================================
+     * SUCCESS
+     * ========================================================
+     */
+
+    return res
+      .status(200)
+      .json({
+
+        ok: true,
+
+        reply:
+          reply.trim(),
+
+        model:
+          data?.model ||
+          VISION_MODEL
+
+      });
+
+
+  } catch (error) {
+
+    /*
+     * ========================================================
+     * UNEXPECTED ERROR
+     * ========================================================
+     */
+
+    console.error(
+      "T.M.D AI Vision Error:",
+      error
+    );
+
+
+    return res
+      .status(500)
+      .json({
+
+        ok: false,
+
+        error:
+          error?.message ||
+
+          "حدث خطأ غير متوقع أثناء تحليل الصورة."
+
+      });
+
+  }
+
+};
