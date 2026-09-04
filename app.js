@@ -1,29 +1,53 @@
 "use strict";
 
+/*
+============================================================
+T.M.D AI
+Professional Frontend
+Groq Only
+============================================================
+
+المسارات:
+
+المحادثة:
+Browser -> /api/chat -> Groq
+
+الصور:
+Browser -> /api/image -> Groq Vision
+
+الملفات:
+Browser -> قراءة الملف محليًا -> /api/chat -> Groq
+
+لا يوجد OpenAI.
+============================================================
+*/
+
+
 /* =========================================================
-   T.M.D AI
-   Frontend
-   Groq Only
-   ========================================================= */
+   STATE
+========================================================= */
 
 const state = {
 
-  messages:
-    JSON.parse(
-      localStorage.getItem("tmd_messages") || "[]"
-    ),
+  messages: loadJSON(
+    "tmd_messages",
+    []
+  ),
 
-  conversations:
-    JSON.parse(
-      localStorage.getItem("tmd_conversations") || "[]"
-    ),
+  conversations: loadJSON(
+    "tmd_conversations",
+    []
+  ),
 
   theme:
-    localStorage.getItem("tmd_theme") || "dark",
+    localStorage.getItem(
+      "tmd_theme"
+    ) || "dark",
 
   model:
-    localStorage.getItem("tmd_model") ||
-    "llama-3.1-8b-instant",
+    localStorage.getItem(
+      "tmd_model"
+    ) || "llama-3.1-8b-instant",
 
   busy: false,
 
@@ -39,12 +63,51 @@ const state = {
 
 
 /* =========================================================
+   HELPERS
+========================================================= */
+
+function loadJSON(
+  key,
+  fallback
+) {
+
+  try {
+
+    const value =
+      localStorage.getItem(
+        key
+      );
+
+    if (!value) {
+      return fallback;
+    }
+
+    const parsed =
+      JSON.parse(value);
+
+    return parsed ?? fallback;
+
+  } catch {
+
+    return fallback;
+
+  }
+
+}
+
+
+function $(id) {
+
+  return document.getElementById(
+    id
+  );
+
+}
+
+
+/* =========================================================
    ELEMENTS
-   ========================================================= */
-
-const $ = id =>
-  document.getElementById(id);
-
+========================================================= */
 
 const chat =
   $("chat");
@@ -58,11 +121,11 @@ const input =
 const send =
   $("send");
 
-const historyList =
-  $("history");
-
 const sidebar =
   $("sidebar");
+
+const historyList =
+  $("history");
 
 const plusButton =
   $("plusButton");
@@ -97,21 +160,83 @@ const attachmentName =
 const attachmentMeta =
   $("attachmentMeta");
 
+const removeAttachment =
+  $("removeAttachment");
+
+const newChat =
+  $("newChat");
+
+const openSidebar =
+  $("openSidebar");
+
+const closeSidebar =
+  $("closeSidebar");
+
+const settingsBtn =
+  $("settingsBtn");
+
+const modalBackdrop =
+  $("modalBackdrop");
+
+const modalClose =
+  $("modalClose");
+
+const modelSelect =
+  $("modelSelect");
+
+const modelSelectSettings =
+  $("modelSelectSettings");
+
+const themeSelect =
+  $("themeSelect");
+
+const themeTop =
+  $("themeTop");
+
+const themeTopDesktop =
+  $("themeTopDesktop");
+
+const toastElement =
+  $("toast");
+
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const DEFAULT_MODEL =
+  "llama-3.1-8b-instant";
+
+const ALLOWED_MODELS = [
+  "llama-3.1-8b-instant",
+  "llama-3.3-70b-versatile"
+];
+
+const MAX_DOCUMENT_SIZE =
+  15 * 1024 * 1024;
+
+const MAX_IMAGE_SIZE =
+  20 * 1024 * 1024;
+
 
 /* =========================================================
    SAVE
-   ========================================================= */
+========================================================= */
 
 function save() {
 
   localStorage.setItem(
     "tmd_messages",
-    JSON.stringify(state.messages)
+    JSON.stringify(
+      state.messages
+    )
   );
 
   localStorage.setItem(
     "tmd_conversations",
-    JSON.stringify(state.conversations)
+    JSON.stringify(
+      state.conversations
+    )
   );
 
   localStorage.setItem(
@@ -129,32 +254,39 @@ function save() {
 
 /* =========================================================
    TOAST
-   ========================================================= */
+========================================================= */
 
-function toast(message) {
+let toastTimer = null;
 
-  const el =
-    $("toast");
 
-  if (!el) return;
+function toast(
+  message
+) {
 
-  el.textContent =
+  if (!toastElement) {
+    return;
+  }
+
+  toastElement.textContent =
     message;
 
-  el.classList.add(
+  toastElement.classList.add(
     "show"
   );
 
   clearTimeout(
-    toast.timer
+    toastTimer
   );
 
-  toast.timer =
+  toastTimer =
     setTimeout(
-      () =>
-        el.classList.remove(
+      () => {
+
+        toastElement.classList.remove(
           "show"
-        ),
+        );
+
+      },
       3000
     );
 
@@ -162,69 +294,122 @@ function toast(message) {
 
 
 /* =========================================================
-   ESCAPE
-   ========================================================= */
+   ESCAPE HTML
+========================================================= */
 
-function esc(value) {
+function escapeHTML(
+  value
+) {
 
   return String(
     value ?? ""
   ).replace(
     /[&<>"']/g,
-    character => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    })[character]
+    character => {
+
+      const map = {
+
+        "&":
+          "&amp;",
+
+        "<":
+          "&lt;",
+
+        ">":
+          "&gt;",
+
+        '"':
+          "&quot;",
+
+        "'":
+          "&#039;"
+
+      };
+
+      return map[
+        character
+      ];
+
+    }
   );
 
 }
 
 
 /* =========================================================
-   FORMAT TEXT
-   ========================================================= */
+   FORMAT MESSAGE
+========================================================= */
 
-function formatText(text) {
+function formatMessage(
+  text
+) {
 
-  let s =
-    esc(text);
-
-  s =
-    s.replace(
-      /```([\w+-]*)\n?([\s\S]*?)```/g,
-      (_, language, code) =>
-        `<pre><code>${code}</code></pre>`
+  let value =
+    escapeHTML(
+      text
     );
 
-  s =
-    s.replace(
+
+  /*
+   * Code blocks
+   */
+
+  value =
+    value.replace(
+      /```(?:[\w+-]+)?\n?([\s\S]*?)```/g,
+      (_, code) => {
+
+        return `
+          <pre class="code-block">
+            <code>${code}</code>
+          </pre>
+        `;
+
+      }
+    );
+
+
+  /*
+   * Inline code
+   */
+
+  value =
+    value.replace(
       /`([^`]+)`/g,
       '<code class="inline-code">$1</code>'
     );
 
-  s =
-    s.replace(
+
+  /*
+   * Bold
+   */
+
+  value =
+    value.replace(
       /\*\*(.*?)\*\*/g,
       "<strong>$1</strong>"
     );
 
-  s =
-    s.replace(
+
+  /*
+   * Line breaks
+   */
+
+  value =
+    value.replace(
       /\n/g,
       "<br>"
     );
 
-  return s;
+
+  return value;
 
 }
 
 
 /* =========================================================
    SCROLL
-   ========================================================= */
+========================================================= */
 
 function scrollBottom() {
 
@@ -246,12 +431,26 @@ function scrollBottom() {
 
 /* =========================================================
    THEME
-   ========================================================= */
+========================================================= */
 
-function setTheme(theme) {
+function setTheme(
+  theme
+) {
+
+  if (
+    theme !== "light" &&
+    theme !== "dark"
+  ) {
+
+    theme =
+      "dark";
+
+  }
+
 
   state.theme =
     theme;
+
 
   document.documentElement.dataset.theme =
     theme;
@@ -259,15 +458,76 @@ function setTheme(theme) {
   document.body.dataset.theme =
     theme;
 
-  const select =
-    $("themeSelect");
 
-  if (select) {
+  if (themeSelect) {
 
-    select.value =
+    themeSelect.value =
       theme;
 
   }
+
+
+  save();
+
+}
+
+
+/* =========================================================
+   THEME BUTTON
+========================================================= */
+
+function toggleTheme() {
+
+  setTheme(
+
+    state.theme === "dark"
+      ? "light"
+      : "dark"
+
+  );
+
+}
+
+
+/* =========================================================
+   MODEL
+========================================================= */
+
+function setModel(
+  model
+) {
+
+  if (
+    !ALLOWED_MODELS.includes(
+      model
+    )
+  ) {
+
+    model =
+      DEFAULT_MODEL;
+
+  }
+
+
+  state.model =
+    model;
+
+
+  if (modelSelect) {
+
+    modelSelect.value =
+      model;
+
+  }
+
+
+  if (modelSelectSettings) {
+
+    modelSelectSettings.value =
+      model;
+
+  }
+
 
   save();
 
@@ -276,27 +536,13 @@ function setTheme(theme) {
 
 /* =========================================================
    PLUS MENU
-   ========================================================= */
-
-function closePlusMenu() {
-
-  if (!plusMenu) return;
-
-  plusMenu.classList.add(
-    "hidden"
-  );
-
-  plusButton?.setAttribute(
-    "aria-expanded",
-    "false"
-  );
-
-}
-
+========================================================= */
 
 function openPlusMenu() {
 
-  if (!plusMenu) return;
+  if (!plusMenu) {
+    return;
+  }
 
   plusMenu.classList.remove(
     "hidden"
@@ -310,17 +556,52 @@ function openPlusMenu() {
 }
 
 
+function closePlusMenu() {
+
+  if (!plusMenu) {
+    return;
+  }
+
+  plusMenu.classList.add(
+    "hidden"
+  );
+
+  plusButton?.setAttribute(
+    "aria-expanded",
+    "false"
+  );
+
+}
+
+
 /* =========================================================
    ATTACHMENT
-   ========================================================= */
+========================================================= */
 
-function resetAttachment() {
+function clearAttachment() {
 
   state.selectedImage =
     null;
 
   state.selectedDocument =
     null;
+
+
+  if (imageInput) {
+
+    imageInput.value =
+      "";
+
+  }
+
+
+  if (documentInput) {
+
+    documentInput.value =
+      "";
+
+  }
+
 
   if (attachmentPreview) {
 
@@ -330,24 +611,12 @@ function resetAttachment() {
 
   }
 
-  if (imageInput) {
-
-    imageInput.value =
-      "";
-
-  }
-
-  if (documentInput) {
-
-    documentInput.value =
-      "";
-
-  }
-
 }
 
 
-function formatBytes(bytes) {
+function formatBytes(
+  bytes
+) {
 
   if (
     !bytes ||
@@ -357,6 +626,7 @@ function formatBytes(bytes) {
     return `${bytes || 0} B`;
 
   }
+
 
   if (
     bytes <
@@ -368,6 +638,7 @@ function formatBytes(bytes) {
     ).toFixed(1)} KB`;
 
   }
+
 
   return `${(
     bytes /
@@ -386,9 +657,11 @@ function showAttachment(
     return;
   }
 
+
   attachmentPreview.classList.remove(
     "hidden"
   );
+
 
   if (attachmentIcon) {
 
@@ -399,6 +672,7 @@ function showAttachment(
 
   }
 
+
   if (attachmentName) {
 
     attachmentName.textContent =
@@ -406,14 +680,11 @@ function showAttachment(
 
   }
 
+
   if (attachmentMeta) {
 
     attachmentMeta.textContent =
-      `${
-        type === "image"
-          ? "صورة"
-          : "ملف"
-      } · ${formatBytes(file.size)}`;
+      `${type === "image" ? "صورة" : "ملف"} • ${formatBytes(file.size)}`;
 
   }
 
@@ -421,14 +692,19 @@ function showAttachment(
 
 
 /* =========================================================
-   MESSAGE
-   ========================================================= */
+   ADD MESSAGE
+========================================================= */
 
 function addMessage(
   role,
   content,
   meta = ""
 ) {
+
+  if (!chat) {
+    return null;
+  }
+
 
   if (welcome) {
 
@@ -437,23 +713,29 @@ function addMessage(
 
   }
 
+
   const article =
     document.createElement(
       "article"
     );
 
+
   article.className =
     `message ${role}`;
+
 
   article.innerHTML = `
 
     <div class="msg-avatar">
+
       ${
         role === "user"
           ? "أنت"
           : "T"
       }
+
     </div>
+
 
     <div class="msg-body">
 
@@ -467,25 +749,31 @@ function addMessage(
 
         ${
           meta
-            ? `<span>${esc(meta)}</span>`
+            ? `<span>${escapeHTML(meta)}</span>`
             : ""
         }
 
       </div>
 
+
       <div class="msg-content">
-        ${formatText(content)}
+
+        ${formatMessage(content)}
+
       </div>
 
     </div>
 
   `;
 
+
   chat.appendChild(
     article
   );
 
+
   scrollBottom();
+
 
   return article;
 
@@ -494,7 +782,7 @@ function addMessage(
 
 /* =========================================================
    GROQ CHAT
-   ========================================================= */
+========================================================= */
 
 async function sendText(
   messages
@@ -502,6 +790,7 @@ async function sendText(
 
   const controller =
     new AbortController();
+
 
   state.controller =
     controller;
@@ -518,6 +807,9 @@ async function sendText(
         headers: {
 
           "Content-Type":
+            "application/json",
+
+          "Accept":
             "application/json"
 
         },
@@ -526,8 +818,7 @@ async function sendText(
           JSON.stringify({
 
             model:
-              state.model ||
-              "llama-3.1-8b-instant",
+              state.model,
 
             messages:
               messages
@@ -549,31 +840,59 @@ async function sendText(
       );
 
 
-  if (
-    !response.ok ||
-    !data.ok
-  ) {
+  if (!response.ok) {
 
     throw new Error(
-      data.error ||
-      `تعذر الاتصال بـ Groq (${response.status})`
+
+      data?.error ||
+
+      `خطأ من الخادم: ${response.status}`
+
     );
 
   }
 
 
-  return (
-    data.reply ||
-    data.message ||
-    "لم تصل نتيجة من Groq."
-  );
+  if (
+    data?.ok !== true
+  ) {
+
+    throw new Error(
+
+      data?.error ||
+
+      "فشل الاتصال بـ Groq."
+
+    );
+
+  }
+
+
+  const reply =
+    data?.reply ||
+    data?.message;
+
+
+  if (
+    typeof reply !== "string" ||
+    !reply.trim()
+  ) {
+
+    throw new Error(
+      "لم يرجع Groq أي إجابة."
+    );
+
+  }
+
+
+  return reply.trim();
 
 }
 
 
 /* =========================================================
-   IMAGE
-   ========================================================= */
+   GROQ VISION
+========================================================= */
 
 async function analyzeImage(
   dataUrl,
@@ -591,6 +910,9 @@ async function analyzeImage(
         headers: {
 
           "Content-Type":
+            "application/json",
+
+          "Accept":
             "application/json"
 
         },
@@ -603,7 +925,7 @@ async function analyzeImage(
 
             prompt:
               prompt ||
-              "حلل الصورة بالتفصيل."
+              "حلل هذه الصورة بالتفصيل."
 
           })
 
@@ -619,31 +941,59 @@ async function analyzeImage(
       );
 
 
-  if (
-    !response.ok ||
-    !data.ok
-  ) {
+  if (!response.ok) {
 
     throw new Error(
-      data.error ||
-      "تعذر تحليل الصورة."
+
+      data?.error ||
+
+      `خطأ في تحليل الصورة: ${response.status}`
+
     );
 
   }
 
 
-  return (
-    data.reply ||
-    data.message ||
-    "لم تصل نتيجة تحليل الصورة."
-  );
+  if (
+    data?.ok !== true
+  ) {
+
+    throw new Error(
+
+      data?.error ||
+
+      "فشل تحليل الصورة."
+
+    );
+
+  }
+
+
+  const reply =
+    data?.reply ||
+    data?.message;
+
+
+  if (
+    typeof reply !== "string" ||
+    !reply.trim()
+  ) {
+
+    throw new Error(
+      "لم يرجع Groq نتيجة للصورة."
+    );
+
+  }
+
+
+  return reply.trim();
 
 }
 
 
 /* =========================================================
-   FILE READER
-   ========================================================= */
+   FILE -> TEXT
+========================================================= */
 
 async function readFileAsText(
   file
@@ -653,10 +1003,12 @@ async function readFileAsText(
     file.name.toLowerCase();
 
 
-  /* TXT / CODE */
+  /*
+   * Text / Code
+   */
 
   if (
-    /\.(txt|md|js|json|html|htm|css|py|csv|xml|yaml|yml|log)$/i
+    /\.(txt|md|js|jsx|ts|tsx|json|html|htm|css|scss|py|java|c|cpp|h|hpp|php|sql|xml|csv|yaml|yml|log)$/i
       .test(name)
   ) {
 
@@ -665,40 +1017,53 @@ async function readFileAsText(
   }
 
 
-  /* DOCX */
+  /*
+   * DOCX
+   */
 
   if (
-    name.endsWith(".docx")
+    name.endsWith(
+      ".docx"
+    )
   ) {
 
-    if (!window.mammoth) {
+    if (
+      typeof window.mammoth ===
+      "undefined"
+    ) {
 
       throw new Error(
-        "قارئ Word غير متوفر."
+        "مكتبة قراءة Word غير محملة."
       );
 
     }
 
+
     const result =
-      await mammoth.extractRawText({
+      await window.mammoth.extractRawText({
 
         arrayBuffer:
           await file.arrayBuffer()
 
       });
 
-    return result.value;
+
+    return result.value || "";
 
   }
 
 
-  /* PDF */
+  /*
+   * PDF
+   */
 
   if (
-    name.endsWith(".pdf")
+    name.endsWith(
+      ".pdf"
+    )
   ) {
 
-    return await readPdf(
+    return await readPDF(
       file
     );
 
@@ -706,81 +1071,81 @@ async function readFileAsText(
 
 
   throw new Error(
-    "صيغة الملف غير مدعومة."
+    "صيغة الملف غير مدعومة حاليًا."
   );
 
 }
 
 
 /* =========================================================
-   PDF
-   ========================================================= */
+   PDF READER
+========================================================= */
 
-async function readPdf(
+async function readPDF(
   file
 ) {
 
-  if (!window.pdfjsLib) {
+  /*
+   * PDF.js قد يكون محملًا
+   * من index.html.
+   */
 
-    if (window.pdfjsReady) {
-
-      await window.pdfjsReady;
-
-    }
-
-  }
-
-
-  if (!window.pdfjsLib) {
+  if (
+    typeof window.pdfjsLib ===
+    "undefined"
+  ) {
 
     throw new Error(
-      "قارئ PDF غير متوفر."
+      "قارئ PDF غير محمل. أضف PDF.js إلى index.html."
     );
 
   }
 
 
+  const bytes =
+    new Uint8Array(
+      await file.arrayBuffer()
+    );
+
+
   const pdf =
     await window.pdfjsLib
       .getDocument({
-
-        data:
-          new Uint8Array(
-            await file.arrayBuffer()
-          )
-
+        data: bytes
       })
       .promise;
 
 
-  const pages =
-    [];
+  const pages = [];
 
 
   for (
-    let i = 1;
-    i <= pdf.numPages;
-    i++
+    let pageNumber = 1;
+    pageNumber <= pdf.numPages;
+    pageNumber++
   ) {
 
     const page =
-      await pdf.getPage(i);
+      await pdf.getPage(
+        pageNumber
+      );
 
-    const text =
+
+    const content =
       await page.getTextContent();
 
 
-    pages.push(
-
-      `### الصفحة ${i}\n` +
-
-      text.items
+    const text =
+      content.items
         .map(
           item =>
-            item.str
+            item.str || ""
         )
-        .join(" ")
+        .join(" ");
 
+
+    pages.push(
+      `### الصفحة ${pageNumber}\n${text}`
     );
 
   }
@@ -794,51 +1159,69 @@ async function readPdf(
 
 
 /* =========================================================
-   FILE PROMPT
-   ========================================================= */
+   DOCUMENT PROMPT
+========================================================= */
 
-function buildDocumentPrompt(
-  userText,
-  fileName,
-  text
+function createDocumentPrompt(
+  file,
+  text,
+  userRequest
 ) {
 
-  const max =
+  const MAX_TEXT =
     45000;
 
-  const clipped =
-    text.length > max
-      ? text.slice(
-          0,
-          max
-        ) +
-        "\n\n[تم اختصار باقي الملف بسبب الحجم]"
-      : text;
+
+  let content =
+    text;
+
+
+  if (
+    content.length >
+    MAX_TEXT
+  ) {
+
+    content =
+      content.slice(
+        0,
+        MAX_TEXT
+      ) +
+
+      "\n\n[تم اختصار جزء من الملف بسبب حجمه.]";
+
+  }
 
 
   return `
 
-لديك ملف مرفق اسمه:
+أنت تقوم بتحليل ملف أرسله المستخدم إلى T.M.D AI.
 
-${fileName}
+اسم الملف:
+${file.name}
+
+نوع الملف:
+${file.type || "غير محدد"}
 
 محتوى الملف:
+----------------------------
 
---------------------
+${content}
 
-${clipped}
-
---------------------
+----------------------------
 
 طلب المستخدم:
-
 ${
-  userText ||
+  userRequest ||
   "حلل الملف واذكر أهم المعلومات الموجودة فيه."
 }
 
-اعتمد على محتوى الملف فقط.
-إذا لم تجد المعلومة المطلوبة، أخبر المستخدم بذلك.
+قواعد مهمة:
+- اعتمد على محتوى الملف.
+- لا تخترع معلومات غير موجودة.
+- إذا لم تجد الإجابة في الملف، قل ذلك بوضوح.
+- إذا طلب المستخدم تلخيصًا، قدم تلخيصًا منظمًا.
+- إذا طلب استخراج معلومات، استخرجها بوضوح.
+- أجب بالعربية إذا كان المستخدم يتحدث بالعربية.
 
 `;
 
@@ -846,10 +1229,10 @@ ${
 
 
 /* =========================================================
-   DATA URL
-   ========================================================= */
+   FILE -> DATA URL
+========================================================= */
 
-function fileToDataUrl(
+function fileToDataURL(
   file
 ) {
 
@@ -862,11 +1245,13 @@ function fileToDataUrl(
       const reader =
         new FileReader();
 
+
       reader.onload =
         () =>
           resolve(
             reader.result
           );
+
 
       reader.onerror =
         () =>
@@ -875,6 +1260,7 @@ function fileToDataUrl(
               "تعذر قراءة الصورة."
             )
           );
+
 
       reader.readAsDataURL(
         file
@@ -887,30 +1273,113 @@ function fileToDataUrl(
 
 
 /* =========================================================
-   SEND
-   ========================================================= */
+   AUTO RESIZE INPUT
+========================================================= */
+
+function autoResize() {
+
+  if (!input) {
+    return;
+  }
+
+
+  input.style.height =
+    "auto";
+
+
+  input.style.height =
+    Math.min(
+      input.scrollHeight,
+      180
+    ) + "px";
+
+}
+
+
+/* =========================================================
+   SEND BUTTON STATE
+========================================================= */
+
+function setSendingState(
+  sending
+) {
+
+  if (!send) {
+    return;
+  }
+
+
+  if (sending) {
+
+    send.classList.add(
+      "stop"
+    );
+
+    send.setAttribute(
+      "aria-label",
+      "إيقاف"
+    );
+
+    send.textContent =
+      "■";
+
+  } else {
+
+    send.classList.remove(
+      "stop"
+    );
+
+    send.setAttribute(
+      "aria-label",
+      "إرسال"
+    );
+
+    send.textContent =
+      "↑";
+
+  }
+
+}
+
+
+/* =========================================================
+   HANDLE SEND
+========================================================= */
 
 async function handleSend() {
 
-  /* STOP */
+  /*
+   * إذا كان يرسل بالفعل
+   * الضغط يصبح إيقاف.
+   */
 
   if (state.busy) {
 
-    state.controller?.abort();
+    if (
+      state.controller
+    ) {
+
+      state.controller.abort();
+
+    }
 
     return;
 
   }
 
 
-  const raw =
-    input.value.trim();
+  const text =
+    input
+      ? input.value.trim()
+      : "";
 
 
-  /* EMPTY */
+  /*
+   * لا يوجد محتوى.
+   */
 
   if (
-    !raw &&
+    !text &&
     !state.selectedImage &&
     !state.selectedDocument
   ) {
@@ -924,16 +1393,14 @@ async function handleSend() {
     true;
 
 
-  send.classList.add(
-    "stop"
+  setSendingState(
+    true
   );
-
-  send.textContent =
-    "■";
 
 
   const userText =
-    raw ||
+    text ||
+
     (
       state.selectedImage
         ? "حلل هذه الصورة."
@@ -941,42 +1408,123 @@ async function handleSend() {
     );
 
 
-  /* SHOW USER MESSAGE */
+  /*
+   * إظهار رسالة المستخدم.
+   */
 
   addMessage(
+
     "user",
+
     userText,
-    state.selectedDocument?.name ||
+
     state.selectedImage?.name ||
+    state.selectedDocument?.name ||
     ""
+
   );
 
 
-  /* CLEAR INPUT */
+  /*
+   * تنظيف خانة الكتابة
+   * فورًا حتى لا تبقى الرسالة معلقة.
+   */
 
-  input.value =
-    "";
+  if (input) {
 
-  autoResize();
+    input.value =
+      "";
+
+    autoResize();
+
+  }
 
 
-  const typing =
+  /*
+   * رسالة انتظار.
+   */
+
+  const assistantMessage =
     addMessage(
       "assistant",
-      "جاري التحليل…"
+      "جاري المعالجة…"
     );
 
 
   try {
 
-    let reply;
+    let reply = "";
+
+
+    /* =====================================================
+       IMAGE
+    ===================================================== */
+
+    if (
+      state.selectedImage
+    ) {
+
+      const file =
+        state.selectedImage;
+
+
+      if (
+        file.size >
+        MAX_IMAGE_SIZE
+      ) {
+
+        throw new Error(
+          "حجم الصورة أكبر من 20MB."
+        );
+
+      }
+
+
+      const dataUrl =
+        await fileToDataURL(
+          file
+        );
+
+
+      reply =
+        await analyzeImage(
+          dataUrl,
+          userText
+        );
+
+
+      state.messages.push(
+
+        {
+
+          role:
+            "user",
+
+          content:
+            userText
+
+        },
+
+        {
+
+          role:
+            "assistant",
+
+          content:
+            reply
+
+        }
+
+      );
+
+    }
 
 
     /* =====================================================
        DOCUMENT
-       ===================================================== */
+    ===================================================== */
 
-    if (
+    else if (
       state.selectedDocument
     ) {
 
@@ -986,7 +1534,7 @@ async function handleSend() {
 
       if (
         file.size >
-        15 * 1024 * 1024
+        MAX_DOCUMENT_SIZE
       ) {
 
         throw new Error(
@@ -996,14 +1544,14 @@ async function handleSend() {
       }
 
 
-      const text =
+      const extractedText =
         await readFileAsText(
           file
         );
 
 
       if (
-        !text.trim()
+        !extractedText.trim()
       ) {
 
         throw new Error(
@@ -1014,10 +1562,10 @@ async function handleSend() {
 
 
       const prompt =
-        buildDocumentPrompt(
-          userText,
-          file.name,
-          text
+        createDocumentPrompt(
+          file,
+          extractedText,
+          userText
         );
 
 
@@ -1026,6 +1574,7 @@ async function handleSend() {
         ...state.messages,
 
         {
+
           role:
             "user",
 
@@ -1046,6 +1595,7 @@ async function handleSend() {
       state.messages.push(
 
         {
+
           role:
             "user",
 
@@ -1055,52 +1605,7 @@ async function handleSend() {
         },
 
         {
-          role:
-            "assistant",
 
-          content:
-            reply
-
-        }
-
-      );
-
-    }
-
-
-    /* =====================================================
-       IMAGE
-       ===================================================== */
-
-    else if (
-      state.selectedImage
-    ) {
-
-      const dataUrl =
-        await fileToDataUrl(
-          state.selectedImage
-        );
-
-
-      reply =
-        await analyzeImage(
-          dataUrl,
-          userText
-        );
-
-
-      state.messages.push(
-
-        {
-          role:
-            "user",
-
-          content:
-            userText
-
-        },
-
-        {
           role:
             "assistant",
 
@@ -1116,7 +1621,7 @@ async function handleSend() {
 
     /* =====================================================
        NORMAL CHAT
-       ===================================================== */
+    ===================================================== */
 
     else {
 
@@ -1150,72 +1655,128 @@ async function handleSend() {
     }
 
 
-    /* SHOW RESPONSE */
+    /*
+     * عرض الرد.
+     */
 
-    typing
-      .querySelector(
-        ".msg-content"
-      )
-      .innerHTML =
-        formatText(
-          reply
+    if (
+      assistantMessage
+    ) {
+
+      const content =
+        assistantMessage.querySelector(
+          ".msg-content"
         );
+
+
+      if (content) {
+
+        content.innerHTML =
+          formatMessage(
+            reply
+          );
+
+      }
+
+    }
 
 
     save();
 
-  }
 
+  } catch (error) {
 
-  catch (error) {
+    /*
+     * إلغاء الطلب.
+     */
 
     if (
-      error.name !==
+      error?.name ===
       "AbortError"
     ) {
 
-      const message =
-        error.message ||
-        "حدث خطأ غير متوقع.";
+      if (
+        assistantMessage
+      ) {
+
+        const content =
+          assistantMessage.querySelector(
+            ".msg-content"
+          );
 
 
-      typing
-        .querySelector(
-          ".msg-content"
-        )
-        .innerHTML =
+        if (content) {
 
-          `<span class="error-text">
-            ${esc(message)}
-          </span>`;
+          content.textContent =
+            "تم إيقاف الطلب.";
 
+        }
 
-      toast(
-        message
-      );
+      }
+
+      return;
 
     }
 
-  }
+
+    console.error(
+      "T.M.D AI Error:",
+      error
+    );
 
 
-  finally {
+    const message =
+      error?.message ||
+      "حدث خطأ غير متوقع.";
 
-    resetAttachment();
+
+    if (
+      assistantMessage
+    ) {
+
+      const content =
+        assistantMessage.querySelector(
+          ".msg-content"
+        );
+
+
+      if (content) {
+
+        content.innerHTML = `
+
+          <span class="error-text">
+
+            ${escapeHTML(message)}
+
+          </span>
+
+        `;
+
+      }
+
+    }
+
+
+    toast(
+      message
+    );
+
+  } finally {
+
+    clearAttachment();
+
 
     state.busy =
       false;
+
 
     state.controller =
       null;
 
 
-    send.classList.remove(
-      "stop"
+    setSendingState(
+      false
     );
-
-    send.textContent =
-      "↑";
 
 
     scrollBottom();
@@ -1226,103 +1787,324 @@ async function handleSend() {
 
 
 /* =========================================================
-   RESIZE
-   ========================================================= */
+   RENDER HISTORY
+========================================================= */
 
-function autoResize() {
+function renderHistory() {
 
-  if (!input) return;
-
-  input.style.height =
-    "auto";
-
-  input.style.height =
-    Math.min(
-      input.scrollHeight,
-      180
-    ) + "px";
-
-}
+  if (!historyList) {
+    return;
+  }
 
 
-/* =========================================================
-   SEND BUTTON
-   ========================================================= */
-
-if (send) {
-
-  send.addEventListener(
-    "click",
-    handleSend
-  );
-
-}
+  historyList.innerHTML =
+    "";
 
 
-/* =========================================================
-   ENTER
-   ========================================================= */
-
-if (input) {
-
-  input.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Enter" &&
-        !event.shiftKey
-      ) {
-
-        event.preventDefault();
-
-        handleSend();
-
-      }
-
-    }
-  );
+  const conversations =
+    [
+      ...state.conversations
+    ].reverse();
 
 
-  input.addEventListener(
-    "input",
-    autoResize
-  );
+  if (
+    !conversations.length
+  ) {
 
-}
+    historyList.innerHTML = `
+
+      <div class="empty-history">
+
+        لا توجد محادثات محفوظة
+
+      </div>
+
+    `;
+
+    return;
+
+  }
 
 
-/* =========================================================
-   PLUS
-   ========================================================= */
+  conversations.forEach(
+    conversation => {
 
-if (plusButton) {
+      const button =
+        document.createElement(
+          "button"
+        );
 
-  plusButton.addEventListener(
-    "click",
-    event => {
 
-      event.stopPropagation();
+      button.type =
+        "button";
 
-      if (
-        plusMenu.classList.contains(
-          "hidden"
-        )
-      ) {
 
-        openPlusMenu();
+      button.className =
+        "history-item";
 
-      } else {
 
-        closePlusMenu();
+      button.textContent =
+        conversation.title ||
+        "محادثة جديدة";
 
-      }
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          loadConversation(
+            conversation
+          );
+
+        }
+      );
+
+
+      historyList.appendChild(
+        button
+      );
 
     }
   );
 
 }
 
+
+/* =========================================================
+   LOAD CONVERSATION
+========================================================= */
+
+function loadConversation(
+  conversation
+) {
+
+  if (!chat) {
+    return;
+  }
+
+
+  chat
+    .querySelectorAll(
+      ".message"
+    )
+    .forEach(
+      element =>
+        element.remove()
+    );
+
+
+  if (welcome) {
+
+    welcome.style.display =
+      "none";
+
+  }
+
+
+  const messages =
+    Array.isArray(
+      conversation.messages
+    )
+      ? conversation.messages
+      : [];
+
+
+  state.messages =
+    [
+      ...messages
+    ];
+
+
+  messages.forEach(
+    message => {
+
+      addMessage(
+        message.role,
+        message.content
+      );
+
+    }
+  );
+
+
+  save();
+
+
+  sidebar?.classList.remove(
+    "open"
+  );
+
+}
+
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+
+function startNewChat() {
+
+  /*
+   * حفظ المحادثة الحالية.
+   */
+
+  if (
+    state.messages.length
+  ) {
+
+    const firstUser =
+      state.messages.find(
+        message =>
+          message.role ===
+          "user"
+      );
+
+
+    const title =
+      String(
+        firstUser?.content ||
+        "محادثة جديدة"
+      ).slice(
+        0,
+        60
+      );
+
+
+    state.conversations.push({
+
+      id:
+        Date.now(),
+
+      title:
+        title,
+
+      messages:
+        [
+          ...state.messages
+        ]
+
+    });
+
+  }
+
+
+  state.messages =
+    [];
+
+
+  if (chat) {
+
+    chat
+      .querySelectorAll(
+        ".message"
+      )
+      .forEach(
+        element =>
+          element.remove()
+      );
+
+  }
+
+
+  if (welcome) {
+
+    welcome.style.display =
+      "";
+
+  }
+
+
+  clearAttachment();
+
+  renderHistory();
+
+  save();
+
+
+  input?.focus();
+
+}
+
+
+/* =========================================================
+   EVENT: SEND
+========================================================= */
+
+send?.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    handleSend();
+
+  }
+);
+
+
+/* =========================================================
+   EVENT: ENTER
+========================================================= */
+
+input?.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+        "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      handleSend();
+
+    }
+
+  }
+);
+
+
+input?.addEventListener(
+  "input",
+  autoResize
+);
+
+
+/* =========================================================
+   EVENT: PLUS
+========================================================= */
+
+plusButton?.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    if (
+      plusMenu?.classList.contains(
+        "hidden"
+      )
+    ) {
+
+      openPlusMenu();
+
+    } else {
+
+      closePlusMenu();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CLOSE PLUS OUTSIDE
+========================================================= */
 
 document.addEventListener(
   "click",
@@ -1344,310 +2126,272 @@ document.addEventListener(
 
 /* =========================================================
    DOCUMENT BUTTON
-   ========================================================= */
+========================================================= */
 
-if (analyzeDocumentButton) {
+analyzeDocumentButton?.addEventListener(
+  "click",
+  event => {
 
-  analyzeDocumentButton.addEventListener(
-    "click",
-    () => {
+    event.preventDefault();
 
-      closePlusMenu();
+    closePlusMenu();
 
-      documentInput?.click();
+    documentInput?.click();
 
-    }
-  );
-
-}
-
-
-if (documentInput) {
-
-  documentInput.addEventListener(
-    "change",
-    () => {
-
-      const file =
-        documentInput.files?.[0];
-
-      if (!file) return;
-
-
-      state.selectedDocument =
-        file;
-
-      state.selectedImage =
-        null;
-
-
-      showAttachment(
-        file,
-        "document"
-      );
-
-
-      toast(
-        "تم إرفاق الملف. اكتب طلبك ثم اضغط إرسال."
-      );
-
-    }
-  );
-
-}
+  }
+);
 
 
 /* =========================================================
-   IMAGE BUTTON
-   ========================================================= */
+   DOCUMENT INPUT
+========================================================= */
 
-if (addImageButton) {
+documentInput?.addEventListener(
+  "change",
+  () => {
 
-  addImageButton.addEventListener(
-    "click",
-    () => {
+    const file =
+      documentInput.files?.[0];
 
-      state.imageMode =
-        "analyze";
 
-      closePlusMenu();
-
-      imageInput?.click();
-
+    if (!file) {
+      return;
     }
-  );
-
-}
 
 
-if (imageEditButton) {
+    state.selectedDocument =
+      file;
 
-  imageEditButton.addEventListener(
-    "click",
-    () => {
 
-      state.imageMode =
-        "edit";
+    state.selectedImage =
+      null;
 
-      closePlusMenu();
 
-      imageInput?.click();
+    showAttachment(
+      file,
+      "document"
+    );
 
+
+    toast(
+      `تم إرفاق الملف: ${file.name}`
+    );
+
+  }
+);
+
+
+/* =========================================================
+   IMAGE ANALYSIS BUTTON
+========================================================= */
+
+addImageButton?.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    state.imageMode =
+      "analyze";
+
+    closePlusMenu();
+
+    imageInput?.click();
+
+  }
+);
+
+
+/* =========================================================
+   IMAGE EDIT BUTTON
+========================================================= */
+
+imageEditButton?.addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+
+    state.imageMode =
+      "edit";
+
+    closePlusMenu();
+
+    imageInput?.click();
+
+  }
+);
+
+
+/* =========================================================
+   IMAGE INPUT
+========================================================= */
+
+imageInput?.addEventListener(
+  "change",
+  () => {
+
+    const file =
+      imageInput.files?.[0];
+
+
+    if (!file) {
+      return;
     }
-  );
-
-}
 
 
-if (imageInput) {
-
-  imageInput.addEventListener(
-    "change",
-    () => {
-
-      const file =
-        imageInput.files?.[0];
-
-      if (!file) return;
-
-
-      if (
-        file.size >
-        20 * 1024 * 1024
-      ) {
-
-        toast(
-          "الصورة أكبر من 20MB."
-        );
-
-        return;
-
-      }
-
-
-      state.selectedImage =
-        file;
-
-      state.selectedDocument =
-        null;
-
-
-      showAttachment(
-        file,
-        "image"
-      );
-
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
 
       toast(
-        "تم إرفاق الصورة."
+        "الملف المحدد ليس صورة."
       );
 
-    }
-  );
+      imageInput.value =
+        "";
 
-}
+      return;
+
+    }
+
+
+    if (
+      file.size >
+      MAX_IMAGE_SIZE
+    ) {
+
+      toast(
+        "حجم الصورة أكبر من 20MB."
+      );
+
+      imageInput.value =
+        "";
+
+      return;
+
+    }
+
+
+    state.selectedImage =
+      file;
+
+
+    state.selectedDocument =
+      null;
+
+
+    showAttachment(
+      file,
+      "image"
+    );
+
+
+    toast(
+      "تم إرفاق الصورة. اكتب طلبك ثم اضغط إرسال."
+    );
+
+  }
+);
 
 
 /* =========================================================
    REMOVE ATTACHMENT
-   ========================================================= */
+========================================================= */
 
-const removeAttachment =
-  $("removeAttachment");
+removeAttachment?.addEventListener(
+  "click",
+  event => {
 
-if (removeAttachment) {
+    event.preventDefault();
 
-  removeAttachment.addEventListener(
-    "click",
-    resetAttachment
-  );
+    clearAttachment();
 
-}
-
-
-/* =========================================================
-   NEW CHAT
-   ========================================================= */
-
-const newChat =
-  $("newChat");
-
-if (newChat) {
-
-  newChat.addEventListener(
-    "click",
-    () => {
-
-      if (
-        state.messages.length
-      ) {
-
-        state.conversations.push({
-
-          id:
-            Date.now(),
-
-          title:
-            String(
-              state.messages.find(
-                m =>
-                  m.role === "user"
-              )?.content ||
-              "محادثة جديدة"
-            ).slice(
-              0,
-              55
-            ),
-
-          messages:
-            state.messages.slice(
-              -50
-            )
-
-        });
-
-      }
-
-
-      state.messages =
-        [];
-
-
-      chat
-        .querySelectorAll(
-          ".message"
-        )
-        .forEach(
-          el =>
-            el.remove()
-        );
-
-
-      if (welcome) {
-
-        welcome.style.display =
-          "flex";
-
-      }
-
-
-      resetAttachment();
-
-      save();
-
-      input?.focus();
-
-    }
-  );
-
-}
+  }
+);
 
 
 /* =========================================================
-   SIDEBAR
-   ========================================================= */
+   NEW CHAT BUTTON
+========================================================= */
 
-const openSidebar =
-  $("openSidebar");
+newChat?.addEventListener(
+  "click",
+  event => {
 
-if (openSidebar) {
+    event.preventDefault();
 
-  openSidebar.addEventListener(
-    "click",
-    () =>
-      sidebar.classList.add(
-        "open"
-      )
-  );
+    startNewChat();
 
-}
+  }
+);
 
 
-const closeSidebar =
-  $("closeSidebar");
+/* =========================================================
+   SIDEBAR OPEN
+========================================================= */
 
-if (closeSidebar) {
+openSidebar?.addEventListener(
+  "click",
+  () => {
 
-  closeSidebar.addEventListener(
-    "click",
-    () =>
-      sidebar.classList.remove(
-        "open"
-      )
-  );
+    sidebar?.classList.add(
+      "open"
+    );
 
-}
+  }
+);
+
+
+/* =========================================================
+   SIDEBAR CLOSE
+========================================================= */
+
+closeSidebar?.addEventListener(
+  "click",
+  () => {
+
+    sidebar?.classList.remove(
+      "open"
+    );
+
+  }
+);
 
 
 /* =========================================================
    SETTINGS
-   ========================================================= */
-
-const settingsBtn =
-  $("settingsBtn");
-
-const modalBackdrop =
-  $("modalBackdrop");
-
-const modalClose =
-  $("modalClose");
-
+========================================================= */
 
 settingsBtn?.addEventListener(
   "click",
-  () =>
+  event => {
+
+    event.preventDefault();
+
     modalBackdrop?.classList.remove(
       "hidden"
-    )
+    );
+
+  }
 );
 
 
+/* =========================================================
+   CLOSE SETTINGS
+========================================================= */
+
 modalClose?.addEventListener(
   "click",
-  () =>
+  () => {
+
     modalBackdrop?.classList.add(
       "hidden"
-    )
+    );
+
+  }
 );
 
 
@@ -1671,239 +2415,132 @@ modalBackdrop?.addEventListener(
 
 
 /* =========================================================
-   THEME
-   ========================================================= */
+   MODEL SELECT
+========================================================= */
 
-const themeTop =
-  $("themeTop");
+modelSelect?.addEventListener(
+  "change",
+  event => {
 
-themeTop?.addEventListener(
-  "click",
-  () => {
-
-    setTheme(
-      state.theme === "dark"
-        ? "light"
-        : "dark"
+    setModel(
+      event.target.value
     );
 
   }
 );
 
 
-const themeSelect =
-  $("themeSelect");
-
-themeSelect?.addEventListener(
+modelSelectSettings?.addEventListener(
   "change",
-  event =>
-    setTheme(
+  event => {
+
+    setModel(
       event.target.value
-    )
+    );
+
+  }
 );
 
 
 /* =========================================================
-   MODEL
-   ========================================================= */
+   THEME
+========================================================= */
 
-const modelSelect =
-  $("modelSelect");
+themeSelect?.addEventListener(
+  "change",
+  event => {
 
-
-if (modelSelect) {
-
-  /*
-   * إصلاح موديل قديم أو غير موجود
-   */
-
-  const validModels = [
-
-    "llama-3.1-8b-instant",
-
-    "llama-3.3-70b-versatile"
-
-  ];
-
-
-  if (
-    !validModels.includes(
-      state.model
-    )
-  ) {
-
-    state.model =
-      "llama-3.1-8b-instant";
+    setTheme(
+      event.target.value
+    );
 
   }
+);
 
 
-  modelSelect.value =
-    state.model;
+themeTop?.addEventListener(
+  "click",
+  toggleTheme
+);
 
 
-  modelSelect.addEventListener(
-    "change",
-    event => {
-
-      const value =
-        event.target.value;
+themeTopDesktop?.addEventListener(
+  "click",
+  toggleTheme
+);
 
 
-      if (
-        validModels.includes(
-          value
-        )
-      ) {
+/* =========================================================
+   INITIALIZE MODEL
+========================================================= */
 
-        state.model =
-          value;
+if (
+  !ALLOWED_MODELS.includes(
+    state.model
+  )
+) {
 
-        save();
-
-        toast(
-          "تم تغيير نموذج Groq."
-        );
-
-      }
-
-    }
-  );
+  state.model =
+    DEFAULT_MODEL;
 
 }
 
 
 /* =========================================================
-   HISTORY
-   ========================================================= */
-
-function renderHistory() {
-
-  if (!historyList) {
-    return;
-  }
-
-
-  historyList.innerHTML =
-    "";
-
-
-  const list =
-    [
-      ...state.conversations
-    ].reverse();
-
-
-  if (!list.length) {
-
-    historyList.innerHTML = `
-
-      <div class="empty-history">
-        لا توجد محادثات محفوظة
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  list.forEach(
-    conversation => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.className =
-        "history-item";
-
-      button.type =
-        "button";
-
-
-      button.textContent =
-        conversation.title ||
-        "محادثة جديدة";
-
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          chat
-            .querySelectorAll(
-              ".message"
-            )
-            .forEach(
-              el =>
-                el.remove()
-            );
-
-
-          if (welcome) {
-
-            welcome.style.display =
-              "none";
-
-          }
-
-
-          (
-            conversation.messages ||
-            []
-          ).forEach(
-            message =>
-              addMessage(
-                message.role,
-                message.content
-              )
-          );
-
-
-          state.messages =
-            [
-              ...(conversation.messages ||
-                [])
-            ];
-
-
-          sidebar?.classList.remove(
-            "open"
-          );
-
-        }
-      );
-
-
-      historyList.appendChild(
-        button
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   INIT
-   ========================================================= */
+   INITIALIZE UI
+========================================================= */
 
 setTheme(
   state.theme
 );
 
+
+setModel(
+  state.model
+);
+
+
 renderHistory();
+
 
 autoResize();
 
-input?.focus();
 
+/* =========================================================
+   RESTORE CURRENT CHAT
+========================================================= */
+
+if (
+  state.messages.length &&
+  chat
+) {
+
+  if (welcome) {
+
+    welcome.style.display =
+      "none";
+
+  }
+
+
+  state.messages.forEach(
+    message => {
+
+      addMessage(
+        message.role,
+        message.content
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   READY
+========================================================= */
 
 console.log(
-  "T.M.D AI loaded successfully - Groq Only"
+  "T.M.D AI loaded successfully — Groq Only"
 );
