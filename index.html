@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -22,10 +20,7 @@
 
   <title>T.M.D AI</title>
 
-
-  <!-- =====================================================
-       Fonts
-  ====================================================== -->
+  <!-- ================= FONT ================= -->
 
   <link
     rel="preconnect"
@@ -43,2262 +38,1482 @@
     rel="stylesheet"
   >
 
-
-  <!-- =====================================================
-       PDF.js
-  ====================================================== -->
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs"
-    type="module"
-  ></script>
-
-
-  <!-- =====================================================
-       Mammoth DOCX
-  ====================================================== -->
+  <!-- ================= DOCX ================= -->
 
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"
   ></script>
 
-
-  <!-- =====================================================
-       Application CSS
-  ====================================================== -->
+  <!-- ================= STYLE ================= -->
 
   <style>
 
-    /* =====================================================
-       VARIABLES
-    ====================================================== */
-
     :root {
+      --bg: #090b0e;
+      --bg2: #0f1216;
+      --panel: #14181d;
+      --panel2: #1a1f25;
 
-      --bg:
-        #0b0d10;
+      --border: rgba(255,255,255,.08);
+      --border2: rgba(255,255,255,.14);
 
-      --bg-secondary:
-        #111419;
+      --text: #f4f6f8;
+      --muted: #9aa3ad;
+      --muted2: #68717c;
 
-      --panel:
-        #14181e;
+      --accent: #21c47b;
+      --accent2: #19a966;
 
-      --panel-2:
-        #191e25;
+      --danger: #ef5350;
 
-      --border:
-        rgba(255,255,255,.08);
+      --sidebar: #101318;
 
-      --border-strong:
-        rgba(255,255,255,.14);
+      --user: #1b222a;
 
-      --text:
-        #f5f7fa;
-
-      --muted:
-        #9ca5b1;
-
-      --muted-2:
-        #707985;
-
-      --accent:
-        #21c47b;
-
-      --accent-hover:
-        #29d487;
-
-      --danger:
-        #ef5350;
-
-      --user:
-        #1b222b;
-
-      --assistant:
-        transparent;
-
-      --sidebar:
-        #101318;
-
-      --shadow:
-        0 20px 60px rgba(0,0,0,.35);
-
-      --radius:
-        18px;
-
+      --radius: 18px;
     }
-
-
-    /* =====================================================
-       LIGHT THEME
-    ===================================================== */
 
     [data-theme="light"] {
+      --bg: #f6f7f9;
+      --bg2: #ffffff;
+      --panel: #ffffff;
+      --panel2: #f0f2f4;
 
-      --bg:
-        #f7f8fa;
+      --border: rgba(0,0,0,.08);
+      --border2: rgba(0,0,0,.14);
 
-      --bg-secondary:
-        #ffffff;
+      --text: #15181c;
+      --muted: #69717b;
+      --muted2: #89919a;
 
-      --panel:
-        #ffffff;
+      --sidebar: #eef0f2;
 
-      --panel-2:
-        #f1f3f5;
-
-      --border:
-        rgba(0,0,0,.08);
-
-      --border-strong:
-        rgba(0,0,0,.14);
-
-      --text:
-        #16191d;
-
-      --muted:
-        #69717c;
-
-      --muted-2:
-        #8b929c;
-
-      --user:
-        #eef1f4;
-
-      --assistant:
-        transparent;
-
-      --sidebar:
-        #f0f2f4;
-
-      --shadow:
-        0 20px 60px rgba(0,0,0,.12);
-
+      --user: #e9edf1;
     }
-
-
-    /* =====================================================
-       RESET
-    ====================================================== */
 
     * {
-
-      box-sizing:
-        border-box;
-
-      margin:
-        0;
-
-      padding:
-        0;
-
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-
-    html {
-
-      width:
-        100%;
-
-      height:
-        100%;
-
-      background:
-        var(--bg);
-
+    html,
+    body {
+      width: 100%;
+      height: 100%;
     }
-
 
     body {
-
-      width:
-        100%;
-
-      height:
-        100%;
-
-      overflow:
-        hidden;
+      overflow: hidden;
 
       font-family:
         "Cairo",
         Arial,
         sans-serif;
 
-      background:
-        var(--bg);
-
-      color:
-        var(--text);
+      background: var(--bg);
+      color: var(--text);
 
       transition:
         background .2s ease,
         color .2s ease;
-
     }
-
 
     button,
-    input,
     textarea,
-    select {
-
-      font:
-        inherit;
-
+    select,
+    input {
+      font: inherit;
     }
-
 
     button {
-
-      border:
-        0;
-
-      cursor:
-        pointer;
-
+      border: 0;
+      cursor: pointer;
     }
-
 
     ::selection {
-
-      background:
-        rgba(33,196,123,.25);
-
+      background: rgba(33,196,123,.25);
     }
 
-
-    /* =====================================================
+    /* ==================================================
        APP
-    ====================================================== */
+    ================================================== */
 
     .app {
+      width: 100%;
+      height: 100vh;
 
-      width:
-        100%;
+      display: flex;
 
-      height:
-        100vh;
-
-      display:
-        flex;
-
-      position:
-        relative;
-
-      overflow:
-        hidden;
-
-    }
-
-
-    /* =====================================================
-       SIDEBAR
-    ====================================================== */
-
-    .sidebar {
-
-      width:
-        285px;
-
-      height:
-        100%;
-
-      flex:
-        0 0 285px;
-
-      display:
-        flex;
-
-      flex-direction:
-        column;
+      overflow: hidden;
 
       background:
-        var(--sidebar);
+        radial-gradient(
+          circle at 50% -20%,
+          rgba(33,196,123,.06),
+          transparent 40%
+        ),
+        var(--bg);
+    }
+
+    /* ==================================================
+       SIDEBAR
+    ================================================== */
+
+    .sidebar {
+      width: 285px;
+      min-width: 285px;
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+
+      background: var(--sidebar);
 
       border-left:
         1px solid var(--border);
 
-      position:
-        relative;
-
-      z-index:
-        50;
+      z-index: 100;
 
       transition:
         transform .25s ease;
-
     }
 
-
     .sidebar-header {
+      height: 76px;
 
-      padding:
-        18px;
+      padding: 16px;
 
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
       border-bottom:
         1px solid var(--border);
-
     }
-
 
     .brand {
+      display: flex;
+      align-items: center;
 
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      gap:
-        11px;
-
+      gap: 11px;
     }
 
-
     .brand-logo {
+      width: 44px;
+      height: 44px;
 
-      width:
-        42px;
+      display: grid;
+      place-items: center;
 
-      height:
-        42px;
+      border-radius: 14px;
 
-      border-radius:
-        13px;
+      color: #fff;
 
-      display:
-        grid;
-
-      place-items:
-        center;
+      font-size: 13px;
+      font-weight: 800;
 
       background:
         linear-gradient(
           135deg,
           var(--accent),
-          #159a61
+          #118955
         );
 
-      color:
-        #fff;
-
-      font-size:
-        16px;
-
-      font-weight:
-        800;
-
       box-shadow:
-        0 8px 25px rgba(33,196,123,.18);
-
+        0 8px 30px
+        rgba(33,196,123,.18);
     }
-
 
     .brand-info {
+      display: flex;
+      flex-direction: column;
 
-      display:
-        flex;
-
-      flex-direction:
-        column;
-
-      line-height:
-        1.25;
-
+      line-height: 1.25;
     }
-
 
     .brand-name {
-
-      font-size:
-        17px;
-
-      font-weight:
-        800;
-
+      font-size: 17px;
+      font-weight: 800;
     }
-
 
     .brand-sub {
+      margin-top: 3px;
 
-      color:
-        var(--muted);
+      color: var(--muted);
 
-      font-size:
-        11px;
-
-      margin-top:
-        3px;
-
+      font-size: 10px;
     }
-
 
     .icon-button {
+      width: 38px;
+      height: 38px;
 
-      width:
-        38px;
+      display: grid;
+      place-items: center;
 
-      height:
-        38px;
+      border-radius: 11px;
 
-      border-radius:
-        11px;
+      background: transparent;
+      color: var(--muted);
 
-      display:
-        grid;
+      font-size: 18px;
 
-      place-items:
-        center;
-
-      background:
-        transparent;
-
-      color:
-        var(--muted);
-
-      transition:
-        .18s ease;
-
+      transition: .18s ease;
     }
-
 
     .icon-button:hover {
-
-      background:
-        var(--panel-2);
-
-      color:
-        var(--text);
-
+      background: var(--panel2);
+      color: var(--text);
     }
 
+    /* ==================================================
+       NEW CHAT
+    ================================================== */
 
     .new-chat {
+      margin: 16px;
 
-      margin:
-        16px;
+      min-height: 48px;
 
-      min-height:
-        46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      border-radius:
-        13px;
+      gap: 9px;
 
-      display:
-        flex;
+      border-radius: 13px;
 
-      align-items:
-        center;
+      color: #07130d;
 
-      justify-content:
-        center;
+      background: var(--accent);
 
-      gap:
-        9px;
+      font-size: 14px;
+      font-weight: 800;
 
-      background:
-        var(--accent);
+      transition: .18s ease;
 
-      color:
-        #07130d;
-
-      font-size:
-        14px;
-
-      font-weight:
-        800;
-
-      transition:
-        .18s ease;
-
+      box-shadow:
+        0 8px 25px
+        rgba(33,196,123,.10);
     }
-
 
     .new-chat:hover {
+      background: #2bd589;
 
-      background:
-        var(--accent-hover);
-
-      transform:
-        translateY(-1px);
-
+      transform: translateY(-1px);
     }
 
+    .new-chat span {
+      font-size: 21px;
+      line-height: 1;
+    }
+
+    /* ==================================================
+       HISTORY
+    ================================================== */
 
     .history-title {
+      padding: 0 18px 10px;
 
-      padding:
-        2px 18px 10px;
+      color: var(--muted2);
 
-      color:
-        var(--muted-2);
-
-      font-size:
-        11px;
-
-      font-weight:
-        700;
-
+      font-size: 11px;
+      font-weight: 700;
     }
-
 
     .history {
+      flex: 1;
 
-      flex:
-        1;
+      overflow-y: auto;
 
-      overflow:
-        auto;
-
-      padding:
-        0 10px 12px;
-
+      padding: 0 10px 12px;
     }
-
 
     .history::-webkit-scrollbar {
-
-      width:
-        5px;
-
+      width: 5px;
     }
-
 
     .history::-webkit-scrollbar-thumb {
-
-      background:
-        var(--border-strong);
-
-      border-radius:
-        10px;
-
+      background: var(--border2);
+      border-radius: 10px;
     }
-
 
     .history-item {
+      width: 100%;
 
-      width:
-        100%;
+      padding: 11px 12px;
 
-      padding:
-        11px 12px;
+      margin-bottom: 5px;
 
-      margin-bottom:
-        5px;
+      border-radius: 11px;
 
-      border-radius:
-        11px;
+      text-align: right;
 
-      text-align:
-        right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
-      white-space:
-        nowrap;
+      background: transparent;
+      color: var(--muted);
 
-      overflow:
-        hidden;
+      font-size: 12px;
 
-      text-overflow:
-        ellipsis;
-
-      background:
-        transparent;
-
-      color:
-        var(--muted);
-
-      font-size:
-        12px;
-
-      transition:
-        .18s ease;
-
+      transition: .18s ease;
     }
-
 
     .history-item:hover,
     .history-item.active {
-
-      background:
-        var(--panel-2);
-
-      color:
-        var(--text);
-
+      background: var(--panel2);
+      color: var(--text);
     }
 
+    .empty-history {
+      padding: 20px 10px;
+
+      text-align: center;
+
+      color: var(--muted2);
+
+      font-size: 12px;
+    }
+
+    /* ==================================================
+       SIDEBAR FOOTER
+    ================================================== */
 
     .sidebar-footer {
+      padding: 12px;
 
-      padding:
-        13px;
+      display: flex;
+      gap: 7px;
 
       border-top:
         1px solid var(--border);
-
-      display:
-        flex;
-
-      gap:
-        7px;
-
     }
-
 
     .footer-button {
+      flex: 1;
 
-      flex:
-        1;
+      min-height: 40px;
 
-      min-height:
-        40px;
+      border-radius: 10px;
 
-      border-radius:
-        10px;
+      background: transparent;
 
-      background:
-        transparent;
+      color: var(--muted);
 
-      color:
-        var(--muted);
-
-      font-size:
-        12px;
-
+      font-size: 12px;
     }
-
 
     .footer-button:hover {
-
-      background:
-        var(--panel-2);
-
-      color:
-        var(--text);
-
+      background: var(--panel2);
+      color: var(--text);
     }
 
-
-    /* =====================================================
+    /* ==================================================
        MAIN
-    ====================================================== */
+    ================================================== */
 
     .main {
+      min-width: 0;
 
-      min-width:
-        0;
+      flex: 1;
 
-      flex:
-        1;
+      height: 100%;
 
-      height:
-        100%;
+      display: flex;
+      flex-direction: column;
 
-      display:
-        flex;
-
-      flex-direction:
-        column;
-
-      background:
-        var(--bg);
-
+      background: var(--bg);
     }
 
-
-    /* =====================================================
+    /* ==================================================
        TOPBAR
-    ====================================================== */
+    ================================================== */
 
     .topbar {
+      height: 66px;
+      min-height: 66px;
 
-      height:
-        66px;
+      padding: 0 20px;
 
-      flex:
-        0 0 66px;
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        space-between;
-
-      padding:
-        0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
       border-bottom:
         1px solid var(--border);
 
       background:
-        color-mix(
-          in srgb,
-          var(--bg) 94%,
-          transparent
-        );
+        rgba(9,11,14,.78);
 
-      backdrop-filter:
-        blur(15px);
+      backdrop-filter: blur(18px);
 
-      position:
-        relative;
-
-      z-index:
-        20;
-
+      z-index: 20;
     }
 
+    [data-theme="light"] .topbar {
+      background:
+        rgba(246,247,249,.82);
+    }
 
     .topbar-right {
+      display: flex;
+      align-items: center;
 
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      gap:
-        9px;
-
+      gap: 10px;
     }
-
-
-    .mobile-menu {
-
-      display:
-        none;
-
-    }
-
-
-    .model-selector {
-
-      min-width:
-        190px;
-
-      height:
-        42px;
-
-      padding:
-        0 12px;
-
-      border:
-        1px solid var(--border);
-
-      border-radius:
-        12px;
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      gap:
-        8px;
-
-      background:
-        var(--panel);
-
-    }
-
-
-    .model-dot {
-
-      width:
-        8px;
-
-      height:
-        8px;
-
-      flex:
-        0 0 8px;
-
-      border-radius:
-        50%;
-
-      background:
-        var(--accent);
-
-      box-shadow:
-        0 0 0 4px rgba(33,196,123,.09);
-
-    }
-
-
-    .model-selector select {
-
-      width:
-        100%;
-
-      border:
-        0;
-
-      outline:
-        0;
-
-      background:
-        transparent;
-
-      color:
-        var(--text);
-
-      cursor:
-        pointer;
-
-      font-size:
-        12px;
-
-      appearance:
-        none;
-
-    }
-
-
-    .model-selector option {
-
-      background:
-        var(--panel);
-
-      color:
-        var(--text);
-
-    }
-
 
     .top-actions {
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      gap:
-        5px;
-
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-
-    /* =====================================================
-       CHAT
-    ====================================================== */
-
-    .chat {
-
-      flex:
-        1;
-
-      overflow:
-        auto;
-
-      padding:
-        35px 20px 180px;
-
-      scroll-behavior:
-        smooth;
-
+    .mobile-menu {
+      display: none;
     }
 
+    /* ==================================================
+       MODEL
+    ================================================== */
 
-    .chat::-webkit-scrollbar {
+    .model-selector {
+      min-width: 170px;
 
-      width:
-        7px;
+      height: 40px;
 
-    }
+      display: flex;
+      align-items: center;
 
+      gap: 8px;
 
-    .chat::-webkit-scrollbar-thumb {
+      padding: 0 12px;
+
+      border-radius: 12px;
+
+      border:
+        1px solid rgba(33,196,123,.20);
 
       background:
-        var(--border-strong);
-
-      border-radius:
-        20px;
-
+        rgba(33,196,123,.06);
     }
 
+    .model-dot {
+      width: 7px;
+      height: 7px;
 
-    .chat-inner {
+      border-radius: 50%;
 
-      width:
-        min(900px, 100%);
+      background: var(--accent);
 
-      margin:
-        auto;
-
+      box-shadow:
+        0 0 10px
+        rgba(33,196,123,.65);
     }
 
+    .model-selector select {
+      width: 100%;
 
-    /* =====================================================
-       WELCOME
-    ====================================================== */
+      border: 0;
+      outline: 0;
 
-    .welcome {
+      background: transparent;
 
-      min-height:
-        calc(100vh - 300px);
+      color: var(--text);
 
-      display:
-        flex;
+      font-size: 11px;
+      font-weight: 700;
 
-      align-items:
-        center;
+      cursor: pointer;
+    }
 
-      justify-content:
-        center;
+    .model-selector select option {
+      background: #14181d;
+      color: #fff;
+    }
 
-      flex-direction:
-        column;
+    /* ==================================================
+       CHAT
+    ================================================== */
 
-      text-align:
-        center;
+    .chat {
+      flex: 1;
+
+      overflow-y: auto;
 
       padding:
-        50px 20px;
-
+        28px 20px 180px;
     }
 
+    .chat::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .chat::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 20px;
+    }
+
+    .chat-inner {
+      width: 100%;
+      max-width: 900px;
+
+      margin: 0 auto;
+    }
+
+    /* ==================================================
+       WELCOME
+    ================================================== */
+
+    .welcome {
+      min-height:
+        calc(100vh - 230px);
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      padding: 30px 10px;
+    }
 
     .welcome-logo {
+      width: 72px;
+      height: 72px;
 
-      width:
-        76px;
+      display: grid;
+      place-items: center;
 
-      height:
-        76px;
+      margin-bottom: 22px;
 
-      border-radius:
-        24px;
+      border-radius: 23px;
 
-      display:
-        grid;
+      color: #fff;
 
-      place-items:
-        center;
+      font-size: 18px;
+      font-weight: 800;
 
       background:
         linear-gradient(
           135deg,
           var(--accent),
-          #128a55
+          #118955
         );
 
-      color:
-        white;
-
-      font-size:
-        23px;
-
-      font-weight:
-        800;
-
       box-shadow:
-        0 20px 50px rgba(33,196,123,.18);
-
-      margin-bottom:
-        22px;
-
+        0 20px 60px
+        rgba(33,196,123,.18);
     }
-
 
     .welcome h1 {
+      font-size: 34px;
 
-      font-size:
-        clamp(26px, 4vw, 38px);
+      font-weight: 800;
 
-      font-weight:
-        800;
-
-      letter-spacing:
-        -.7px;
-
+      letter-spacing: -.5px;
     }
-
 
     .welcome p {
+      max-width: 620px;
 
-      max-width:
-        620px;
+      margin-top: 10px;
 
-      color:
-        var(--muted);
+      color: var(--muted);
 
-      font-size:
-        14px;
+      font-size: 13px;
 
-      line-height:
-        1.9;
-
-      margin-top:
-        10px;
-
+      line-height: 2;
     }
 
+    /* ==================================================
+       WELCOME CARDS
+    ================================================== */
 
     .welcome-cards {
+      width: 100%;
 
-      width:
-        min(720px, 100%);
+      margin-top: 35px;
 
-      margin-top:
-        30px;
-
-      display:
-        grid;
+      display: grid;
 
       grid-template-columns:
         repeat(3, 1fr);
 
-      gap:
-        10px;
-
+      gap: 12px;
     }
-
 
     .welcome-card {
+      min-height: 135px;
 
-      padding:
-        16px;
+      padding: 20px;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      text-align: right;
 
       border:
         1px solid var(--border);
 
+      border-radius: 17px;
+
       background:
-        var(--panel);
+        linear-gradient(
+          145deg,
+          var(--panel),
+          rgba(20,24,29,.70)
+        );
 
-      border-radius:
-        15px;
-
-      text-align:
-        right;
-
-      transition:
-        .18s ease;
-
+      transition: .2s ease;
     }
-
 
     .welcome-card:hover {
-
-      transform:
-        translateY(-2px);
+      transform: translateY(-3px);
 
       border-color:
-        var(--border-strong);
+        rgba(33,196,123,.25);
 
+      box-shadow:
+        0 15px 45px
+        rgba(0,0,0,.20);
     }
-
 
     .welcome-card-icon {
+      width: 38px;
+      height: 38px;
 
-      font-size:
-        20px;
+      display: grid;
+      place-items: center;
 
-      margin-bottom:
-        9px;
+      margin-bottom: 12px;
 
-    }
-
-
-    .welcome-card strong {
-
-      display:
-        block;
-
-      font-size:
-        13px;
-
-    }
-
-
-    .welcome-card span {
-
-      display:
-        block;
-
-      margin-top:
-        4px;
-
-      color:
-        var(--muted);
-
-      font-size:
-        11px;
-
-      line-height:
-        1.7;
-
-    }
-
-
-    /* =====================================================
-       MESSAGES
-    ====================================================== */
-
-    .message {
-
-      width:
-        100%;
-
-      display:
-        flex;
-
-      margin-bottom:
-        24px;
-
-    }
-
-
-    .user-message {
-
-      justify-content:
-        flex-start;
-
-    }
-
-
-    .assistant-message {
-
-      justify-content:
-        flex-end;
-
-    }
-
-
-    .message-bubble {
-
-      max-width:
-        min(780px, 92%);
-
-      padding:
-        13px 16px;
-
-      border-radius:
-        17px;
-
-      font-size:
-        14px;
-
-      line-height:
-        1.9;
-
-      overflow:
-        hidden;
-
-    }
-
-
-    .user-message .message-bubble {
+      border-radius: 11px;
 
       background:
-        var(--user);
+        rgba(33,196,123,.10);
+
+      font-size: 18px;
+    }
+
+    .welcome-card strong {
+      font-size: 13px;
+    }
+
+    .welcome-card span {
+      margin-top: 7px;
+
+      color: var(--muted);
+
+      font-size: 10px;
+
+      line-height: 1.8;
+    }
+
+    /* ==================================================
+       MESSAGES
+    ================================================== */
+
+    .message {
+      display: flex;
+
+      gap: 12px;
+
+      margin-bottom: 28px;
+
+      animation:
+        messageIn .22s ease;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .msg-avatar {
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 11px;
+
+      background: var(--panel2);
+
+      color: var(--text);
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .message.assistant .msg-avatar {
+      background:
+        linear-gradient(
+          135deg,
+          var(--accent),
+          #128a54
+        );
+
+      color: #fff;
+    }
+
+    .msg-body {
+      min-width: 0;
+      flex: 1;
+
+      padding-top: 2px;
+    }
+
+    .msg-label {
+      display: flex;
+      align-items: center;
+
+      gap: 8px;
+
+      margin-bottom: 7px;
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .msg-label span {
+      color: var(--muted2);
+
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    .msg-content {
+      color: var(--text);
+
+      font-size: 13px;
+
+      line-height: 2;
+
+      overflow-wrap: anywhere;
+    }
+
+    .message.user {
+      padding: 13px 15px;
+
+      border-radius: 16px;
+
+      background: var(--user);
 
       border:
         1px solid var(--border);
-
-      border-bottom-left-radius:
-        5px;
-
     }
 
-
-    .assistant-message .message-bubble {
-
-      background:
-        var(--assistant);
-
-      border-bottom-right-radius:
-        5px;
-
+    .message.user .msg-content {
+      color: var(--text);
     }
 
+    .msg-content pre {
+      margin: 12px 0;
 
-    .message-bubble h2,
-    .message-bubble h3,
-    .message-bubble h4 {
+      padding: 15px;
 
-      margin:
-        10px 0 6px;
+      overflow-x: auto;
 
-    }
+      direction: ltr;
+      text-align: left;
 
+      border-radius: 12px;
 
-    .message-bubble strong {
-
-      font-weight:
-        800;
-
-    }
-
-
-    .message-bubble code {
-
-      padding:
-        2px 6px;
-
-      border-radius:
-        6px;
-
-      background:
-        var(--panel-2);
-
-      font-family:
-        Consolas,
-        monospace;
-
-      font-size:
-        12px;
-
-    }
-
-
-    .code-block {
-
-      direction:
-        ltr;
-
-      text-align:
-        left;
-
-      overflow:
-        auto;
-
-      margin:
-        12px 0;
-
-      padding:
-        15px;
-
-      border-radius:
-        12px;
-
-      background:
-        #090b0e;
-
-      color:
-        #e8edf2;
+      background: #080a0d;
 
       border:
         1px solid rgba(255,255,255,.08);
 
+      font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+      font-size: 12px;
+
+      line-height: 1.7;
     }
 
+    .inline-code {
+      padding: 2px 6px;
 
-    .code-block code {
+      border-radius: 6px;
 
-      padding:
-        0;
+      background: var(--panel2);
 
-      background:
-        transparent;
-
-      color:
-        inherit;
-
+      font-family: monospace;
     }
 
+    .error-text {
+      color: var(--danger);
+    }
 
-    /* =====================================================
+    /* ==================================================
        COMPOSER
-    ====================================================== */
+    ================================================== */
 
     .composer-wrap {
+      position: fixed;
 
-      position:
-        absolute;
-
-      bottom:
-        0;
-
-      right:
-        0;
-
-      left:
-        0;
+      right: 285px;
+      left: 0;
+      bottom: 0;
 
       padding:
-        18px 20px 20px;
+        18px 20px 18px;
+
+      z-index: 40;
 
       background:
         linear-gradient(
-          to bottom,
-          transparent,
-          var(--bg) 28%
-        );
-
-      pointer-events:
-        none;
-
-    }
-
-
-    .composer {
-
-      width:
-        min(900px, 100%);
-
-      margin:
-        auto;
-
-      position:
-        relative;
-
-      pointer-events:
-        auto;
-
-    }
-
-
-    .input-shell {
-
-      min-height:
-        62px;
-
-      display:
-        flex;
-
-      align-items:
-        flex-end;
-
-      gap:
-        9px;
-
-      padding:
-        9px;
-
-      border:
-        1px solid var(--border-strong);
-
-      border-radius:
-        19px;
-
-      background:
-        color-mix(
-          in srgb,
-          var(--panel) 94%,
+          to top,
+          var(--bg) 55%,
           transparent
         );
-
-      box-shadow:
-        var(--shadow);
-
-      backdrop-filter:
-        blur(18px);
-
     }
 
+    .composer-inner {
+      width: 100%;
+      max-width: 900px;
+
+      margin: 0 auto;
+    }
+
+    /* ==================================================
+       ATTACHMENT PREVIEW
+    ================================================== */
+
+    .attachment-preview {
+      margin-bottom: 9px;
+
+      padding: 10px 12px;
+
+      display: flex;
+      align-items: center;
+
+      gap: 10px;
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 13px;
+
+      background: var(--panel);
+    }
+
+    .attachment-icon {
+      width: 34px;
+      height: 34px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 10px;
+
+      background:
+        rgba(33,196,123,.10);
+    }
+
+    .attachment-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .attachment-name {
+      display: block;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .attachment-meta {
+      display: block;
+
+      margin-top: 2px;
+
+      color: var(--muted);
+
+      font-size: 9px;
+    }
+
+    .remove-attachment {
+      width: 32px;
+      height: 32px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 9px;
+
+      background: transparent;
+
+      color: var(--muted);
+
+      font-size: 16px;
+    }
+
+    .remove-attachment:hover {
+      background: rgba(239,83,80,.10);
+      color: var(--danger);
+    }
+
+    /* ==================================================
+       INPUT SHELL
+    ================================================== */
+
+    .input-shell {
+      min-height: 62px;
+
+      display: flex;
+      align-items: flex-end;
+
+      gap: 9px;
+
+      padding: 9px;
+
+      border:
+        1px solid var(--border2);
+
+      border-radius: 20px;
+
+      background:
+        rgba(20,24,29,.96);
+
+      box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.30);
+
+      transition: .2s ease;
+    }
+
+    [data-theme="light"] .input-shell {
+      background: rgba(255,255,255,.96);
+    }
 
     .input-shell:focus-within {
-
       border-color:
-        rgba(33,196,123,.4);
+        rgba(33,196,123,.35);
 
       box-shadow:
-        0 20px 60px rgba(0,0,0,.3),
-        0 0 0 3px rgba(33,196,123,.06);
-
+        0 20px 60px
+        rgba(0,0,0,.25),
+        0 0 0 3px
+        rgba(33,196,123,.05);
     }
-
-
-    .input-area {
-
-      flex:
-        1;
-
-      min-width:
-        0;
-
-      max-height:
-        220px;
-
-      resize:
-        none;
-
-      border:
-        0;
-
-      outline:
-        0;
-
-      background:
-        transparent;
-
-      color:
-        var(--text);
-
-      padding:
-        9px 7px;
-
-      line-height:
-        1.7;
-
-      font-size:
-        14px;
-
-    }
-
-
-    .input-area::placeholder {
-
-      color:
-        var(--muted-2);
-
-    }
-
 
     .circle-button {
+      width: 38px;
+      min-width: 38px;
+      height: 38px;
 
-      width:
-        43px;
+      display: grid;
+      place-items: center;
 
-      height:
-        43px;
-
-      flex:
-        0 0 43px;
-
-      border-radius:
-        13px;
-
-      display:
-        grid;
-
-      place-items:
-        center;
+      border-radius: 50%;
 
       background:
-        var(--panel-2);
+        var(--panel2);
 
-      color:
-        var(--text);
+      color: var(--text);
 
-      border:
-        1px solid var(--border);
+      font-size: 21px;
 
-      transition:
-        .18s ease;
-
+      transition: .18s ease;
     }
-
 
     .circle-button:hover {
+      transform: scale(1.04);
 
       background:
-        var(--border-strong);
-
+        rgba(33,196,123,.14);
     }
-
 
     .send-button {
+      background: var(--accent);
 
-      background:
-        var(--accent);
+      color: #07130d;
 
-      color:
-        #06130c;
-
-      font-size:
-        20px;
-
-      font-weight:
-        900;
-
+      font-size: 18px;
+      font-weight: 900;
     }
-
 
     .send-button:hover {
-
-      background:
-        var(--accent-hover);
-
+      background: #2bd589;
     }
 
-
-    .send-button:disabled {
-
-      opacity:
-        .5;
-
-      cursor:
-        not-allowed;
-
+    .send-button.stop {
+      background: var(--danger);
+      color: #fff;
     }
 
+    .input-area {
+      flex: 1;
+
+      min-width: 0;
+
+      min-height: 40px;
+      max-height: 180px;
+
+      resize: none;
+
+      border: 0;
+      outline: 0;
+
+      padding:
+        8px 5px;
+
+      background: transparent;
+
+      color: var(--text);
+
+      font-size: 13px;
+
+      line-height: 1.8;
+    }
+
+    .input-area::placeholder {
+      color: var(--muted2);
+    }
 
     .composer-note {
+      padding-top: 8px;
 
-      text-align:
-        center;
+      text-align: center;
 
-      color:
-        var(--muted-2);
+      color: var(--muted2);
 
-      font-size:
-        10px;
-
-      margin-top:
-        8px;
-
+      font-size: 9px;
     }
 
-
-    /* =====================================================
+    /* ==================================================
        PLUS MENU
-    ====================================================== */
+    ================================================== */
+
+    .plus-menu-wrapper {
+      position: relative;
+    }
 
     .plus-menu {
+      position: absolute;
 
-      position:
-        absolute;
+      right: 0;
+      bottom: 53px;
 
-      bottom:
-        72px;
+      width: 310px;
 
-      right:
-        0;
-
-      width:
-        250px;
-
-      padding:
-        8px;
+      padding: 8px;
 
       border:
-        1px solid var(--border-strong);
+        1px solid var(--border2);
 
-      border-radius:
-        15px;
+      border-radius: 17px;
 
       background:
-        var(--panel);
+        rgba(20,24,29,.98);
 
       box-shadow:
-        var(--shadow);
+        0 25px 70px
+        rgba(0,0,0,.45);
 
-      z-index:
-        100;
+      backdrop-filter: blur(20px);
 
+      animation:
+        menuIn .18s ease;
+
+      z-index: 200;
     }
 
-
-    .plus-menu.hidden {
-
-      display:
-        none;
-
+    [data-theme="light"] .plus-menu {
+      background:
+        rgba(255,255,255,.98);
     }
 
+    @keyframes menuIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
 
     .plus-menu-title {
+      padding: 9px 11px;
 
-      padding:
-        8px 10px;
+      color: var(--muted2);
 
-      color:
-        var(--muted);
-
-      font-size:
-        10px;
-
-      font-weight:
-        700;
-
+      font-size: 10px;
+      font-weight: 700;
     }
-
 
     .plus-option {
+      width: 100%;
 
-      width:
-        100%;
+      padding: 12px;
 
-      padding:
-        11px 10px;
+      display: flex;
+      align-items: center;
 
-      border-radius:
-        10px;
+      gap: 11px;
 
-      display:
-        flex;
+      border-radius: 12px;
 
-      align-items:
-        center;
+      background: transparent;
 
-      gap:
-        11px;
+      color: var(--text);
 
-      background:
-        transparent;
+      text-align: right;
 
-      color:
-        var(--text);
-
-      text-align:
-        right;
-
+      transition: .16s ease;
     }
-
 
     .plus-option:hover {
-
-      background:
-        var(--panel-2);
-
+      background: var(--panel2);
     }
-
 
     .plus-option-icon {
+      width: 40px;
+      min-width: 40px;
+      height: 40px;
 
-      width:
-        35px;
+      display: grid;
+      place-items: center;
 
-      height:
-        35px;
-
-      display:
-        grid;
-
-      place-items:
-        center;
-
-      border-radius:
-        10px;
+      border-radius: 11px;
 
       background:
-        var(--panel-2);
+        rgba(33,196,123,.10);
 
-      font-size:
-        16px;
-
+      font-size: 18px;
     }
-
 
     .plus-option-content {
+      min-width: 0;
 
-      flex:
-        1;
+      display: flex;
+      flex-direction: column;
 
+      align-items: flex-start;
     }
-
 
     .plus-option-title {
-
-      display:
-        block;
-
-      font-size:
-        12px;
-
-      font-weight:
-        700;
-
+      font-size: 12px;
+      font-weight: 800;
     }
-
 
     .plus-option-desc {
+      margin-top: 2px;
 
-      display:
-        block;
+      color: var(--muted);
 
-      color:
-        var(--muted);
-
-      font-size:
-        9px;
-
-      margin-top:
-        2px;
-
+      font-size: 9px;
     }
 
-
-    /* =====================================================
-       FILE PREVIEW
-    ====================================================== */
-
-    .preview {
-
-      width:
-        min(900px, 100%);
-
-      margin:
-        0 auto 8px;
-
-      padding:
-        9px;
-
-      border:
-        1px solid var(--border);
-
-      border-radius:
-        14px;
-
-      background:
-        var(--panel);
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      gap:
-        10px;
-
-    }
-
-
-    .preview.hidden {
-
-      display:
-        none;
-
-    }
-
-
-    .preview-image {
-
-      width:
-        50px;
-
-      height:
-        50px;
-
-      object-fit:
-        cover;
-
-      border-radius:
-        10px;
-
-      background:
-        var(--panel-2);
-
-    }
-
-
-    .preview-info {
-
-      min-width:
-        0;
-
-      flex:
-        1;
-
-    }
-
-
-    .preview-name {
-
-      display:
-        block;
-
-      overflow:
-        hidden;
-
-      white-space:
-        nowrap;
-
-      text-overflow:
-        ellipsis;
-
-      font-size:
-        12px;
-
-      font-weight:
-        700;
-
-    }
-
-
-    .preview-mode {
-
-      display:
-        block;
-
-      color:
-        var(--muted);
-
-      font-size:
-        10px;
-
-      margin-top:
-        2px;
-
-    }
-
-
-    .preview-remove {
-
-      width:
-        32px;
-
-      height:
-        32px;
-
-      border-radius:
-        9px;
-
-      background:
-        transparent;
-
-      color:
-        var(--muted);
-
-    }
-
-
-    .preview-remove:hover {
-
-      background:
-        rgba(239,83,80,.1);
-
-      color:
-        var(--danger);
-
-    }
-
-
-    /* =====================================================
+    /* ==================================================
        MODAL
-    ====================================================== */
+    ================================================== */
 
     .modal-backdrop {
+      position: fixed;
 
-      position:
-        fixed;
+      inset: 0;
 
-      inset:
-        0;
+      display: grid;
+      place-items: center;
 
-      z-index:
-        200;
-
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        center;
-
-      padding:
-        20px;
+      padding: 20px;
 
       background:
-        rgba(0,0,0,.55);
+        rgba(0,0,0,.62);
 
-      backdrop-filter:
-        blur(8px);
+      backdrop-filter: blur(7px);
 
+      z-index: 500;
     }
-
-
-    .modal-backdrop.hidden {
-
-      display:
-        none;
-
-    }
-
 
     .modal {
-
-      width:
-        min(500px, 100%);
+      width: 100%;
+      max-width: 460px;
 
       border:
-        1px solid var(--border-strong);
+        1px solid var(--border2);
 
-      border-radius:
-        20px;
+      border-radius: 20px;
 
-      background:
-        var(--panel);
+      overflow: hidden;
+
+      background: var(--panel);
 
       box-shadow:
-        var(--shadow);
-
-      overflow:
-        hidden;
-
+        0 30px 100px
+        rgba(0,0,0,.45);
     }
 
-
     .modal-header {
+      min-height: 62px;
 
-      padding:
-        18px;
+      padding: 0 17px;
 
-      display:
-        flex;
-
-      align-items:
-        center;
-
-      justify-content:
-        space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
       border-bottom:
         1px solid var(--border);
-
     }
-
 
     .modal-title {
-
-      font-size:
-        16px;
-
-      font-weight:
-        800;
-
+      font-size: 15px;
+      font-weight: 800;
     }
-
 
     .modal-body {
-
-      padding:
-        18px;
-
+      padding: 20px;
     }
-
 
     .setting {
-
-      margin-bottom:
-        18px;
-
+      margin-bottom: 18px;
     }
-
 
     .setting:last-child {
-
-      margin-bottom:
-        0;
-
+      margin-bottom: 0;
     }
-
 
     .setting-label {
+      display: block;
 
-      display:
-        block;
+      margin-bottom: 8px;
 
-      margin-bottom:
-        7px;
+      color: var(--muted);
 
-      color:
-        var(--muted);
-
-      font-size:
-        11px;
-
-      font-weight:
-        700;
-
+      font-size: 11px;
+      font-weight: 700;
     }
-
 
     .setting select {
+      width: 100%;
 
-      width:
-        100%;
+      height: 44px;
 
-      height:
-        45px;
+      padding: 0 12px;
 
-      padding:
-        0 12px;
+      outline: 0;
 
       border:
-        1px solid var(--border);
+        1px solid var(--border2);
 
-      border-radius:
-        11px;
+      border-radius: 11px;
 
-      outline:
-        0;
+      background: var(--panel2);
 
-      background:
-        var(--panel-2);
+      color: var(--text);
 
-      color:
-        var(--text);
-
-      font-size:
-        12px;
-
+      font-size: 12px;
     }
 
-
-    /* =====================================================
+    /* ==================================================
        TOAST
-    ====================================================== */
+    ================================================== */
 
     .toast {
+      position: fixed;
 
-      position:
-        fixed;
-
-      left:
-        50%;
-
-      bottom:
-        30px;
+      left: 50%;
+      bottom: 105px;
 
       transform:
-        translate(-50%, 20px);
+        translateX(-50%)
+        translateY(15px);
 
       padding:
-        11px 17px;
+        10px 17px;
 
       border:
-        1px solid var(--border-strong);
+        1px solid var(--border2);
 
-      border-radius:
-        11px;
+      border-radius: 12px;
 
       background:
-        var(--panel);
+        rgba(20,24,29,.96);
 
-      color:
-        var(--text);
+      color: var(--text);
+
+      font-size: 11px;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transition: .2s ease;
+
+      z-index: 700;
 
       box-shadow:
-        var(--shadow);
-
-      font-size:
-        12px;
-
-      opacity:
-        0;
-
-      visibility:
-        hidden;
-
-      transition:
-        .2s ease;
-
-      z-index:
-        500;
-
+        0 15px 40px
+        rgba(0,0,0,.35);
     }
-
 
     .toast.show {
-
-      opacity:
-        1;
-
-      visibility:
-        visible;
+      opacity: 1;
 
       transform:
-        translate(-50%, 0);
-
+        translateX(-50%)
+        translateY(0);
     }
 
+    /* ==================================================
+       HELPERS
+    ================================================== */
 
-    /* =====================================================
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==================================================
        MOBILE
-    ====================================================== */
+    ================================================== */
 
-    @media (
-      max-width: 800px
-    ) {
+    @media (max-width: 850px) {
 
       .sidebar {
+        position: fixed;
 
-        position:
-          fixed;
-
-        top:
-          0;
-
-        bottom:
-          0;
-
-        right:
-          0;
+        top: 0;
+        bottom: 0;
+        right: 0;
 
         transform:
           translateX(100%);
 
         box-shadow:
-          -20px 0 50px rgba(0,0,0,.25);
-
+          -20px 0 60px
+          rgba(0,0,0,.30);
       }
-
 
       .sidebar.open {
-
         transform:
           translateX(0);
-
       }
-
 
       .mobile-menu {
-
-        display:
-          grid;
-
+        display: grid;
       }
-
-
-      .model-selector {
-
-        min-width:
-          145px;
-
-      }
-
-
-      .topbar {
-
-        padding:
-          0 10px;
-
-      }
-
-
-      .chat {
-
-        padding:
-          22px 12px 170px;
-
-      }
-
 
       .composer-wrap {
+        right: 0;
 
         padding:
           10px 10px 14px;
-
       }
 
+      .chat {
+        padding:
+          20px 12px 165px;
+      }
 
       .welcome {
-
         min-height:
-          calc(100vh - 240px);
-
+          calc(100vh - 220px);
       }
-
 
       .welcome-cards {
-
-        grid-template-columns:
-          1fr;
-
+        grid-template-columns: 1fr;
       }
 
-
-      .message-bubble {
-
-        max-width:
-          95%;
-
+      .message {
+        gap: 9px;
       }
 
-    }
-
-
-    @media (
-      max-width: 520px
-    ) {
+      .message.user {
+        padding: 11px;
+      }
 
       .model-selector {
+        min-width: 145px;
+      }
+    }
 
-        min-width:
-          120px;
+    @media (max-width: 520px) {
 
+      .topbar {
+        padding: 0 10px;
       }
 
+      .model-selector {
+        min-width: 125px;
+      }
 
       .model-selector select {
-
-        font-size:
-          10px;
-
+        font-size: 10px;
       }
-
 
       .top-actions .icon-button {
-
-        width:
-          34px;
-
-        height:
-          34px;
-
+        width: 34px;
+        height: 34px;
       }
-
-
-      .brand-sub {
-
-        display:
-          none;
-
-      }
-
 
       .welcome h1 {
-
-        font-size:
-          27px;
-
+        font-size: 27px;
       }
-
 
       .welcome p {
-
-        font-size:
-          12px;
-
+        font-size: 11px;
       }
 
+      .plus-menu {
+        right: -5px;
+
+        width:
+          min(310px, calc(100vw - 30px));
+      }
+
+      .composer-note {
+        font-size: 8px;
+      }
     }
 
   </style>
-
 </head>
-
 
 <body data-theme="dark">
 
-
-  <!-- =====================================================
+  <!-- ==================================================
        APP
-  ====================================================== -->
+  ================================================== -->
 
   <div class="app">
 
-
-    <!-- ===================================================
+    <!-- ==================================================
          SIDEBAR
-    ==================================================== -->
+    ================================================== -->
 
     <aside
       class="sidebar"
       id="sidebar"
     >
-
 
       <div class="sidebar-header">
 
@@ -2322,14 +1537,13 @@
 
         </div>
 
-
         <button
           class="icon-button"
           id="closeSidebar"
           type="button"
           aria-label="إغلاق القائمة"
         >
-          ✕
+          ×
         </button>
 
       </div>
@@ -2381,23 +1595,20 @@
 
       </div>
 
-
     </aside>
 
 
-    <!-- ===================================================
+    <!-- ==================================================
          MAIN
-    ==================================================== -->
+    ================================================== -->
 
     <main class="main">
 
-
-      <!-- =================================================
+      <!-- ==================================================
            TOPBAR
       ================================================== -->
 
       <header class="topbar">
-
 
         <div class="topbar-right">
 
@@ -2405,7 +1616,7 @@
             class="icon-button mobile-menu"
             id="openSidebar"
             type="button"
-            aria-label="القائمة"
+            aria-label="فتح القائمة"
           >
             ☰
           </button>
@@ -2417,7 +1628,7 @@
 
             <select
               id="modelSelect"
-              aria-label="اختيار النموذج"
+              aria-label="اختيار نموذج Groq"
             >
 
               <option
@@ -2452,18 +1663,16 @@
             id="themeTopDesktop"
             type="button"
             aria-label="تغيير المظهر"
-            onclick="document.getElementById('themeTop')?.click()"
           >
             ◐
           </button>
 
         </div>
 
-
       </header>
 
 
-      <!-- =================================================
+      <!-- ==================================================
            CHAT
       ================================================== -->
 
@@ -2474,10 +1683,9 @@
 
         <div class="chat-inner">
 
-
-          <!-- =============================================
+          <!-- ==================================================
                WELCOME
-          ============================================== -->
+          ================================================== -->
 
           <div
             class="welcome"
@@ -2488,11 +1696,9 @@
               T.M.D
             </div>
 
-
             <h1>
               كيف يمكنني مساعدتك؟
             </h1>
-
 
             <p>
               مساعدك الذكي للمحادثة وتحليل الملفات
@@ -2502,8 +1708,11 @@
 
             <div class="welcome-cards">
 
-
-              <div class="welcome-card">
+              <button
+                class="welcome-card"
+                type="button"
+                data-prompt="اشرح لي هذا الموضوع بالتفصيل وبطريقة بسيطة."
+              >
 
                 <div class="welcome-card-icon">
                   💬
@@ -2517,10 +1726,14 @@
                   اسأل أي سؤال واحصل على إجابات منظمة.
                 </span>
 
-              </div>
+              </button>
 
 
-              <div class="welcome-card">
+              <button
+                class="welcome-card"
+                type="button"
+                data-prompt="حلل الملف المرفق واشرح أهم المعلومات الموجودة بداخله."
+              >
 
                 <div class="welcome-card-icon">
                   📄
@@ -2531,13 +1744,17 @@
                 </strong>
 
                 <span>
-                  PDF و DOCX و TXT والعديد من الملفات النصية.
+                  PDF و DOCX و TXT والملفات النصية.
                 </span>
 
-              </div>
+              </button>
 
 
-              <div class="welcome-card">
+              <button
+                class="welcome-card"
+                type="button"
+                data-prompt="حلل الصورة المرفقة واشرح لي كل ما يظهر فيها."
+              >
 
                 <div class="welcome-card-icon">
                   🖼️
@@ -2551,183 +1768,180 @@
                   ارفع صورة واطلب من T.M.D AI تحليل محتواها.
                 </span>
 
-              </div>
-
+              </button>
 
             </div>
 
           </div>
-
 
         </div>
 
       </section>
 
 
-      <!-- =================================================
+      <!-- ==================================================
            COMPOSER
       ================================================== -->
 
       <div class="composer-wrap">
 
+        <div class="composer-inner">
 
-        <div class="composer">
 
-
-          <!-- =============================================
-               FILE / IMAGE PREVIEW
-          ============================================== -->
+          <!-- ==================================================
+               ATTACHMENT PREVIEW
+          ================================================== -->
 
           <div
-            class="preview hidden"
-            id="imagePreviewContainer"
+            class="attachment-preview hidden"
+            id="attachmentPreview"
           >
 
-            <img
-              class="preview-image"
-              id="imagePreview"
-              alt="معاينة"
+            <div
+              class="attachment-icon"
+              id="attachmentIcon"
             >
+              📄
+            </div>
 
-
-            <div class="preview-info">
+            <div class="attachment-info">
 
               <span
-                class="preview-name"
-                id="imageFileName"
+                class="attachment-name"
+                id="attachmentName"
               >
-                الملف
               </span>
 
               <span
-                class="preview-mode"
-                id="imageModeLabel"
+                class="attachment-meta"
+                id="attachmentMeta"
               >
-                تحليل الصورة
               </span>
 
             </div>
 
-
             <button
-              class="preview-remove"
-              id="removeImage"
+              class="remove-attachment"
+              id="removeAttachment"
               type="button"
-              aria-label="إزالة الملف"
+              aria-label="إزالة المرفق"
             >
-              ✕
+              ×
             </button>
 
           </div>
 
 
-          <!-- =============================================
-               PLUS MENU
-          ============================================== -->
-
-          <div
-            class="plus-menu hidden"
-            id="plusMenu"
-          >
-
-            <div class="plus-menu-title">
-              إضافة إلى المحادثة
-            </div>
-
-
-            <button
-              class="plus-option"
-              id="analyzeDocumentButton"
-              type="button"
-            >
-
-              <span class="plus-option-icon">
-                📄
-              </span>
-
-              <span class="plus-option-content">
-
-                <span class="plus-option-title">
-                  تحليل ملف
-                </span>
-
-                <span class="plus-option-desc">
-                  PDF · DOCX · TXT · JSON · Code
-                </span>
-
-              </span>
-
-            </button>
-
-
-            <button
-              class="plus-option"
-              id="addImageButton"
-              type="button"
-            >
-
-              <span class="plus-option-icon">
-                🖼️
-              </span>
-
-              <span class="plus-option-content">
-
-                <span class="plus-option-title">
-                  تحليل صورة
-                </span>
-
-                <span class="plus-option-desc">
-                  تحليل الصورة والنصوص الموجودة بداخلها
-                </span>
-
-              </span>
-
-            </button>
-
-
-            <button
-              class="plus-option"
-              id="imageEditButton"
-              type="button"
-            >
-
-              <span class="plus-option-icon">
-                ✨
-              </span>
-
-              <span class="plus-option-content">
-
-                <span class="plus-option-title">
-                  وصف / تجهيز صورة
-                </span>
-
-                <span class="plus-option-desc">
-                  إرسال الصورة مع تعليماتك
-                </span>
-
-              </span>
-
-            </button>
-
-          </div>
-
-
-          <!-- =============================================
+          <!-- ==================================================
                INPUT
-          ============================================== -->
+          ================================================== -->
 
           <div class="input-shell">
 
+            <div class="plus-menu-wrapper">
 
-            <button
-              class="circle-button"
-              id="plusButton"
-              type="button"
-              aria-label="إضافة"
-              aria-expanded="false"
-            >
-              ＋
-            </button>
+              <button
+                class="circle-button"
+                id="plusButton"
+                type="button"
+                aria-label="إضافة ملف أو صورة"
+                aria-expanded="false"
+              >
+                ＋
+              </button>
+
+
+              <!-- ==================================================
+                   PLUS MENU
+              ================================================== -->
+
+              <div
+                class="plus-menu hidden"
+                id="plusMenu"
+              >
+
+                <div class="plus-menu-title">
+                  إضافة إلى المحادثة
+                </div>
+
+
+                <button
+                  class="plus-option"
+                  id="analyzeDocumentButton"
+                  type="button"
+                >
+
+                  <span class="plus-option-icon">
+                    📄
+                  </span>
+
+                  <span class="plus-option-content">
+
+                    <span class="plus-option-title">
+                      تحليل ملف
+                    </span>
+
+                    <span class="plus-option-desc">
+                      PDF و DOCX و TXT و JSON و CSS وغيرها
+                    </span>
+
+                  </span>
+
+                </button>
+
+
+                <button
+                  class="plus-option"
+                  id="addImageButton"
+                  type="button"
+                >
+
+                  <span class="plus-option-icon">
+                    🖼️
+                  </span>
+
+                  <span class="plus-option-content">
+
+                    <span class="plus-option-title">
+                      تحليل صورة
+                    </span>
+
+                    <span class="plus-option-desc">
+                      تحليل الصورة وقراءة النصوص الظاهرة
+                    </span>
+
+                  </span>
+
+                </button>
+
+
+                <button
+                  class="plus-option"
+                  id="imageEditButton"
+                  type="button"
+                >
+
+                  <span class="plus-option-icon">
+                    ✨
+                  </span>
+
+                  <span class="plus-option-content">
+
+                    <span class="plus-option-title">
+                      وصف / تجهيز صورة
+                    </span>
+
+                    <span class="plus-option-desc">
+                      إرسال الصورة مع تعليماتك
+                    </span>
+
+                  </span>
+
+                </button>
+
+              </div>
+
+            </div>
 
 
             <textarea
@@ -2749,31 +1963,25 @@
               ↑
             </button>
 
-
           </div>
 
 
           <div class="composer-note">
-
             T.M.D AI يعمل بواسطة Groq · لا تشارك المعلومات السرية
-
           </div>
-
 
         </div>
 
       </div>
 
-
     </main>
-
 
   </div>
 
 
-  <!-- =====================================================
+  <!-- ==================================================
        SETTINGS MODAL
-  ====================================================== -->
+  ================================================== -->
 
   <div
     class="modal-backdrop hidden"
@@ -2787,7 +1995,6 @@
       aria-labelledby="settingsTitle"
     >
 
-
       <div class="modal-header">
 
         <div
@@ -2797,14 +2004,13 @@
           إعدادات T.M.D AI
         </div>
 
-
         <button
           class="icon-button"
           id="modalClose"
           type="button"
           aria-label="إغلاق"
         >
-          ✕
+          ×
         </button>
 
       </div>
@@ -2824,28 +2030,24 @@
 
           <select
             id="modelSelectSettings"
-            onchange="
-              document.getElementById('modelSelect').value=this.value;
-              document.getElementById('modelSelect').dispatchEvent(new Event('change'));
-            "
           >
 
             <option
               value="llama-3.1-8b-instant"
             >
-              Llama 3.1 8B — سريع
+              T.M.D Fast
             </option>
 
             <option
               value="llama-3.3-70b-versatile"
             >
-              Llama 3.3 70B — احترافي
+              T.M.D Pro
             </option>
 
             <option
               value="meta-llama/llama-4-scout-17b-16e-instruct"
             >
-              Llama 4 Scout — رؤية
+              T.M.D Vision
             </option>
 
           </select>
@@ -2886,9 +2088,9 @@
   </div>
 
 
-  <!-- =====================================================
+  <!-- ==================================================
        TOAST
-  ====================================================== -->
+  ================================================== -->
 
   <div
     class="toast"
@@ -2897,9 +2099,9 @@
   ></div>
 
 
-  <!-- =====================================================
-       HIDDEN FILE INPUTS
-  ====================================================== -->
+  <!-- ==================================================
+       HIDDEN IMAGE INPUT
+  ================================================== -->
 
   <input
     type="file"
@@ -2908,6 +2110,10 @@
     hidden
   >
 
+
+  <!-- ==================================================
+       HIDDEN DOCUMENT INPUT
+  ================================================== -->
 
   <input
     type="file"
@@ -2933,9 +2139,9 @@
   >
 
 
-  <!-- =====================================================
-       PDF.JS INITIALIZATION
-  ====================================================== -->
+  <!-- ==================================================
+       PDF.JS
+  ================================================== -->
 
   <script type="module">
 
@@ -2953,9 +2159,7 @@
         pdfjs;
 
       window.pdfjsReady =
-        Promise.resolve(
-          pdfjs
-        );
+        Promise.resolve(pdfjs);
 
     } catch (error) {
 
@@ -2965,31 +2169,29 @@
       );
 
       window.pdfjsReady =
-        Promise.reject(
-          error
-        );
+        Promise.reject(error);
 
     }
 
   </script>
 
 
-  <!-- =====================================================
-       APPLICATION
-  ====================================================== -->
+  <!-- ==================================================
+       IMPORTANT
+       APPLICATION JAVASCRIPT
+       
+       لا تضع app.js هنا كنص.
+       يتم تحميله كملف JavaScript.
+  ================================================== -->
 
   <script src="/app.js"></script>
 
 
-  <!-- =====================================================
-       SMALL COMPATIBILITY PATCH
-  ====================================================== -->
+  <!-- ==================================================
+       MODEL SETTINGS SYNC
+  ================================================== -->
 
   <script>
-
-    /*
-     * مزامنة اختيار الموديل في الإعدادات
-     */
 
     document.addEventListener(
       "DOMContentLoaded",
@@ -3003,6 +2205,16 @@
         const settingsModel =
           document.getElementById(
             "modelSelectSettings"
+          );
+
+        const desktopTheme =
+          document.getElementById(
+            "themeTopDesktop"
+          );
+
+        const themeButton =
+          document.getElementById(
+            "themeTop"
           );
 
 
@@ -3025,6 +2237,38 @@
             }
           );
 
+
+          settingsModel.addEventListener(
+            "change",
+            () => {
+
+              mainModel.value =
+                settingsModel.value;
+
+              mainModel.dispatchEvent(
+                new Event("change")
+              );
+
+            }
+          );
+
+        }
+
+
+        if (
+          desktopTheme &&
+          themeButton
+        ) {
+
+          desktopTheme.addEventListener(
+            "click",
+            () => {
+
+              themeButton.click();
+
+            }
+          );
+
         }
 
       }
@@ -3032,7 +2276,5 @@
 
   </script>
 
-
 </body>
-
 </html>
