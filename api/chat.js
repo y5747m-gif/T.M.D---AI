@@ -91,70 +91,6 @@ const SYSTEM_PROMPT = `
 `.trim();
 
 
-
-
-/* =========================================================
-   CREATOR IDENTITY REPLIES
-   ========================================================= */
-
-const CREATOR_REPLIES = [
-  "تم تطويري وإنشائي بواسطة المطور ياسين عمرو عبد الرحيم، وقد أنشأني لمساعدتك في أي شيء.",
-  "المطور ياسين عمرو عبد الرحيم هو من أنشأني وطوّرني لأكون مساعدًا لك في مختلف المهام.",
-  "أنا T.M.D AI، وقد قام المطور ياسين عمرو عبد الرحيم بإنشائي وتطويري لأساعدك في أي شيء تحتاجه.",
-  "وراء تطويري وإنشائي المطور ياسين عمرو عبد الرحيم، والهدف من إنشائي هو مساعدتك وتقديم أفضل إجابة ممكنة.",
-  "تم إنشائي وتطويري بواسطة ياسين عمرو عبد الرحيم لأكون أداة تساعدك في الأسئلة والبرمجة والصور والملفات وغيرها.",
-  "صانعي ومطوري هو ياسين عمرو عبد الرحيم، وقد أنشأني خصيصًا لمساعدتك في مختلف الأمور.",
-  "أنا من تطوير المطور ياسين عمرو عبد الرحيم، وقد أنشأني كي أساعدك في أي شيء.",
-  "المطور ياسين عمرو عبد الرحيم هو صاحب فكرة T.M.D AI ومن قام بإنشائها وتطويرها لمساعدتك.",
-  "T.M.D AI من إنشاء وتطوير ياسين عمرو عبد الرحيم، وقد صممني لأكون مساعدًا مفيدًا لك.",
-  "تم إنشائي على يد ياسين عمرو عبد الرحيم بهدف أن أساعدك في التعلم والعمل والبرمجة والصور والملفات.",
-  "مطوّري هو ياسين عمرو عبد الرحيم، وهو من أنشأ T.M.D AI لتكون أداة تساعدك في كل ما تحتاجه.",
-  "هذه الأداة من تصميم وتطوير ياسين عمرو عبد الرحيم، وقد أنشأني لأساعدك بأفضل شكل ممكن.",
-  "أنا نتاج تطوير ياسين عمرو عبد الرحيم، وقد أنشأني لأكون مساعدك الذكي في المهام المختلفة.",
-  "منشئ T.M.D AI ومطورها هو ياسين عمرو عبد الرحيم، وهدفي أن أساعدك في أي شيء مفيد.",
-  "ياسين عمرو عبد الرحيم هو المطور الذي أنشأني وطوّرني لتقديم المساعدة للمستخدمين."
-];
-
-function normalizeArabicText(text) {
-  return String(text || "")
-    .toLowerCase()
-    .replace(/[أإآٱ]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
-    .replace(/[ًٌٍَُِّْـ]/g, "")
-    .replace(/[^\p{L}\p{N}\s.؟?!_-]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isCreatorQuestion(text) {
-  const value = normalizeArabicText(text);
-  if (!value) return false;
-
-  const patterns = [
-    "من صنعك", "مين صنعك", "من طورك", "مين طورك",
-    "من انشاك", "مين انشاك", "من انشاك مين",
-    "من صممك", "مين صممك", "من برمجك", "مين برمجك",
-    "من مطورك", "مين مطورك", "من هو مطورك", "مين هو مطورك",
-    "من صاحبك", "مين صاحبك", "من صاحب الاداه", "مين صاحب الاداه",
-    "من انشأ هذه الاداه", "من انشئ هذه الاداه",
-    "من صنع هذه الاداه", "من طور هذه الاداه",
-    "من صنع t.m.d ai", "من طور t.m.d ai", "من انشا t.m.d ai",
-    "who made you", "who created you", "who built you",
-    "who developed you", "who is your developer", "who is your creator",
-    "who made t.m.d ai", "who created t.m.d ai"
-  ];
-
-  return patterns.some((pattern) => value.includes(pattern));
-}
-
-function getCreatorReply() {
-  return CREATOR_REPLIES[
-    Math.floor(Math.random() * CREATOR_REPLIES.length)
-  ];
-}
-
-
 /* =========================================================
    JSON RESPONSE
    ========================================================= */
@@ -679,7 +615,7 @@ async function callGroq(
       ...messages
     ],
     temperature: 0.35,
-    max_completion_tokens: 2048,
+    max_completion_tokens: 800,
     stream: false
   };
 
@@ -880,36 +816,6 @@ module.exports =
           }
         );
 
-      }
-
-
-      /*
-       * Creator question: answer locally without consuming Groq.
-       */
-      const lastUserMessage =
-        messages
-          .slice()
-          .reverse()
-          .find((message) => message.role === "user");
-
-      const lastUserText =
-        Array.isArray(lastUserMessage?.content)
-          ? lastUserMessage.content
-              .filter((part) => part?.type === "text" || part?.type === "input_text")
-              .map((part) => part.text || "")
-              .join(" ")
-          : String(lastUserMessage?.content || "");
-
-      if (isCreatorQuestion(lastUserText)) {
-        return sendJSON(
-          res,
-          200,
-          {
-            ok: true,
-            reply: getCreatorReply(),
-            model: "local-creator-response"
-          }
-        );
       }
 
 
