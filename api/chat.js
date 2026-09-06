@@ -15,6 +15,18 @@ const GROQ_URL =
    MODELS
    ========================================================= */
 
+const DEFAULT_TEXT_MODEL =
+  "openai/gpt-oss-120b";
+
+
+const FALLBACK_TEXT_MODEL =
+  "openai/gpt-oss-20b";
+
+
+const VISION_MODEL =
+  "qwen/qwen3.8-27b";
+
+
 const ALLOWED_MODELS =
   new Set(
     [
@@ -24,37 +36,6 @@ const ALLOWED_MODELS =
       "qwen/qwen3.8-27b"
     ]
   );
-
-
-const CONFIGURED_TEXT_MODEL =
-  String(
-    process.env.GROQ_MODEL ||
-    "openai/gpt-oss-120b"
-  ).trim();
-
-
-const DEFAULT_TEXT_MODEL =
-  ALLOWED_MODELS.has(CONFIGURED_TEXT_MODEL)
-    ? CONFIGURED_TEXT_MODEL
-    : "openai/gpt-oss-120b";
-
-
-const FALLBACK_TEXT_MODEL =
-  "openai/gpt-oss-20b";
-
-
-const CONFIGURED_VISION_MODEL =
-  String(
-    process.env.GROQ_VISION_MODEL ||
-    "qwen/qwen3.8-27b"
-  ).trim();
-
-
-const VISION_MODEL =
-  CONFIGURED_VISION_MODEL === "qwen/qwen3.6-27b" ||
-  CONFIGURED_VISION_MODEL === "qwen/qwen3.8-27b"
-    ? CONFIGURED_VISION_MODEL
-    : "qwen/qwen3.8-27b";
 
 
 /* =========================================================
@@ -889,19 +870,6 @@ module.exports =
           .catch(
             () => ({})
           );
-
-
-      /*
-       * Retry a single rate-limited request using Groq's
-       * Retry-After header when available.
-       */
-      if (response.status === 429) {
-        const retryAfter = Math.min(8, Math.max(1, Number(response.headers.get("retry-after")) || 2));
-        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
-
-        response = await callGroq(apiKey, model, messages);
-        data = await response.json().catch(() => ({}));
-      }
 
 
       /*
