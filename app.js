@@ -814,9 +814,24 @@ function togglePlusMenu() {
     return;
   }
 
-  plusMenu.classList.toggle(
-    "open"
-  );
+  const isHidden =
+    plusMenu.classList.contains("hidden");
+
+  if (isHidden) {
+    plusMenu.classList.remove("hidden");
+    plusMenu.classList.add("open");
+  } else {
+    plusMenu.classList.remove("open");
+    plusMenu.classList.add("hidden");
+  }
+
+  if (plusButton) {
+    plusButton.classList.toggle("active", isHidden);
+    plusButton.setAttribute(
+      "aria-expanded",
+      isHidden ? "true" : "false"
+    );
+  }
 
 }
 
@@ -827,9 +842,16 @@ function closePlusMenu() {
     return;
   }
 
-  plusMenu.classList.remove(
-    "open"
-  );
+  plusMenu.classList.remove("open");
+  plusMenu.classList.add("hidden");
+
+  if (plusButton) {
+    plusButton.classList.remove("active");
+    plusButton.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+  }
 
 }
 
