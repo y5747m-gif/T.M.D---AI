@@ -49,26 +49,26 @@
   <style>
 
     :root {
-      --bg: #090b0e;
-      --bg2: #0f1216;
-      --panel: #14181d;
-      --panel2: #1a1f25;
+      --bg: #070707;
+      --bg2: #0d0d0d;
+      --panel: #111111;
+      --panel2: #171717;
 
-      --border: rgba(255,255,255,.08);
-      --border2: rgba(255,255,255,.14);
+      --border: rgba(255,38,38,.15);
+      --border2: rgba(255,55,55,.28);
 
-      --text: #f4f6f8;
-      --muted: #9aa3ad;
-      --muted2: #68717c;
+      --text: #f7f7f7;
+      --muted: #a8a8a8;
+      --muted2: #6e6e6e;
 
-      --accent: #21c47b;
-      --accent2: #19a966;
+      --accent: #ff2020;
+      --accent2: #b00000;
 
-      --danger: #ef5350;
+      --danger: #ff3b3b;
 
-      --sidebar: #101318;
+      --sidebar: #090909;
 
-      --user: #1b222a;
+      --user: #1a0b0b;
 
       --radius: 18px;
     }
@@ -1593,6 +1593,238 @@
       --sidebar: #ededed;
       --user: #fff1f1;
     }
+
+
+    /* =====================================================
+       FINAL T.M.D AI DANGER UI — RED / BLACK
+       Visual-only layer: keeps existing DOM and JS wiring.
+    ====================================================== */
+    :root {
+      --danger-red: #ff1d25;
+      --danger-red-dark: #8f0000;
+      --danger-red-mid: #c4000d;
+      --danger-red-soft: rgba(255,29,37,.14);
+      --danger-red-line: rgba(255,50,55,.30);
+      --danger-black: #050505;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,28,34,.20), transparent 28%),
+        radial-gradient(circle at 88% 88%, rgba(160,0,14,.17), transparent 30%),
+        linear-gradient(180deg, #030303 0%, #090909 45%, #050505 100%) !important;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(rgba(255,0,0,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,0,.018) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.45), transparent 85%);
+    }
+
+    .app { position: relative; z-index: 1; }
+
+    .sidebar {
+      background:
+        linear-gradient(180deg, rgba(12,12,12,.98), rgba(3,3,3,.98)) !important;
+      border-left-color: rgba(255,35,42,.22) !important;
+      box-shadow: -18px 0 50px rgba(0,0,0,.34), inset -1px 0 rgba(255,20,20,.05);
+    }
+
+    .brand-logo {
+      background: linear-gradient(145deg, #ff4848, #920000) !important;
+      color: #fff !important;
+      box-shadow: 0 0 26px rgba(255,20,25,.25), inset 0 1px rgba(255,255,255,.14) !important;
+    }
+
+    .brand-name,
+    .top-title,
+    .model-badge,
+    .plus-menu-title,
+    .welcome h1 {
+      text-shadow: 0 0 18px rgba(255,25,30,.18);
+    }
+
+    .brand-name span,
+    .model-badge,
+    .quick-title {
+      color: #ff5960 !important;
+    }
+
+    .topbar {
+      background: rgba(5,5,5,.60) !important;
+      border-bottom-color: rgba(255,40,45,.18) !important;
+      box-shadow: 0 1px 0 rgba(255,0,0,.025), 0 14px 40px rgba(0,0,0,.14);
+    }
+
+    .model-badge,
+    .model-selector select {
+      border-color: rgba(255,40,45,.26) !important;
+      background: rgba(255,20,25,.06) !important;
+    }
+
+    .model-dot,
+    .status-dot,
+    .sidebar-status i {
+      background: var(--danger-red) !important;
+      box-shadow: 0 0 13px rgba(255,30,35,.75) !important;
+    }
+
+    .new-chat,
+    .send-button,
+    .circle-button {
+      border-color: rgba(255,40,45,.30) !important;
+    }
+
+    .new-chat {
+      color: #fff !important;
+      background: linear-gradient(135deg, rgba(210,0,12,.92), rgba(102,0,6,.94)) !important;
+      box-shadow: 0 8px 22px rgba(150,0,10,.18), inset 0 1px rgba(255,255,255,.08) !important;
+    }
+
+    .new-chat:hover,
+    .send-button:hover,
+    .circle-button:hover {
+      background: linear-gradient(135deg, #ff282e, #b0000a) !important;
+      box-shadow: 0 0 24px rgba(255,25,30,.24) !important;
+    }
+
+    .send-button {
+      background: linear-gradient(145deg, #ff343a, #a90008) !important;
+      color: #fff !important;
+      box-shadow: 0 0 0 1px rgba(255,25,30,.10), 0 0 22px rgba(255,20,25,.18) !important;
+    }
+
+    .send-button.stop {
+      background: linear-gradient(145deg, #8e0000, #500000) !important;
+    }
+
+    .circle-button,
+    .plus-button {
+      background: rgba(255,22,28,.05) !important;
+      color: #ff5057 !important;
+    }
+
+    .circle-button:hover,
+    .circle-button.active {
+      background: rgba(255,25,30,.15) !important;
+      color: #fff !important;
+    }
+
+    .plus-menu,
+    .attachment-preview,
+    .input-shell,
+    .composer,
+    .message.user,
+    .message.assistant,
+    .welcome-card {
+      border-color: rgba(255,38,43,.21) !important;
+    }
+
+    .plus-menu {
+      background: linear-gradient(180deg, rgba(18,10,10,.99), rgba(9,7,7,.99)) !important;
+      box-shadow: 0 22px 60px rgba(0,0,0,.52), 0 0 30px rgba(160,0,10,.12) !important;
+    }
+
+    .plus-option:hover,
+    .history-item:hover,
+    .history-item.active,
+    .welcome-card:hover {
+      background: rgba(255,25,32,.10) !important;
+      border-color: rgba(255,42,48,.30) !important;
+    }
+
+    .plus-option-icon,
+    .welcome-card-icon {
+      background: rgba(255,25,30,.10) !important;
+      color: #ff646a !important;
+    }
+
+    .composer {
+      background: linear-gradient(145deg, rgba(17,12,12,.97), rgba(8,8,8,.98)) !important;
+      border-color: rgba(255,36,42,.26) !important;
+      box-shadow: 0 18px 60px rgba(0,0,0,.38), 0 0 30px rgba(150,0,10,.08) !important;
+    }
+
+    .composer textarea::placeholder,
+    .input-area::placeholder {
+      color: #7e6f70 !important;
+    }
+
+    .message.user {
+      background: linear-gradient(145deg, #18090a, #110707) !important;
+    }
+
+    .message.assistant {
+      background: rgba(10,10,10,.42) !important;
+    }
+
+    .message-avatar {
+      border-color: rgba(255,35,40,.25) !important;
+    }
+
+    .welcome-logo {
+      background: linear-gradient(145deg, #ff3037, #8c0006) !important;
+      color: #fff !important;
+      box-shadow: 0 0 35px rgba(255,20,25,.22) !important;
+    }
+
+    .welcome-card {
+      background: rgba(255,255,255,.02) !important;
+    }
+
+    .composer-note,
+    .footer-btn,
+    .sidebar-icon {
+      color: #9b8586 !important;
+    }
+
+    .toast {
+      border-color: rgba(255,40,45,.30) !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,.40), 0 0 22px rgba(190,0,12,.14) !important;
+    }
+
+    [data-theme="light"] body,
+    body.light {
+      background:
+        radial-gradient(circle at 10% 8%, rgba(220,0,10,.10), transparent 30%),
+        radial-gradient(circle at 90% 90%, rgba(170,0,10,.08), transparent 32%),
+        linear-gradient(180deg, #fff 0%, #f7f7f7 50%, #f2f2f2 100%) !important;
+    }
+
+    [data-theme="light"] .sidebar {
+      background: linear-gradient(180deg, #fff, #f3f3f3) !important;
+    }
+
+    [data-theme="light"] .topbar {
+      background: rgba(255,255,255,.74) !important;
+    }
+
+    [data-theme="light"] .composer {
+      background: rgba(255,255,255,.96) !important;
+    }
+
+    [data-theme="light"] .plus-menu {
+      background: rgba(255,255,255,.98) !important;
+    }
+
+    [data-theme="light"] .message.user {
+      background: #fff1f1 !important;
+    }
+
+    @media (max-width: 700px) {
+      .topbar { height: 58px !important; }
+      .sidebar { box-shadow: -18px 0 55px rgba(0,0,0,.48) !important; }
+      .composer { border-radius: 20px !important; }
+      .plus-menu { max-width: calc(100vw - 28px) !important; }
+    }
+
 </style>
 </head>
 
