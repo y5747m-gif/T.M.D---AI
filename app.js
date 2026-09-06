@@ -20,7 +20,7 @@ const state = {
 
   model:
     localStorage.getItem("tmd_model") ||
-    "llama-3.1-8b-instant",
+    "openai/gpt-oss-120b",
 
   busy: false,
 
@@ -39,16 +39,25 @@ const state = {
    ========================================================= */
 
 const MODELS = {
-  fast: "llama-3.1-8b-instant",
-  smart: "llama-3.3-70b-versatile",
-  vision: "meta-llama/llama-4-scout-17b-16e-instruct"
+  fast: "openai/gpt-oss-20b",
+  smart: "openai/gpt-oss-120b",
+  vision: "qwen/qwen3.8-27b"
 };
 
 const VALID_MODELS = new Set([
   MODELS.fast,
   MODELS.smart,
-  MODELS.vision
+  MODELS.vision,
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "qwen/qwen3.6-27b",
+  "qwen/qwen3.8-27b"
 ]);
+
+if (!VALID_MODELS.has(state.model)) {
+  state.model = MODELS.smart;
+  localStorage.setItem("tmd_model", state.model);
+}
 
 
 /* =========================================================
@@ -2082,202 +2091,102 @@ async function sendMessage() {
 
 function buildApiMessages() {
 
-  const result =
-    [];
-
-
-  /*
-   * Last 24 messages only.
-   */
-
   const historyMessages =
-    state.messages.slice(
-      -24
-    );
-
-
-  /*
-   * Only send the newest image/file
-   * to prevent huge requests.
-   */
+    Array.isArray(state.messages)
+      ? state.messages.slice(-16)
+      : [];
 
   const lastImageIndex =
     historyMessages.reduce(
-      function(
-        index,
-        message,
-        currentIndex
-      ) {
-
-        return message?.image
-          ? currentIndex
-          : index;
-
-      },
+      (index, message, currentIndex) =>
+        message?.image ? currentIndex : index,
       -1
     );
-
 
   const lastFileIndex =
     historyMessages.reduce(
-      function(
-        index,
-        message,
-        currentIndex
-      ) {
-
-        return message?.fileText
-          ? currentIndex
-          : index;
-
-      },
+      (index, message, currentIndex) =>
+        message?.fileText ? currentIndex : index,
       -1
     );
 
+  /*
+   * Image requests intentionally contain only the current image
+   * and the current user instruction. This keeps the visual model
+   * focused on the uploaded image and prevents old conversation
+   * content from influencing the answer or inflating the request.
+   */
+  if (lastImageIndex !== -1) {
+    const message = historyMessages[lastImageIndex];
 
-  historyMessages.forEach(
-    function(
-      message,
-      index
-    ) {
-
-      if (!message) {
-        return;
-      }
-
-
-      if (
-        message.role !==
-          "user" &&
-        message.role !==
-          "assistant"
-      ) {
-
-        return;
-
-      }
-
-
-      /*
-       * IMAGE
-       */
-
-      if (
-        message.role ===
-          "user" &&
-        message.image &&
-        index ===
-          lastImageIndex
-      ) {
-
-        result.push(
+    return [
+      {
+        role: "user",
+        content: [
           {
-            role:
-              "user",
-
-            content:
-              [
-
-                {
-                  type:
-                    "text",
-
-                  text:
-                    message.content ||
-                    "حلل هذه الصورة."
-                },
-
-                {
-                  type:
-                    "image_url",
-
-                  image_url:
-                    {
-                      url:
-                        message.image
-                    }
-
-                }
-
-              ]
-
-          }
-        );
-
-
-        return;
-
-      }
-
-
-      /*
-       * FILE
-       */
-
-      if (
-        message.role ===
-          "user" &&
-        message.fileText &&
-        index ===
-          lastFileIndex
-      ) {
-
-        result.push(
+            type: "text",
+            text:
+              message.content?.trim() ||
+              "حلل هذه الصورة وقدم النتيجة النهائية فقط."
+          },
           {
-
-            role:
-              "user",
-
-            content:
-              `${message.content || "حلل الملف."}
-
-اسم الملف:
-${message.fileName || "file"}
-
-محتوى الملف:
---- BEGIN FILE ---
-${truncateText(
-  message.fileText,
-  70000
-)}
---- END FILE ---`
-
+            type: "image_url",
+            image_url: {
+              url: message.image
+            }
           }
-        );
-
-
-        return;
-
+        ]
       }
+    ];
+  }
 
+  /*
+   * File requests contain the newest file and a very small amount
+   * of recent conversational context only.
+   */
+  if (lastFileIndex !== -1) {
+    const context = [];
 
-      /*
-       * NORMAL MESSAGE
-       */
+    for (let i = Math.max(0, lastFileIndex - 2); i < lastFileIndex; i++) {
+      const message = historyMessages[i];
+      if (!message) continue;
+      if (message.role !== "user" && message.role !== "assistant") continue;
+      if (typeof message.content !== "string" || !message.content.trim()) continue;
 
-      result.push(
-        {
-
-          role:
-            message.role,
-
-          content:
-            typeof message.content ===
-            "string"
-              ? message.content
-              : ""
-
-        }
-      );
-
+      context.push({
+        role: message.role,
+        content: message.content.slice(-1500)
+      });
     }
-  );
 
+    const fileMessage = historyMessages[lastFileIndex];
 
-  return result;
+    context.push({
+      role: "user",
+      content:
+        `${fileMessage.content || "حلل الملف المرفق."}\n\n` +
+        `اسم الملف: ${fileMessage.fileName || "file"}\n\n` +
+        `محتوى الملف:\n--- BEGIN FILE ---\n` +
+        `${truncateText(fileMessage.fileText || "", 12000)}\n` +
+        `--- END FILE ---`
+    });
 
+    return context;
+  }
+
+  /* Normal chat: keep only recent text context. */
+  return historyMessages
+    .filter((message) =>
+      message &&
+      (message.role === "user" || message.role === "assistant") &&
+      typeof message.content === "string" &&
+      message.content.trim()
+    )
+    .map((message) => ({
+      role: message.role,
+      content: message.content.slice(-2500)
+    }));
 }
-
 
 /* =========================================================
    CLEAN ASSISTANT REPLY
