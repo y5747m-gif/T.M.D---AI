@@ -1428,3 +1428,13 @@ body.light .image-preview-info span:first-child {
     height: 45px;
   }
 }
+
+
+/* T.M.D AI RED / BLACK DANGER THEME */
+:root{--bg:#070707;--bg2:#0d0d0d;--panel:#111;--panel2:#171717;--border:rgba(255,46,46,.16);--border2:rgba(255,56,56,.28);--text:#f7f7f7;--muted:#a5a5a5;--muted2:#6f6f6f;--accent:#ff1f1f;--accent2:#b50000;--danger:#ff3838;--sidebar:#090909;--user:#1a0b0b}
+body{background:radial-gradient(circle at 18% 10%,rgba(255,20,20,.16),transparent 28%),radial-gradient(circle at 86% 78%,rgba(180,0,0,.12),transparent 32%),linear-gradient(180deg,#050505 0%,#0b0b0b 55%,#070707 100%)}
+.brand-logo{background:linear-gradient(145deg,#ff3b3b,#a30000)!important;color:#fff!important}
+.send-button,.new-chat{background:#ff1f1f!important;color:#fff!important;box-shadow:0 0 28px rgba(255,20,20,.18)}
+.send-button:hover,.new-chat:hover{background:#e91313!important}
+.plus-menu,.attachment-preview,.composer,.input-shell{border-color:rgba(255,40,40,.24)!important}
+.plus-option:hover,.history-item:hover,.history-item.active{background:rgba(255,25,25,.10)!important}
