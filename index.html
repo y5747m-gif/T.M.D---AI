@@ -1495,7 +1495,105 @@
       }
     }
 
-  </style>
+  
+
+    /* ==================================================
+       T.M.D AI — RED / BLACK DANGER THEME
+    ================================================== */
+    :root {
+      --bg: #070707;
+      --bg2: #0d0d0d;
+      --panel: #111111;
+      --panel2: #171717;
+      --border: rgba(255, 46, 46, .16);
+      --border2: rgba(255, 56, 56, .28);
+      --text: #f7f7f7;
+      --muted: #a5a5a5;
+      --muted2: #6f6f6f;
+      --accent: #ff1f1f;
+      --accent2: #b50000;
+      --danger: #ff3838;
+      --sidebar: #090909;
+      --user: #1a0b0b;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255, 20, 20, .16), transparent 28%),
+        radial-gradient(circle at 86% 78%, rgba(180, 0, 0, .12), transparent 32%),
+        linear-gradient(180deg, #050505 0%, #0b0b0b 55%, #070707 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .22;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 1px, transparent 1px 9px),
+        radial-gradient(circle at 50% 0%, rgba(255, 30, 30, .10), transparent 45%);
+      mix-blend-mode: screen;
+    }
+
+    .app, .sidebar, .main, .topbar, .chat-area, .composer, .plus-menu, .modal {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo, .send-button, .new-chat, .circle-button, .plus-button {
+      box-shadow: 0 0 0 1px rgba(255, 30, 30, .10), 0 0 28px rgba(255, 20, 20, .18);
+    }
+
+    .brand-logo {
+      background: linear-gradient(145deg, #ff3b3b, #a30000) !important;
+      color: #fff !important;
+    }
+
+    .brand-name, .top-title, .plus-menu-title {
+      text-shadow: 0 0 16px rgba(255, 30, 30, .18);
+    }
+
+    .model-dot, .sidebar-status i, .status-dot {
+      background: #ff2626 !important;
+      box-shadow: 0 0 12px rgba(255, 30, 30, .65) !important;
+    }
+
+    .new-chat:hover, .send-button:hover, .circle-button:hover {
+      background: #e91313 !important;
+    }
+
+    .plus-menu, .attachment-preview, .message.user, .composer, .input-shell {
+      border-color: rgba(255, 40, 40, .24) !important;
+    }
+
+    .plus-option:hover, .history-item:hover, .history-item.active {
+      background: rgba(255, 25, 25, .10) !important;
+    }
+
+    .send-button.stop {
+      background: #7f0000 !important;
+    }
+
+    .error-text {
+      color: #ff6a6a !important;
+    }
+
+    [data-theme="light"] {
+      --bg: #f5f5f5;
+      --bg2: #ffffff;
+      --panel: #ffffff;
+      --panel2: #f1f1f1;
+      --border: rgba(150, 0, 0, .13);
+      --border2: rgba(160, 0, 0, .20);
+      --text: #191919;
+      --muted: #6f6f6f;
+      --muted2: #8b8b8b;
+      --sidebar: #ededed;
+      --user: #fff1f1;
+    }
+</style>
 </head>
 
 <body data-theme="dark">
@@ -1632,21 +1730,21 @@
             >
 
               <option
-                value="llama-3.1-8b-instant"
+                value="openai/gpt-oss-20b"
               >
-                T.M.D Fast
+                T.M.D Fast — GPT OSS 20B
               </option>
 
               <option
-                value="llama-3.3-70b-versatile"
+                value="openai/gpt-oss-120b"
               >
-                T.M.D Pro
+                T.M.D Pro — GPT OSS 120B
               </option>
 
               <option
-                value="meta-llama/llama-4-scout-17b-16e-instruct"
+                value="qwen/qwen3.8-27b"
               >
-                T.M.D Vision
+                T.M.D Vision — Qwen 3.8 27B
               </option>
 
             </select>
@@ -2033,21 +2131,21 @@
           >
 
             <option
-              value="llama-3.1-8b-instant"
+              value="openai/gpt-oss-20b"
             >
-              T.M.D Fast
+              T.M.D Fast — GPT OSS 20B
             </option>
 
             <option
-              value="llama-3.3-70b-versatile"
+              value="openai/gpt-oss-120b"
             >
-              T.M.D Pro
+              T.M.D Pro — GPT OSS 120B
             </option>
 
             <option
-              value="meta-llama/llama-4-scout-17b-16e-instruct"
+              value="qwen/qwen3.8-27b"
             >
-              T.M.D Vision
+              T.M.D Vision — Qwen 3.8 27B
             </option>
 
           </select>
