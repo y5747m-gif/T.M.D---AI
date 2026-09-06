@@ -17,7 +17,7 @@ const GROQ_URL =
 
 const VISION_MODEL =
   process.env.GROQ_VISION_MODEL ||
-  "meta-llama/llama-4-scout-17b-16e-instruct";
+  "qwen/qwen3.8-27b";
 
 
 module.exports = async function handler(req, res) {
@@ -341,8 +341,11 @@ module.exports = async function handler(req, res) {
               temperature:
                 0.3,
 
-              max_tokens:
-                4096
+              max_completion_tokens:
+                2048,
+
+              reasoning_effort:
+                "none"
 
             })
 
