@@ -16,23 +16,24 @@ const GROQ_URL =
    ========================================================= */
 
 const DEFAULT_TEXT_MODEL =
-  "llama-3.1-8b-instant";
+  "openai/gpt-oss-120b";
 
 
 const FALLBACK_TEXT_MODEL =
-  "llama-3.1-8b-instant";
+  "openai/gpt-oss-20b";
 
 
 const VISION_MODEL =
-  "meta-llama/llama-4-scout-17b-16e-instruct";
+  "qwen/qwen3.8-27b";
 
 
 const ALLOWED_MODELS =
   new Set(
     [
-      "llama-3.1-8b-instant",
-      "llama-3.3-70b-versatile",
-      VISION_MODEL
+      "openai/gpt-oss-20b",
+      "openai/gpt-oss-120b",
+      "qwen/qwen3.6-27b",
+      "qwen/qwen3.8-27b"
     ]
   );
 
@@ -585,61 +586,43 @@ async function callGroq(
   messages
 ) {
 
+  const payload = {
+    model,
+    messages: [
+      {
+        role: "system",
+        content: SYSTEM_PROMPT
+      },
+      ...messages
+    ],
+    temperature: 0.35,
+    max_completion_tokens: 2048,
+    stream: false
+  };
+
+  if (
+    model === "openai/gpt-oss-20b" ||
+    model === "openai/gpt-oss-120b"
+  ) {
+    payload.reasoning_format = "hidden";
+  }
+
+  if (
+    model === "qwen/qwen3.6-27b" ||
+    model === "qwen/qwen3.8-27b"
+  ) {
+    payload.reasoning_effort = "none";
+  }
+
   return fetch(
     GROQ_URL,
     {
-
-      method:
-        "POST",
-
-      headers:
-        {
-
-          "Content-Type":
-            "application/json",
-
-          "Authorization":
-            `Bearer ${apiKey}`
-
-        },
-
-      body:
-        JSON.stringify(
-          {
-
-            model,
-
-            messages:
-              [
-                {
-                  role:
-                    "system",
-
-                  content:
-                    SYSTEM_PROMPT
-                },
-
-                ...messages
-
-              ],
-
-            /*
-             * Lower temperature keeps
-             * responses cleaner.
-             */
-
-            temperature:
-              0.35,
-
-            max_completion_tokens:
-              4096,
-
-            stream:
-              false
-
-          }
-        )
-
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
     }
   );
 
