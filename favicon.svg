@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c101d"/>
+      <stop offset="50%" stop-color="#140f2b"/>
+      <stop offset="100%" stop-color="#070913"/>
+    </linearGradient>
+    <linearGradient id="grad-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="50%" stop-color="#7f00ff"/>
+      <stop offset="100%" stop-color="#ff007f"/>
+    </linearGradient>
+    <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="40%" stop-color="#9d4edd"/>
+      <stop offset="80%" stop-color="#ff007f"/>
+      <stop offset="100%" stop-color="#ffd166"/>
+    </linearGradient>
+    <radialGradient id="grad-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#7f00ff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="100" height="100" rx="26" fill="url(#grad-bg)"/>
+  <rect width="98" height="98" x="1" y="1" rx="25" stroke="url(#grad-ring)" stroke-width="2" stroke-opacity="0.7"/>
+
+  <!-- Subtle Ambient Glow -->
+  <circle cx="50" cy="50" r="38" fill="url(#grad-glow)" opacity="0.6"/>
+
+  <!-- Orbital Rings -->
+  <ellipse cx="50" cy="50" rx="38" ry="16" transform="rotate(-30 50 50)" stroke="url(#grad-ring)" stroke-width="1.8" stroke-dasharray="8 4" opacity="0.8"/>
+  <ellipse cx="50" cy="50" rx="38" ry="16" transform="rotate(35 50 50)" stroke="url(#grad-ring)" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.6"/>
+
+  <!-- Orbital Satellites / Quantum nodes -->
+  <circle cx="20" cy="36" r="3.2" fill="#00ffff" filter="url(#glow-blur)"/>
+  <circle cx="80" cy="64" r="2.8" fill="#ff007f" filter="url(#glow-blur)"/>
+  <circle cx="72" cy="28" r="2.2" fill="#ffd166" filter="url(#glow-blur)"/>
+
+  <!-- Central Core Hexagon / Star Badge -->
+  <polygon points="50,22 74,36 74,64 50,78 26,64 26,36" fill="#0e1324" stroke="url(#grad-ring)" stroke-width="2.2" filter="url(#glow-blur)"/>
+
+  <!-- Central Monogram TMD with sparkling star -->
+  <text x="50" y="54" font-family="'Cairo', 'Space Grotesk', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">TMD</text>
+  <text x="50" y="66" font-family="'Cairo', 'Space Grotesk', -apple-system, sans-serif" font-size="7.5" font-weight="800" fill="#00f2fe" text-anchor="middle" letter-spacing="2.5">AI PRO</text>
+
+  <!-- Sparkle Flare on top -->
+  <path d="M 50 18 Q 50 24 56 24 Q 50 24 50 30 Q 50 24 44 24 Q 50 24 50 18 Z" fill="#ffffff" filter="url(#glow-blur)"/>
+</svg>
