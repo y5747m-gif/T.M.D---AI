@@ -2,64 +2,34 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#06080f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="T.M.D_AI_Pro — منصة الذكاء الاصطناعي الاحترافية، تطوير وتصميم المطور ياسين عمرو عبد الرحيم">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <title>T.M.D_AI_Pro — المساعد الذكي الاحترافي</title>
 
-  <meta
-    name="theme-color"
-    content="#07080b"
-  >
+  <!-- ================= FAVICON ================= -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-  <meta
-    name="description"
-    content="T.M.D_AI_Pro — مساعد ذكاء اصطناعي احترافي يعمل بواسطة Groq"
-  >
+  <!-- ================= GOOGLE FONTS ================= -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-  <title>T.M.D_AI_Pro</title>
+  <!-- ================= MAMMOTH (DOCX) ================= -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 
-  <!-- ================= FONTS ================= -->
+  <!-- ================= STYLESHEET ================= -->
+  <link rel="stylesheet" href="/style.css">
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
-
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- ================= DOCX ================= -->
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"
-  ></script>
-
-  <!-- ================= STYLE ================= -->
-
-  <link
-    rel="stylesheet"
-    href="/style.css"
-  >
-
-  <!--
-    منع وميض المظهر: يُطبَّق المظاهر المحفوظ قبل تحميل الصفحة.
-  -->
+  <!-- منع وميض المظهر والخلفية المحفوظة -->
   <script>
     (function () {
       try {
         var t = localStorage.getItem("tmd_theme");
-        document.documentElement.dataset.theme =
-          t === "light" ? "light" : "dark";
+        document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
       } catch (e) {}
     })();
   </script>
@@ -68,192 +38,194 @@
 <body data-theme="dark">
 
   <!-- ==================================================
-       APP
+       BACKGROUND LAYERS (خلفية النجوم والتخصيص)
   ================================================== -->
+  <!-- طبقة الصورة المخصصة للمستخدم -->
+  <div class="user-bg-layer" id="userBgLayer" aria-hidden="true"></div>
 
-  <div class="app">
+  <!-- طبقة تعتيم وضبابية الخلفية للمستخدم -->
+  <div class="bg-dim-overlay" id="bgDimOverlay" aria-hidden="true"></div>
+
+  <!-- الكانفاس التفاعلي للنجوم البراقة والشهب المتلألئة -->
+  <canvas class="stars-canvas" id="starsCanvas" aria-hidden="true"></canvas>
+
+  <!-- سديم متوهج خلفي -->
+  <div class="cosmos-nebula" id="cosmosNebula" aria-hidden="true"></div>
+
+
+  <!-- ==================================================
+       MAIN APP CONTAINER
+  ================================================== -->
+  <div class="app" id="appContainer">
 
     <!-- ==================================================
-         SIDEBAR
+         SIDEBAR (القائمة الجانبية المتجاوبة)
     ================================================== -->
-
-    <aside
-      class="sidebar"
-      id="sidebar"
-    >
+    <aside class="sidebar" id="sidebar">
 
       <div class="sidebar-header">
 
-        <div class="brand">
-
-          <!-- الشعار مع انيميشن الطوافان -->
-          <div class="orbit-logo orbit-logo--brand">
-
-            <span class="orbit-ring orbit-ring--a" aria-hidden="true">
-              <i class="orbit-sat"></i>
-            </span>
-
-            <span class="orbit-ring orbit-ring--b" aria-hidden="true">
-              <i class="orbit-sat orbit-sat--b"></i>
-            </span>
-
-            <div class="orbit-logo-tile">
-              T.M.D
+        <div class="brand" title="T.M.D AI Pro">
+          <!-- الشعار الأيقوني الاحترافي الجديد مع مدارات متحركة -->
+          <div class="cosmic-logo cosmic-logo--sm">
+            <div class="cosmic-ring ring-1"></div>
+            <div class="cosmic-ring ring-2"></div>
+            <div class="cosmic-core">
+              <svg class="logo-svg" viewBox="0 0 100 100" fill="none">
+                <polygon points="50,15 82,33 82,67 50,85 18,67 18,33" fill="url(#core-grad-sb)" stroke="url(#stroke-grad-sb)" stroke-width="3"/>
+                <defs>
+                  <linearGradient id="core-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#7f00ff" stop-opacity="0.9"/>
+                  </linearGradient>
+                  <linearGradient id="stroke-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00ffff"/>
+                    <stop offset="50%" stop-color="#ff007f"/>
+                    <stop offset="100%" stop-color="#ffd166"/>
+                  </linearGradient>
+                </defs>
+                <text x="50" y="58" font-family="'Cairo', sans-serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">T</text>
+              </svg>
             </div>
-
+            <span class="sparkle-dot dot-1"></span>
+            <span class="sparkle-dot dot-2"></span>
           </div>
 
           <div class="brand-info">
-
-            <span class="brand-name">
-              T.M.D_AI_
-              <em class="brand-pro">Pro</em>
-            </span>
-
-            <span class="brand-sub">
-              Professional · Groq
-            </span>
-
+            <div class="brand-name">
+              <span class="brand-text">T.M.D_AI_</span>
+              <span class="brand-badge-pro">PRO</span>
+            </div>
+            <span class="brand-sub">تطوير: ياسين عمرو عبد الرحيم</span>
           </div>
 
         </div>
 
-        <button
-          class="icon-button"
-          id="closeSidebar"
-          type="button"
-          aria-label="إغلاق القائمة"
-        >
-          ×
+        <button class="icon-button close-sidebar-btn" id="closeSidebar" type="button" aria-label="إغلاق القائمة">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
 
       </div>
 
 
-      <button
-        class="new-chat"
-        id="newChat"
-        type="button"
-      >
-
-        <span class="new-chat-icon">＋</span>
-
-        <span>محادثة جديدة</span>
-
+      <!-- زر محادثة جديدة -->
+      <button class="new-chat-btn" id="newChat" type="button">
+        <span class="btn-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </span>
+        <span class="btn-label">محادثة جديدة</span>
+        <span class="kbd-badge" title="اختصار">Ctrl+K</span>
       </button>
 
 
-      <div class="history-title">
-        المحادثات
+      <!-- عنوان سجل المحادثات -->
+      <div class="history-header">
+        <span class="history-title">سجل المحادثات</span>
+        <button class="clear-all-history-btn" id="clearAllHistoryBtn" type="button" title="مسح كل المحادثات">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
       </div>
 
 
-      <div
-        class="history"
-        id="history"
-      ></div>
+      <!-- قائمة المحادثات -->
+      <div class="history-list" id="history"></div>
 
 
+      <!-- بطاقة المطور السريعة -->
+      <div class="developer-card" id="developerCardBtn" role="button" tabindex="0" title="معلومات المطور">
+        <div class="dev-avatar">
+          <span class="dev-avatar-sparkle">✦</span>
+        </div>
+        <div class="dev-meta">
+          <span class="dev-tag">مهندس ومصمم النظام</span>
+          <span class="dev-name">ياسين عمرو عبد الرحيم</span>
+        </div>
+        <span class="dev-arrow">‹</span>
+      </div>
+
+
+      <!-- أسفل القائمة الجانبية -->
       <div class="sidebar-footer">
 
-        <button
-          class="footer-button"
-          id="settingsBtn"
-          type="button"
-        >
-          <span class="footer-icon">⚙</span>
-          الإعدادات
+        <button class="footer-btn customizer-btn-sidebar" id="sidebarCustomizerBtn" type="button">
+          <span class="footer-icon">🎨</span>
+          <span class="footer-btn-label">تخصيص الخلفية</span>
         </button>
 
-        <button
-          class="footer-button"
-          id="themeTop"
-          type="button"
-        >
-          <span class="footer-icon">◐</span>
-          المظهر
+        <button class="footer-btn" id="settingsBtn" type="button">
+          <span class="footer-icon">⚙️</span>
+          <span class="footer-btn-label">الإعدادات</span>
+        </button>
+
+        <button class="footer-btn theme-toggle-btn" id="themeTop" type="button" title="تبديل المظهر">
+          <span class="footer-icon theme-icon-indicator">◐</span>
+          <span class="footer-btn-label">المظهر</span>
         </button>
 
       </div>
 
     </aside>
 
+    <!-- غطاء خلفي للقائمة في الموبايل -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 
     <!-- ==================================================
-         MAIN
+         MAIN CONTENT AREA
     ================================================== -->
-
-    <main class="main">
+    <main class="main" id="mainContent">
 
       <!-- ==================================================
-           TOPBAR
+           TOP NAVIGATION BAR
       ================================================== -->
-
       <header class="topbar">
 
         <div class="topbar-right">
 
-          <button
-            class="icon-button mobile-menu"
-            id="openSidebar"
-            type="button"
-            aria-label="فتح القائمة"
-          >
-            ☰
+          <button class="icon-button mobile-menu-btn" id="openSidebar" type="button" aria-label="فتح القائمة">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
 
-
-          <div class="model-selector">
-
-            <span class="model-dot" aria-hidden="true"></span>
-
-            <select
-              id="modelSelect"
-              aria-label="اختيار نموذج Groq"
-            >
-
-              <option
-                value="openai/gpt-oss-20b"
-              >
-                T.M.D_AI_Pro Fast — GPT OSS 20B
-              </option>
-
-              <option
-                value="openai/gpt-oss-120b"
-              >
-                T.M.D_AI_Pro — GPT OSS 120B
-              </option>
-
-              <option
-                value="qwen/qwen3.8-27b"
-              >
-                T.M.D_AI_Pro Vision — Qwen 3.8 27B
-              </option>
-
+          <!-- اختيار النموذج الذكي -->
+          <div class="model-selector-wrapper">
+            <span class="model-pulse-dot" aria-hidden="true"></span>
+            <select id="modelSelect" class="model-select" aria-label="اختيار نموذج الذكاء الاصطناعي">
+              <option value="openai/gpt-oss-120b">T.M.D Pro — GPT OSS 120B (الذكي)</option>
+              <option value="openai/gpt-oss-20b">T.M.D Fast — GPT OSS 20B (السريع)</option>
+              <option value="qwen/qwen3.8-27b">T.M.D Vision — Qwen 3.8 27B (الصور)</option>
             </select>
-
           </div>
 
-
-          <span
-            class="model-badge"
-            id="modelName"
-          >
-            T.M.D_AI_Pro
-          </span>
+          <!-- شارة النموذج / الحالة -->
+          <div class="status-pill" id="statusPill">
+            <span class="status-light"></span>
+            <span class="status-name" id="modelName">T.M.D_AI_Pro</span>
+          </div>
 
         </div>
 
 
-        <div class="top-actions">
+        <div class="topbar-left">
 
-          <button
-            class="icon-button"
-            id="themeTopDesktop"
-            type="button"
-            aria-label="تغيير المظهر"
-          >
-            ◐
+          <!-- زر تخصيص الخلفية والمظهر المباشر -->
+          <button class="topbar-action-btn bg-customizer-trigger" id="openBgCustomizerBtn" type="button" title="تخصيص الخلفية لصورتك الخاصة">
+            <span class="topbar-btn-icon">🎨</span>
+            <span class="topbar-btn-text">تخصيص الخلفية</span>
+          </button>
+
+          <!-- زر تصدير المحادثة -->
+          <button class="icon-button" id="exportChatBtn" type="button" title="تصدير المحادثة">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          </button>
+
+          <!-- زر مسح المحادثة الحالية -->
+          <button class="icon-button" id="clearChatBtn" type="button" title="مسح المحادثة">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+
+          <!-- زر تبديل الوضع الليلي/النهاري -->
+          <button class="icon-button" id="themeTopDesktop" type="button" aria-label="تغيير المظهر" title="المظهر">
+            <span class="theme-icon">◐</span>
           </button>
 
         </div>
@@ -262,115 +234,109 @@
 
 
       <!-- ==================================================
-           CHAT
+           CHAT STREAM AREA
       ================================================== -->
-
-      <section
-        class="chat"
-        id="chat"
-      >
+      <section class="chat" id="chat">
 
         <!-- ==================================================
-             WELCOME
+             HERO WELCOME SCREEN
         ================================================== -->
+        <div class="welcome" id="welcome">
 
-        <div
-          class="welcome"
-          id="welcome"
-        >
+          <!-- الشعار الكوني الاحترافي الكبير -->
+          <div class="cosmic-logo cosmic-logo--hero">
+            <div class="cosmic-halo"></div>
+            <div class="cosmic-ring ring-1"></div>
+            <div class="cosmic-ring ring-2"></div>
+            <div class="cosmic-ring ring-3"></div>
 
-          <!-- شعار الترحيب مع انيميشن الطوافان -->
-          <div class="orbit-logo orbit-logo--hero">
-
-            <span class="orbit-ring orbit-ring--a" aria-hidden="true">
-              <i class="orbit-sat"></i>
-            </span>
-
-            <span class="orbit-ring orbit-ring--b" aria-hidden="true">
-              <i class="orbit-sat orbit-sat--b"></i>
-            </span>
-
-            <div class="orbit-halo" aria-hidden="true"></div>
-
-            <div class="orbit-logo-tile">
-              T.M.D
+            <div class="cosmic-core">
+              <svg class="logo-svg-hero" viewBox="0 0 120 120" fill="none">
+                <defs>
+                  <linearGradient id="hero-grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0a1026"/>
+                    <stop offset="50%" stop-color="#160c2b"/>
+                    <stop offset="100%" stop-color="#060914"/>
+                  </linearGradient>
+                  <linearGradient id="hero-grad-poly" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f2fe"/>
+                    <stop offset="35%" stop-color="#9d4edd"/>
+                    <stop offset="70%" stop-color="#ff007f"/>
+                    <stop offset="100%" stop-color="#ffd166"/>
+                  </linearGradient>
+                  <filter id="hero-glow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feMerge>
+                      <feMergeNode in="blur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+                <polygon points="60,16 98,38 98,82 60,104 22,82 22,38" fill="url(#hero-grad-bg)" stroke="url(#hero-grad-poly)" stroke-width="2.8" filter="url(#hero-glow)"/>
+                <circle cx="60" cy="60" r="28" fill="none" stroke="url(#hero-grad-poly)" stroke-width="1.2" stroke-dasharray="6 3"/>
+                <text x="60" y="66" font-family="'Cairo', sans-serif" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">TMD</text>
+                <text x="60" y="80" font-family="'Space Grotesk', sans-serif" font-size="8" font-weight="700" fill="#00f2fe" text-anchor="middle" letter-spacing="3">AI PRO</text>
+                <!-- النجم اللامع فوق الشعار -->
+                <path d="M 60 12 Q 60 17 65 17 Q 60 17 60 22 Q 60 17 55 17 Q 60 17 60 12 Z" fill="#ffffff"/>
+              </svg>
             </div>
 
+            <span class="sparkle-dot dot-1"></span>
+            <span class="sparkle-dot dot-2"></span>
+            <span class="sparkle-dot dot-3"></span>
+          </div>
+
+          <div class="welcome-heading-wrap">
+            <h1 class="welcome-title">
+              مرحباً بك في <span class="brand-highlight">T.M.D_AI_Pro</span>
+            </h1>
+            <p class="welcome-sub">
+              منصة الذكاء الاصطناعي الفائقة للمحادثة الذكية، تحليل المستندات المعقدة، ورؤية الصور، بسرعة فائقة وتصميم متجاوب.
+            </p>
+            <div class="creator-badge" id="welcomeCreatorBadge">
+              <span class="creator-sparkle">✨</span>
+              <span>تصميم وهندسة وتطوير المطور: <strong>ياسين عمرو عبد الرحيم</strong></span>
+            </div>
           </div>
 
 
-          <h1 class="welcome-title">
-            كيف يمكنني مساعدتك اليوم؟
-          </h1>
+          <!-- بطاقات الاقتراحات السريعة -->
+          <div class="welcome-cards-grid">
 
-          <p class="welcome-sub">
-            مساعدك الذكي الاحترافي للمحادثة، تحليل الملفات،
-            وفهم الصور — بسرعة Groq ودقة عالية.
-          </p>
-
-
-          <div class="welcome-cards">
-
-            <button
-              class="welcome-card"
-              type="button"
-              data-prompt="اشرح لي هذا الموضوع بالتفصيل وبطريقة بسيطة."
-            >
-
-              <div class="welcome-card-icon">
-                💬
+            <button class="welcome-card card--chat" type="button" data-prompt="اشرح لي الذكاء الاصطناعي وتطبيقاته المستقبلية بطريقة مبسطة واحترافية.">
+              <div class="card-icon-wrap">💬</div>
+              <div class="card-text">
+                <strong>محادثة ذكية وتوليد أفكار</strong>
+                <span>اسأل في البرمجة، العلوم، أو أي استفسار تريده.</span>
               </div>
-
-              <strong>
-                محادثة ذكية
-              </strong>
-
-              <span>
-                اسأل أي سؤال واحصل على إجابة واضحة ومنظمة.
-              </span>
-
+              <span class="card-arrow">←</span>
             </button>
 
-
-            <button
-              class="welcome-card"
-              type="button"
-              data-prompt="حلل الملف المرفق واشرح أهم المعلومات الموجودة بداخله."
-            >
-
-              <div class="welcome-card-icon">
-                📄
+            <button class="welcome-card card--doc" type="button" data-prompt="حلل الملف المرفق واشرح أهم النقاط الرئيسية والاستنتاجات المستخرجة منه.">
+              <div class="card-icon-wrap">📄</div>
+              <div class="card-text">
+                <strong>تحليل الملفات والمستندات</strong>
+                <span>دعم كامل لملفات PDF و Word و TXT والأكواد.</span>
               </div>
-
-              <strong>
-                تحليل الملفات
-              </strong>
-
-              <span>
-                PDF و DOCX و TXT والملفات النصية.
-              </span>
-
+              <span class="card-arrow">←</span>
             </button>
 
-
-            <button
-              class="welcome-card"
-              type="button"
-              data-prompt="حلل الصورة المرفقة واشرح لي كل ما يظهر فيها."
-            >
-
-              <div class="welcome-card-icon">
-                🖼️
+            <button class="welcome-card card--vision" type="button" data-prompt="حلل هذه الصورة المرفقة واشرح كل ما تراه فيها بالتفصيل واستخرج النصوص.">
+              <div class="card-icon-wrap">🖼️</div>
+              <div class="card-text">
+                <strong>رؤية وتحليل الصور</strong>
+                <span>فهم الصور، قراءة المستندات المصورة واستخراج البيانات.</span>
               </div>
+              <span class="card-arrow">←</span>
+            </button>
 
-              <strong>
-                تحليل الصور
-              </strong>
-
-              <span>
-                ارفع صورة واطلب من T.M.D_AI_Pro تحليل محتواها.
-              </span>
-
+            <button class="welcome-card card--creator" type="button" data-prompt="من صممك وبرمجك ومن هو المطور الذي قام بابتكار وتطوير هذه الأداة؟">
+              <div class="card-icon-wrap">👨‍💻</div>
+              <div class="card-text">
+                <strong>من صمم وبرمج هذه الأداة؟</strong>
+                <span>تعرف على المطور والمصمم المبدع ياسين عمرو عبد الرحيم.</span>
+              </div>
+              <span class="card-arrow">←</span>
             </button>
 
           </div>
@@ -380,179 +346,77 @@
       </section>
 
 
-      <!-- ==================================================
-           COMPOSER
-      ================================================== -->
+      <!-- زر النزول لأسفل المحادثة -->
+      <button class="scroll-bottom-btn hidden" id="scrollBottomBtn" type="button" aria-label="النزول للأسفل">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
 
+
+      <!-- ==================================================
+           COMPOSER (صندوق كتابة الرسالة)
+      ================================================== -->
       <div class="composer-wrap">
 
         <div class="composer-inner">
 
-
-          <!-- ==================================================
-               ATTACHMENT PREVIEW
-          ================================================== -->
-
-          <div
-            class="attachment hidden"
-            id="imagePreviewContainer"
-          >
-
+          <!-- معاينة المرفق (صورة أو مستند) -->
+          <div class="attachment hidden" id="imagePreviewContainer">
             <div class="attachment-thumb">
-
-              <img
-                id="imagePreview"
-                alt="معاينة المرفق"
-              >
-
-              <span class="attachment-doc" aria-hidden="true">
-                📄
-              </span>
-
+              <img id="imagePreview" alt="معاينة المرفق">
+              <span class="attachment-doc" aria-hidden="true">📄</span>
             </div>
 
             <div class="attachment-info">
-
-              <span
-                class="attachment-name"
-                id="imageFileName"
-              >
-                الملف
-              </span>
-
-              <span
-                class="attachment-mode"
-                id="imageModeLabel"
-              >
-                تحليل الصورة
-              </span>
-
+              <span class="attachment-name" id="imageFileName">الملف</span>
+              <span class="attachment-mode" id="imageModeLabel">تحليل الصورة</span>
             </div>
 
-            <button
-              class="attachment-remove"
-              id="removeImage"
-              type="button"
-              aria-label="إزالة المرفق"
-            >
-              ×
+            <button class="attachment-remove" id="removeImage" type="button" aria-label="إزالة المرفق">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-
           </div>
 
 
-          <!-- ==================================================
-               INPUT SHELL
-          ================================================== -->
-
+          <!-- غلاف الإدخال -->
           <div class="input-shell">
 
+            <!-- قائمة زر الإضافة ＋ -->
             <div class="plus-menu-wrapper">
-
-              <button
-                class="circle-button"
-                id="plusButton"
-                type="button"
-                aria-label="إضافة ملف أو صورة"
-                aria-expanded="false"
-              >
-                ＋
+              <button class="circle-button plus-toggle-btn" id="plusButton" type="button" aria-label="إضافة مرفق" aria-expanded="false" title="إرفاق ملف أو صورة">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </button>
 
+              <div class="plus-menu hidden" id="plusMenu">
+                <div class="plus-menu-title">إضافة إلى المحادثة</div>
 
-              <!-- ==================================================
-                   PLUS MENU
-              ================================================== -->
-
-              <div
-                class="plus-menu hidden"
-                id="plusMenu"
-              >
-
-                <div class="plus-menu-title">
-                  إضافة إلى المحادثة
-                </div>
-
-
-                <button
-                  class="plus-option"
-                  id="analyzeDocumentButton"
-                  type="button"
-                >
-
-                  <span class="plus-option-icon">
-                    📄
-                  </span>
-
+                <button class="plus-option" id="analyzeDocumentButton" type="button">
+                  <span class="plus-option-icon">📄</span>
                   <span class="plus-option-content">
-
-                    <span class="plus-option-title">
-                      تحليل ملف
-                    </span>
-
-                    <span class="plus-option-desc">
-                      PDF و DOCX و TXT و JSON وغيرها
-                    </span>
-
+                    <span class="plus-option-title">تحليل مستند / ملف</span>
+                    <span class="plus-option-desc">PDF و Word و TXT و JSON والأكواد</span>
                   </span>
-
                 </button>
 
-
-                <button
-                  class="plus-option"
-                  id="addImageButton"
-                  type="button"
-                >
-
-                  <span class="plus-option-icon">
-                    🖼️
-                  </span>
-
+                <button class="plus-option" id="addImageButton" type="button">
+                  <span class="plus-option-icon">🖼️</span>
                   <span class="plus-option-content">
-
-                    <span class="plus-option-title">
-                      تحليل صورة
-                    </span>
-
-                    <span class="plus-option-desc">
-                      تحليل الصورة وقراءة النصوص الظاهرة
-                    </span>
-
+                    <span class="plus-option-title">تحليل صورة</span>
+                    <span class="plus-option-desc">قراءة الصور واستخراج النصوص</span>
                   </span>
-
                 </button>
 
-
-                <button
-                  class="plus-option"
-                  id="imageEditButton"
-                  type="button"
-                >
-
-                  <span class="plus-option-icon">
-                    ✨
-                  </span>
-
+                <button class="plus-option" id="imageEditButton" type="button">
+                  <span class="plus-option-icon">✨</span>
                   <span class="plus-option-content">
-
-                    <span class="plus-option-title">
-                      وصف / تجهيز صورة
-                    </span>
-
-                    <span class="plus-option-desc">
-                      إرسال الصورة مع تعليماتك
-                    </span>
-
+                    <span class="plus-option-title">تجهيز / تعديل صورة</span>
+                    <span class="plus-option-desc">إرسال صورة مع تعليمات مخصصة</span>
                   </span>
-
                 </button>
-
               </div>
-
             </div>
 
 
+            <!-- حقل النص -->
             <textarea
               class="input-area"
               id="input"
@@ -563,20 +427,18 @@
             ></textarea>
 
 
-            <button
-              class="circle-button send-button"
-              id="send"
-              type="button"
-              aria-label="إرسال"
-            >
-              ↑
+            <!-- زر الإرسال / الإيقاف -->
+            <button class="circle-button send-button" id="send" type="button" aria-label="إرسال" title="إرسال (Enter)">
+              <svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
             </button>
 
           </div>
 
 
           <div class="composer-note">
-            T.M.D_AI_Pro يعمل بواسطة Groq · لا تشارك معلومات حساسة
+            <span>T.M.D_AI_Pro · تصميم وتطوير <strong>ياسين عمرو عبد الرحيم</strong></span>
+            <span class="note-sep">•</span>
+            <span class="bg-quick-hint" id="bgQuickHint" role="button">🎨 تخصيص مظهرك الخاص</span>
           </div>
 
         </div>
@@ -589,362 +451,320 @@
 
 
   <!-- ==================================================
-       SETTINGS MODAL
+       BACKGROUND CUSTOMIZATION MODAL (واجهة تخصيص الخلفية)
+       خاصة بكل مستخدم وتُحفظ في متصفحه فقط
   ================================================== -->
-
-  <div
-    class="modal-backdrop hidden"
-    id="modalBackdrop"
-  >
-
-    <div
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="settingsTitle"
-    >
+  <div class="modal-backdrop hidden" id="bgCustomizerModalBackdrop">
+    <div class="modal modal--customizer" role="dialog" aria-modal="true" aria-labelledby="bgCustomizerTitle">
 
       <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title-icon">🎨</span>
+          <div>
+            <h2 class="modal-title" id="bgCustomizerTitle">تخصيص الخلفية والمظهر</h2>
+            <p class="modal-subtitle">خصص خلفية الأداة بصورتك المفضلة أو اختر خلفيات الفضاء البراقة (تُحفظ في جهازك فقط)</p>
+          </div>
+        </div>
+        <button class="icon-button modal-close-btn" id="bgCustomizerClose" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
 
-        <div
-          class="modal-title"
-          id="settingsTitle"
-        >
-          إعدادات T.M.D_AI_Pro
+      <div class="modal-body customizer-body">
+
+        <!-- تنبيه الخصوصية المحلية -->
+        <div class="customizer-notice">
+          <span class="notice-icon">🔒</span>
+          <span><strong>تخصيص شخصي مستقل:</strong> أي خلفية تختارها أو ترفعها تظهر في متصفحك وجهازك أنت فقط دون أن تتغير عند أي مستخدم آخر.</span>
         </div>
 
-        <button
-          class="icon-button"
-          id="modalClose"
-          type="button"
-          aria-label="إغلاق"
-        >
-          ×
-        </button>
+        <!-- تبويبات اختيار نوع الخلفية -->
+        <div class="customizer-tabs">
+          <button class="customizer-tab active" data-tab="presets" type="button">
+            ✨ خلفيات النجوم والكون
+          </button>
+          <button class="customizer-tab" data-tab="upload" type="button">
+            📁 صورة من جهازك
+          </button>
+          <button class="customizer-tab" data-tab="url" type="button">
+            🔗 رابط صورة خارجي
+          </button>
+        </div>
+
+
+        <!-- محتوى التبويب 1: الخلفيات الجاهزة والنجوم -->
+        <div class="tab-pane active" id="panePresets">
+          <div class="presets-grid">
+
+            <div class="preset-card active" data-preset="animated-stars">
+              <div class="preset-preview preview--stars">
+                <div class="mini-sparkles"></div>
+                <span class="preset-tag">متحركة تفاعلية</span>
+              </div>
+              <div class="preset-info">
+                <strong>✨ فضاء النجوم البراقة (الافتراضية)</strong>
+                <span>نجوم متلألئة، شهب متحركة، ولمعان براق فائق النقاء</span>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="nebula">
+              <div class="preset-preview preview--nebula"></div>
+              <div class="preset-info">
+                <strong>🪐 سديم فضائي فائق</strong>
+                <span>ألوان سديمية بنفسجية وزرقاء عميقة مع غبار كوني</span>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="cyberpunk">
+              <div class="preset-preview preview--cyberpunk"></div>
+              <div class="preset-info">
+                <strong>🔮 سايبر بانك نيون</strong>
+                <span>أضواء نيون سايبرية وتوهجات فوسفورية عصرية</span>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="aurora">
+              <div class="preset-preview preview--aurora"></div>
+              <div class="preset-info">
+                <strong>❄️ الشفق القطبي الشمالي</strong>
+                <span>تموجات الشفق الزمردي الساحر في سماء الليل</span>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="obsidian">
+              <div class="preset-preview preview--obsidian"></div>
+              <div class="preset-info">
+                <strong>🖤 فحم أوبسيديان فاخر</strong>
+                <span>سواد مخملي نقي مريح جداً للعين وموفر للطاقة</span>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="galaxy-gold">
+              <div class="preset-preview preview--galaxy-gold"></div>
+              <div class="preset-info">
+                <strong>🌅 أفق المجرة الذهبي</strong>
+                <span>تدرجات ذهبية كونية براقة مع هالات شمسية</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- محتوى التبويب 2: رفع صورة خاصة من الجهاز -->
+        <div class="tab-pane hidden" id="paneUpload">
+          <div class="upload-dropzone" id="bgUploadDropzone">
+            <input type="file" id="userCustomBgInput" accept="image/*" hidden>
+            <div class="dropzone-icon">🖼️</div>
+            <h3>اختر صورة من هاتفك أو كمبيوترك</h3>
+            <p>يدعم JPG و PNG و WEBP و GIF (يتم حفظها في جهازك فقط)</p>
+            <button class="upload-select-btn" id="triggerBgUploadBtn" type="button">
+              📂 تصفح الصور من الجهاز
+            </button>
+          </div>
+
+          <div class="custom-bg-preview-wrap hidden" id="uploadedPreviewWrap">
+            <div class="custom-bg-preview-title">معاينة الصورة المرفوعة:</div>
+            <div class="custom-bg-preview-box">
+              <img id="uploadedPreviewImg" alt="معاينة الخلفية المرفوعة">
+              <button class="remove-custom-bg-btn" id="removeUploadedBgBtn" type="button" title="حذف هذه الصورة">
+                × إزالة الصورة
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- محتوى التبويب 3: رابط صورة مباشر -->
+        <div class="tab-pane hidden" id="paneUrl">
+          <div class="url-input-group">
+            <label for="bgUrlInput">أدخل رابط صورة الخلفية (Direct Image URL):</label>
+            <div class="url-input-row">
+              <input type="url" id="bgUrlInput" placeholder="https://images.unsplash.com/photo-..." dir="ltr">
+              <button class="apply-url-btn" id="applyBgUrlBtn" type="button">تطبيق الرابط</button>
+            </div>
+            <span class="input-hint">يمكنك استخدام أي رابط صورة من Unsplash أو الإنترنت.</span>
+          </div>
+        </div>
+
+
+        <!-- أدوات التحكم والضبط المتقدمة (الضبابية والتعتيم واللمعان) -->
+        <div class="customizer-controls">
+          <div class="controls-title">⚙️ أدوات ضبط الرؤية والمظهر</div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>تعتيم الخلفية (لزيادة وضوح النصوص)</span>
+              <strong id="dimValueLabel">40%</strong>
+            </div>
+            <input type="range" id="bgDimRange" min="0" max="90" value="40" class="custom-slider">
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>درجة الضبابية (Blur Effect)</span>
+              <strong id="blurValueLabel">0px</strong>
+            </div>
+            <input type="range" id="bgBlurRange" min="0" max="25" value="0" class="custom-slider">
+          </div>
+
+          <div class="control-row switch-row">
+            <div class="control-label">
+              <span>إبقاء لمعان النجوم المتحركة فوق صورتك الخاصة</span>
+              <span class="control-sub">يجعل النجوم والشهب تتلألأ فوق أي صورة تضعها</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="starsOverlayToggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>كثافة وبريق النجوم المتحركة</span>
+              <strong id="starsDensityLabel">عالية</strong>
+            </div>
+            <input type="range" id="starsDensityRange" min="1" max="3" value="2" class="custom-slider">
+          </div>
+        </div>
 
       </div>
 
 
-      <div class="modal-body">
-
-
-        <div class="setting">
-
-          <label
-            class="setting-label"
-            for="modelSelectSettings"
-          >
-            نموذج الذكاء الاصطناعي
-          </label>
-
-          <select
-            id="modelSelectSettings"
-          >
-
-            <option
-              value="openai/gpt-oss-20b"
-            >
-              T.M.D_AI_Pro Fast — GPT OSS 20B
-            </option>
-
-            <option
-              value="openai/gpt-oss-120b"
-            >
-              T.M.D_AI_Pro — GPT OSS 120B
-            </option>
-
-            <option
-              value="qwen/qwen3.8-27b"
-            >
-              T.M.D_AI_Pro Vision — Qwen 3.8 27B
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="setting">
-
-          <label
-            class="setting-label"
-            for="themeSelect"
-          >
-            المظهر
-          </label>
-
-          <select
-            id="themeSelect"
-          >
-
-            <option value="dark">
-              داكن
-            </option>
-
-            <option value="light">
-              فاتح
-            </option>
-
-          </select>
-
-        </div>
-
-
+      <div class="modal-footer">
+        <button class="btn btn-secondary reset-bg-btn" id="resetBgBtn" type="button">
+          🔄 استعادة الخلفية الافتراضية
+        </button>
+        <button class="btn btn-primary" id="saveBgSettingsBtn" type="button">
+          ✓ حفظ وتطبيق التغييرات
+        </button>
       </div>
 
     </div>
-
   </div>
 
 
   <!-- ==================================================
-       TOAST
+       SETTINGS MODAL (إعدادات عامة)
   ================================================== -->
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
 
-  <div
-    class="toast"
-    id="toast"
-    role="status"
-  ></div>
+      <div class="modal-header">
+        <div class="modal-title" id="settingsTitle">إعدادات T.M.D_AI_Pro</div>
+        <button class="icon-button" id="modalClose" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="setting">
+          <label class="setting-label" for="modelSelectSettings">نموذج الذكاء الاصطناعي</label>
+          <select id="modelSelectSettings" class="setting-select">
+            <option value="openai/gpt-oss-120b">T.M.D_AI_Pro — GPT OSS 120B (الذكي)</option>
+            <option value="openai/gpt-oss-20b">T.M.D_AI_Pro Fast — GPT OSS 20B (السريع)</option>
+            <option value="qwen/qwen3.8-27b">T.M.D_AI_Pro Vision — Qwen 3.8 27B (تحليل الصور)</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <label class="setting-label" for="themeSelect">المظهر اللوني</label>
+          <select id="themeSelect" class="setting-select">
+            <option value="dark">🌙 المظهر الداكن (الفاخر)</option>
+            <option value="light">☀️ المظهر الفاتح (النهاري)</option>
+          </select>
+        </div>
+
+        <div class="setting setting--action">
+          <div class="setting-info">
+            <label class="setting-label">تخصيص الخلفية الشخصية</label>
+            <span class="setting-desc">تغيير الخلفية لصورتك أو تفعيل فضاء النجوم</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="openBgFromSettingsBtn" type="button">
+            🎨 فتح مخصص الخلفية
+          </button>
+        </div>
+
+        <div class="setting developer-info-box">
+          <div class="dev-box-header">
+            <span class="dev-box-icon">👑</span>
+            <strong>المطور والمصمم</strong>
+          </div>
+          <p class="dev-box-name">ياسين عمرو عبد الرحيم</p>
+          <p class="dev-box-desc">تم بناء وتطوير منصة T.M.D_AI_Pro باحترافية كاملة وتصميم عصري فائق الأداء.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 
 
   <!-- ==================================================
-       HIDDEN IMAGE INPUT
+       DEVELOPER INFO MODAL (معلومات المطور)
   ================================================== -->
-
-  <input
-    type="file"
-    id="imageInput"
-    accept="image/*"
-    hidden
-  >
+  <div class="modal-backdrop hidden" id="developerModalBackdrop">
+    <div class="modal modal--dev" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div class="modal-title">عن المطور والمصمم</div>
+        <button class="icon-button" id="devModalClose" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body dev-profile-body">
+        <div class="dev-profile-avatar">
+          <div class="dev-avatar-glow"></div>
+          <span class="dev-symbol">✦ TMD ✦</span>
+        </div>
+        <h3 class="dev-full-name">ياسين عمرو عبد الرحيم</h3>
+        <p class="dev-role-badge">المطور والمهندس والمصمم الحصري لـ T.M.D_AI_Pro</p>
+        <p class="dev-bio">
+          قام المهندس والمطور <strong>ياسين عمرو عبد الرحيم</strong> بتصميم وهندسة هذه الأداة المتطورة لتقديم تجربة ذكاء اصطناعي رائدة تجمع بين السرعة الفائقة والواجهة النجمية التفاعلية وقابلية التخصيص الكاملة لكل مستخدم.
+        </p>
+        <div class="dev-badges-list">
+          <span class="badge-item">🚀 Groq Ultra Fast Engine</span>
+          <span class="badge-item">✨ Sparkling Starry Canvas</span>
+          <span class="badge-item">🎨 Personal User Customization</span>
+          <span class="badge-item">📱 100% Adaptive & Responsive</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ==================================================
-       HIDDEN DOCUMENT INPUT
+       TOAST NOTIFICATIONS
   ================================================== -->
-
-  <input
-    type="file"
-    id="documentInput"
-    accept=".pdf,.docx,.txt,.md,.js,.json,.html,.htm,.css,.py,.csv,.xml,.yaml,.yml,.log"
-    hidden
-  >
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 
   <!-- ==================================================
-       PDF.JS
+       HIDDEN FILE INPUTS
   ================================================== -->
+  <input type="file" id="imageInput" accept="image/*" hidden>
+  <input type="file" id="documentInput" accept=".pdf,.docx,.txt,.md,.js,.json,.html,.htm,.css,.py,.csv,.xml,.yaml,.yml,.log" hidden>
 
+
+  <!-- ==================================================
+       PDF.JS WORKER SCRIPT
+  ================================================== -->
   <script type="module">
-
     try {
-
-      const pdfjs =
-        await import(
-          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs"
-        );
-
-      pdfjs.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs";
-
-      window.pdfjsLib =
-        pdfjs;
-
-      window.pdfjsReady =
-        Promise.resolve(pdfjs);
-
+      const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs");
+      pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs";
+      window.pdfjsLib = pdfjs;
+      window.pdfjsReady = Promise.resolve(pdfjs);
     } catch (error) {
-
-      console.error(
-        "PDF.js initialization failed:",
-        error
-      );
-
-      window.pdfjsReady =
-        Promise.reject(error);
-
+      console.error("PDF.js initialization failed:", error);
+      window.pdfjsReady = Promise.reject(error);
     }
-
   </script>
-
 
   <!-- ==================================================
        APPLICATION JAVASCRIPT
   ================================================== -->
-
   <script src="/app.js"></script>
-
-
-  <!-- ==================================================
-       UI SYNC
-       مزامنة النموذج والمظهر + ربط أزرار المظهر
-       وبطاقات الترحيب. لا يغير منطق Groq.
-  ================================================== -->
-
-  <script>
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
-
-        const mainModel =
-          document.getElementById(
-            "modelSelect"
-          );
-
-        const settingsModel =
-          document.getElementById(
-            "modelSelectSettings"
-          );
-
-        const themeSelect =
-          document.getElementById(
-            "themeSelect"
-          );
-
-        const desktopTheme =
-          document.getElementById(
-            "themeTopDesktop"
-          );
-
-        const sidebarTheme =
-          document.getElementById(
-            "themeTop"
-          );
-
-
-        /*
-         * MOUNT MODEL SELECTS
-         */
-
-        if (
-          mainModel &&
-          settingsModel
-        ) {
-
-          settingsModel.value =
-            mainModel.value;
-
-          mainModel.addEventListener(
-            "change",
-            () => {
-
-              settingsModel.value =
-                mainModel.value;
-
-            }
-          );
-
-          settingsModel.addEventListener(
-            "change",
-            () => {
-
-              mainModel.value =
-                settingsModel.value;
-
-              mainModel.dispatchEvent(
-                new Event("change")
-              );
-
-            }
-          );
-
-        }
-
-
-        /*
-         * THEME TOGGLE BUTTONS
-         */
-
-        const toggleTheme =
-          () => {
-
-            if (!themeSelect) {
-              return;
-            }
-
-            const current =
-              document.body.dataset.theme ===
-              "light"
-                ? "light"
-                : "dark";
-
-            themeSelect.value =
-              current === "light"
-                ? "dark"
-                : "light";
-
-            themeSelect.dispatchEvent(
-              new Event("change")
-            );
-
-          };
-
-        if (desktopTheme) {
-
-          desktopTheme.addEventListener(
-            "click",
-            toggleTheme
-          );
-
-        }
-
-        if (sidebarTheme) {
-
-          sidebarTheme.addEventListener(
-            "click",
-            toggleTheme
-          );
-
-        }
-
-
-        /*
-         * WELCOME CARDS
-         */
-
-        const input =
-          document.getElementById(
-            "input"
-          );
-
-        document.querySelectorAll(
-          ".welcome-card[data-prompt]"
-        ).forEach(
-          (card) => {
-
-            card.addEventListener(
-              "click",
-              () => {
-
-                if (!input) {
-                  return;
-                }
-
-                input.value =
-                  card.dataset.prompt;
-
-                input.style.height = "auto";
-
-                input.style.height =
-                  Math.min(
-                    input.scrollHeight,
-                    180
-                  ) + "px";
-
-                input.focus();
-
-              }
-            );
-
-          }
-        );
-
-      }
-    );
-
-  </script>
 
 </body>
 </html>
