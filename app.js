@@ -33,7 +33,6 @@ const VALID_MODELS = new Set([
   MODELS.vision,
   "openai/gpt-oss-120b",
   "openai/gpt-oss-20b",
-  "qwen/qwen3.6-27b",
   "qwen/qwen3.8-27b"
 ]);
 
@@ -1249,6 +1248,32 @@ function fileToDataURL(file) {
 /* =========================================================
    13. MESSAGE SENDING & SMART ROUTING
    ========================================================= */
+/*
+ * Translate HTTP errors into clear Arabic guidance
+ * instead of showing a bare status code like "403".
+ */
+function describeHttpError(status) {
+  switch (status) {
+    case 401:
+      return "خدمة الذكاء الاصطناعي ترفض المفتاح (401). حدّث GROQ_API_KEY في إعدادات Vercel ثم أعد النشر.";
+    case 403:
+      return "تم رفض الوصول (403). مفتاح Groq لا يملك صلاحية النموذج المطلوب — فعّل النموذج في console.groq.com أو حدّث المفتاح في Vercel ثم أعد النشر.";
+    case 404:
+      return "النموذج المطلوب غير موجود في خدمة Groq (404). اختر نموذجًا آخر من الإعدادات أو حدّث قائمة النماذج.";
+    case 413:
+      return "حجم الرسالة أو المرفق كبير جدًا (413). جرّب مرفقًا أصغر.";
+    case 429:
+      return "تم تجاوز حدود الاستخدام مؤقتًا (429). انتظر دقيقة ثم أعد المحاولة.";
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return `الخادم واجه مشكلة مؤقتة (${status}). أعد المحاولة بعد لحظات.`;
+    default:
+      return `خطأ من الخادم: ${status}`;
+  }
+}
+
 async function sendMessage() {
   if (state.busy) {
     stopRequest();
@@ -1336,7 +1361,10 @@ async function sendMessage() {
     removeLoadingMessage(loadingId);
 
     if (!response.ok) {
-      throw new Error(data?.error || `خطأ من الخادم: ${response.status}`);
+      throw new Error(
+        data?.error ||
+        describeHttpError(response.status)
+      );
     }
 
     if (!data?.ok) {
