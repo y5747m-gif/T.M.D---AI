@@ -1,8 +1,8 @@
 {
-  "name": "tmd-ai-professional",
-  "version": "2.0.0",
+  "name": "tmd-ai-pro",
+  "version": "3.0.0",
   "private": true,
-  "description": "T.M.D AI - Professional ChatGPT Style Interface on Groq & Vercel",
+  "description": "T.M.D_AI_Pro — Professional AI Chat Interface on Groq & Vercel",
   "engines": {
     "node": ">=20"
   },
