@@ -1,5 +1,5 @@
 const DEFAULT_SETTINGS = {
-  siteName: "T.M.D AI",
+  siteName: "T.M.D_AI_Pro",
   siteDescription: "المساعد الذكي",
   developerName: "ياسين عمرو عبد الرحيم",
 

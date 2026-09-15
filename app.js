@@ -1,7 +1,7 @@
 "use strict";
 
 /* =========================================================
-   T.M.D AI
+   T.M.D_AI_Pro
    FINAL FRONTEND
    Groq + Chat + Images + Files + Plus Button
    ========================================================= */
@@ -65,7 +65,7 @@ if (!VALID_MODELS.has(state.model)) {
    ========================================================= */
 
 const SYSTEM_RULES = `
-أنت T.M.D AI، مساعد ذكاء اصطناعي محترف.
+أنت T.M.D_AI_Pro، مساعد ذكاء اصطناعي محترف.
 
 قواعد مهمة جدًا:
 
@@ -784,7 +784,7 @@ function updateModelUI() {
   ) {
 
     modelName.textContent =
-      "T.M.D Vision";
+      "T.M.D_AI_Pro Vision";
 
   } else if (
     state.model ===
@@ -792,12 +792,12 @@ function updateModelUI() {
   ) {
 
     modelName.textContent =
-      "T.M.D Pro";
+      "T.M.D_AI_Pro";
 
   } else {
 
     modelName.textContent =
-      "T.M.D Fast";
+      "T.M.D_AI_Pro Fast";
 
   }
 
@@ -2053,7 +2053,7 @@ async function sendMessage() {
   } catch (error) {
 
     console.error(
-      "T.M.D AI Error:",
+      "T.M.D_AI_Pro Error:",
       error
     );
 
@@ -3511,5 +3511,5 @@ window.TMDAI = {
    ========================================================= */
 
 console.log(
-  "T.M.D AI — FINAL Groq Frontend Loaded"
+  "T.M.D_AI_Pro — Professional Groq Frontend Loaded"
 );

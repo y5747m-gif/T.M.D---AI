@@ -1,7 +1,7 @@
 "use strict";
 
 /* =========================================================
-   T.M.D AI
+   T.M.D_AI_Pro
    FINAL GROQ API
    Vercel Serverless Function
    /api/chat.js
@@ -62,7 +62,7 @@ const VISION_MODEL =
    ========================================================= */
 
 const SYSTEM_PROMPT = `
-أنت T.M.D AI، مساعد ذكاء اصطناعي محترف.
+أنت T.M.D_AI_Pro، مساعد ذكاء اصطناعي محترف.
 
 قواعد مهمة جدًا:
 
@@ -1078,7 +1078,7 @@ module.exports =
     ) {
 
       console.error(
-        "T.M.D AI /api/chat error",
+        "T.M.D_AI_Pro /api/chat error",
         error
       );
 

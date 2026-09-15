@@ -2,10 +2,10 @@
 
 /*
  * ============================================================
- * T.M.D AI
+ * T.M.D_AI_Pro
  * Groq Vision API
  *
- * T.M.D AI -> /api/image -> Groq Vision
+ * T.M.D_AI_Pro -> /api/image -> Groq Vision
  *
  * لا يوجد OpenAI API Key
  * ============================================================
@@ -252,7 +252,7 @@ module.exports = async function handler(req, res) {
 
         content:
           `
-أنت T.M.D AI Vision، مساعد متخصص في تحليل الصور.
+أنت T.M.D_AI_Pro Vision، مساعد متخصص في تحليل الصور.
 
 تعليماتك:
 
@@ -478,7 +478,7 @@ module.exports = async function handler(req, res) {
      */
 
     console.error(
-      "T.M.D AI Vision Error:",
+      "T.M.D_AI_Pro Vision Error:",
       error
     );
 
