@@ -18,17 +18,27 @@
 أضف في Vercel Environment Variables:
 
 1. `GROQ_API_KEY`
-2. `GROQ_MODEL`
-3. `GROQ_VISION_MODEL`
+2. `GROQ_MODEL` (اختياري)
+3. `GROQ_VISION_MODEL` (اختياري)
 4. `OWNER_SECRET`
-5. `BLOB_READ_WRITE_TOKEN`
+5. `BLOB_READ_WRITE_TOKEN` (اختياري — لوحة المالك والصور)
 
 القيم المقترحة:
 
 ```text
-GROQ_MODEL=llama-3.3-70b-versatile
-GROQ_VISION_MODEL=qwen/qwen3.6-27b
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_VISION_MODEL=qwen/qwen3.8-27b
 ```
+
+> ⚠️ **مهم:** لا تستخدم `llama-3.3-70b-versatile` — أصبح متاحًا لخطة Enterprise فقط على Groq، ولا تستخدم `qwen/qwen3.6-27b` — تم إيقافه من Groq.
+
+## حل مشكلة 403 (تم رفض الوصول)
+
+إذا ظهر لك خطأ `403` عند إرسال رسالة:
+
+1. **مفتاح Groq:** تأكد أن `GROQ_API_KEY` صالح في [console.groq.com/keys](https://console.groq.com/keys)، وحدّثه في Vercel ثم اضغط **Redeploy**.
+2. **صلاحيات النماذج:** افتح [console.groq.com](https://console.groq.com) ← Settings/Permissions وتأكد أن نماذج `openai/gpt-oss-120b` و `openai/gpt-oss-20b` و `qwen/qwen3.8-27b` مسموحة لمفتاحك.
+3. **السلسلة البديلة:** الخادم يجرّب تلقائيًا نماذج بديلة (`gpt-oss-120b` ثم `gpt-oss-20b`) إذا أعاد Groq خطأ 403/404 لنموذج ما، فيعمل الدردشة النصية حتى لو تعطل نموذج واحد.
 
 ## Vercel Blob
 

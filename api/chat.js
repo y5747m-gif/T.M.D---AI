@@ -20,7 +20,6 @@ const ALLOWED_MODELS =
     [
       "openai/gpt-oss-20b",
       "openai/gpt-oss-120b",
-      "qwen/qwen3.6-27b",
       "qwen/qwen3.8-27b"
     ]
   );
@@ -43,6 +42,32 @@ const FALLBACK_TEXT_MODEL =
   "openai/gpt-oss-20b";
 
 
+/*
+ * سلسلة النماذج البديلة للنصوص.
+ * إذا أعاد Groq خطأ 403/404 لنموذج
+ * (نموذج غير متاح أو غير مصرح لمفتاحك)
+ * نجرّب النموذج التالي تلقائيًا.
+ */
+
+const TEXT_FALLBACK_CHAIN =
+  [
+    ...new Set(
+      [
+        DEFAULT_TEXT_MODEL,
+        "openai/gpt-oss-120b",
+        FALLBACK_TEXT_MODEL
+      ]
+    )
+  ];
+
+
+/*
+ * نموذج الرؤية (الصور).
+ * نموذج qwen/qwen3.6-27b تم إيقافه من Groq،
+ * لذلك لا يُقبل إلا qwen3.8 حتى لو كان
+ * GROQ_VISION_MODEL مضبوطًا على قيمة قديمة.
+ */
+
 const CONFIGURED_VISION_MODEL =
   String(
     process.env.GROQ_VISION_MODEL ||
@@ -51,10 +76,7 @@ const CONFIGURED_VISION_MODEL =
 
 
 const VISION_MODEL =
-  CONFIGURED_VISION_MODEL === "qwen/qwen3.6-27b" ||
-  CONFIGURED_VISION_MODEL === "qwen/qwen3.8-27b"
-    ? CONFIGURED_VISION_MODEL
-    : "qwen/qwen3.8-27b";
+  "qwen/qwen3.8-27b";
 
 
 /* =========================================================
@@ -616,7 +638,6 @@ async function callGroq(
   }
 
   if (
-    model === "qwen/qwen3.6-27b" ||
     model === "qwen/qwen3.8-27b"
   ) {
     payload.reasoning_effort = "none";
@@ -633,6 +654,119 @@ async function callGroq(
       body: JSON.stringify(payload)
     }
   );
+
+}
+
+
+/* =========================================================
+   ERROR EXPLANATION
+   ترجمة أخطاء Groq إلى رسائل عربية واضحة
+   تشرح السبب والحل بدل إظهار رمز 403 فقط.
+   ========================================================= */
+
+function explainGroqError(
+  status,
+  model,
+  hasImage,
+  groqMessage
+) {
+
+  const detail = groqMessage
+    ? `\n\nتفاصيل Groq: ${groqMessage}`
+    : "";
+
+
+  switch (
+    status
+  ) {
+
+    case 401:
+
+      return (
+        "مفتاح Groq غير صالح أو منتهي (401). " +
+        "أنشئ مفتاحًا جديدًا من console.groq.com " +
+        "ثم حدّث GROQ_API_KEY في إعدادات Vercel وأعد النشر." +
+        detail
+      );
+
+
+    case 403:
+
+      if (
+        hasImage
+      ) {
+
+        return (
+          "النموذج المستخدم لتحليل الصور غير متاح لمفتاح Groq الحالي (403 — صلاحيات غير كافية). " +
+          "افتح console.groq.com وفعّل الوصول إلى نموذج " +
+          model +
+          " من Model Permissions، أو حدّث GROQ_VISION_MODEL في إعدادات Vercel ثم أعد النشر." +
+          detail
+        );
+
+      }
+
+
+      return (
+        "مفتاح Groq لا يملك صلاحية استخدام النموذج المطلوب (403). " +
+        "افتح console.groq.com وتحقق من Model Permissions، " +
+        "أو أنشئ مفتاح API جديدًا وحدّث GROQ_API_KEY في Vercel ثم أعد النشر." +
+        detail
+      );
+
+
+    case 413:
+
+      return (
+        "حجم الطلب كبير جدًا (413). " +
+        "أرسل صورة أصغر حجمًا أو قلّل طول الرسالة وحاول مجددًا." +
+        detail
+      );
+
+
+    case 429:
+
+      return (
+        "تم تجاوز حدود استخدام Groq مؤقتًا (429). " +
+        "انتظر دقيقة واحدة ثم أعد إرسال الرسالة." +
+        detail
+      );
+
+
+    case 400:
+
+      return (
+        "رفض Groq الطلب (400). " +
+        "قد يكون النموذج غير متاح أو محتوى الطلب غير مدعوم. " +
+        "حاول تغيير النموذج من الإعدادات وإعادة المحاولة." +
+        detail
+      );
+
+
+    default:
+
+      if (
+        status >= 500
+      ) {
+
+        return (
+          "خدمة Groq تواجه مشكلة مؤقتة (" +
+          status +
+          "). أعد إرسال الرسالة بعد لحظات." +
+          detail
+        );
+
+      }
+
+
+      return (
+        "حدث خطأ أثناء الاتصال بخدمة Groq (" +
+        (status || "غير معروف") +
+        ")." +
+        detail
+      );
+
+  }
 
 }
 
@@ -861,71 +995,47 @@ module.exports =
 
 
       /*
-       * Call Groq
+       * Build the model candidate chain.
+       *
+       * لأي سبب — نموذج محذوف، أو غير مصرّح
+       * لمفتاحك (403) — نجرّب النموذج التالي
+       * في السلسلة بدل إظهار خطأ 403 للمستخدم.
        */
 
-      let response =
-        await callGroq(
-          apiKey,
-          model,
-          messages
-        );
-
-
-      let data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
+      const candidates = hasImage
+        ? [VISION_MODEL]
+        : [
+            ...new Set(
+              [
+                model,
+                ...TEXT_FALLBACK_CHAIN
+              ]
+            )
+          ];
 
 
       /*
-       * Retry a single rate-limited request using Groq's
-       * Retry-After header when available.
-       */
-      if (response.status === 429) {
-        const retryAfter = Math.min(8, Math.max(1, Number(response.headers.get("retry-after")) || 2));
-        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
-
-        response = await callGroq(apiKey, model, messages);
-        data = await response.json().catch(() => ({}));
-      }
-
-
-      /*
-       * Text-model fallback.
+       * Call Groq through the fallback chain.
        */
 
-      if (
-        !response.ok &&
-        !hasImage &&
-        model !==
-          FALLBACK_TEXT_MODEL &&
-        (
-          response.status ===
-            403 ||
-          response.status ===
-            404
-        )
+      let response = null;
+      let data = {};
+      let usedModel = "";
+
+      for (
+        let i = 0;
+        i < candidates.length;
+        i++
       ) {
 
-        console.warn(
-          `Groq model ${model} unavailable. Falling back to ${FALLBACK_TEXT_MODEL}.`
-        );
-
-
-        model =
-          FALLBACK_TEXT_MODEL;
-
+        usedModel = candidates[i];
 
         response =
           await callGroq(
             apiKey,
-            model,
+            usedModel,
             messages
           );
-
 
         data =
           await response
@@ -934,11 +1044,106 @@ module.exports =
               () => ({})
             );
 
+
+        /*
+         * Retry a single rate-limited request
+         * using Groq's Retry-After header.
+         */
+
+        if (
+          response.status === 429
+        ) {
+
+          const retryAfter =
+            Math.min(
+              8,
+              Math.max(
+                1,
+                Number(
+                  response.headers.get(
+                    "retry-after"
+                  )
+                ) || 2
+              )
+            );
+
+          await new Promise(
+            (resolve) =>
+              setTimeout(
+                resolve,
+                retryAfter * 1000
+              )
+          );
+
+          response =
+            await callGroq(
+              apiKey,
+              usedModel,
+              messages
+            );
+
+          data =
+            await response
+              .json()
+              .catch(
+                () => ({})
+              );
+
+        }
+
+
+        /*
+         * Success — stop here.
+         */
+
+        if (
+          response.ok
+        ) {
+          break;
+        }
+
+
+        /*
+         * Model unavailable (403 / 404 / 400):
+         * try the next candidate in the chain.
+         */
+
+        const canFallback =
+          i < candidates.length - 1 &&
+          [
+            400,
+            403,
+            404
+          ].includes(
+            response.status
+          );
+
+        if (
+          canFallback
+        ) {
+
+          console.warn(
+            `Groq model ${usedModel} unavailable (HTTP ${response.status}). Falling back to ${candidates[i + 1]}.`
+          );
+
+          continue;
+
+        }
+
+
+        /*
+         * Non-recoverable error — stop.
+         */
+
+        break;
+
       }
 
 
       /*
-       * API error
+       * API error — return a clear Arabic
+       * message that explains the cause and
+       * the exact fix, instead of a bare 403.
        */
 
       if (
@@ -948,7 +1153,16 @@ module.exports =
         const groqMessage =
           data?.error?.message ||
           data?.error?.error?.message ||
-          "حدث خطأ أثناء الاتصال بخدمة Groq.";
+          "";
+
+
+        const friendlyMessage =
+          explainGroqError(
+            response.status,
+            usedModel,
+            hasImage,
+            groqMessage
+          );
 
 
         console.error(
@@ -957,7 +1171,8 @@ module.exports =
             status:
               response.status,
 
-            model,
+            model:
+              usedModel,
 
             message:
               groqMessage
@@ -980,9 +1195,17 @@ module.exports =
               "GROQ_API_ERROR",
 
             error:
-              groqMessage,
+              friendlyMessage,
 
-            model
+            detail:
+              groqMessage ||
+              undefined,
+
+            upstreamStatus:
+              response.status,
+
+            model:
+              usedModel
 
           }
         );
@@ -1030,7 +1253,8 @@ module.exports =
             error:
               "لم يرجع Groq إجابة نصية.",
 
-            model
+            model:
+              usedModel
 
           }
         );
@@ -1052,7 +1276,8 @@ module.exports =
 
           reply,
 
-          model
+          model:
+            usedModel
 
         }
       );
