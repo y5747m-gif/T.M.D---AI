@@ -45,10 +45,12 @@ const DEFAULT_SETTINGS = {
 
 // =====================================================
 // كلمة مرور المالك
-// يمكنك تغييرها من هنا
+// الأفضل ضبطها عبر Environment Variable في Vercel
+// (OWNER_PASSWORD) — القيمة أدناه احتياطية فقط.
 // =====================================================
 
-const OWNER_PASSWORD = "TMD2026@Owner";
+const OWNER_PASSWORD =
+  process.env.OWNER_PASSWORD || "TMD2026@Owner";
 
 
 // =====================================================

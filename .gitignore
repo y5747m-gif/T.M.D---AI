@@ -1,0 +1,13 @@
+# Dependencies & build output
+node_modules/
+.vercel/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# مصادر الصور الكبيرة قبل الضغط (الأصول النهائية في /images)
+assets-src/

@@ -9,7 +9,11 @@ const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
+  ".mjs": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -88,7 +92,21 @@ const server = http.createServer(async (req, res) => {
     pathname = "/index.html";
   }
 
-  const filePath = path.join(ROOT, pathname);
+  // منع الوصول للملفات المخفية (مثل .git و .env)
+  if (pathname.split("/").some(seg => seg.startsWith("."))) {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    return res.end("404 Not Found");
+  }
+
+  let filePath = path.join(ROOT, pathname);
+
+  // محاكاة cleanUrls الخاصة بـ Vercel: /about -> /about.html
+  if (!fs.existsSync(filePath) && !path.extname(pathname)) {
+    const htmlCandidate = path.join(ROOT, `${pathname}.html`);
+    if (fs.existsSync(htmlCandidate)) {
+      filePath = htmlCandidate;
+    }
+  }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     const ext = path.extname(filePath).toLowerCase();
@@ -99,11 +117,11 @@ const server = http.createServer(async (req, res) => {
     });
     fs.createReadStream(filePath).pipe(res);
   } else {
-    // Fallback to index.html for SPA if not found
-    const indexPath = path.join(ROOT, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      fs.createReadStream(indexPath).pipe(res);
+    // صفحة 404 حقيقية بحالة 404 (بدل إرجاع الصفحة الرئيسية بحالة 200)
+    const notFoundPath = path.join(ROOT, "404.html");
+    if (fs.existsSync(notFoundPath)) {
+      res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+      fs.createReadStream(notFoundPath).pipe(res);
     } else {
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("404 Not Found");
