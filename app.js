@@ -942,16 +942,8 @@ function bindEvents() {
     updateModelUI();
   });
 
-  // Welcome Cards Click to Prompt
-  document.querySelectorAll(".welcome-card[data-prompt]").forEach(card => {
-    card.addEventListener("click", () => {
-      if (!input) return;
-      input.value = card.dataset.prompt;
-      input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 180) + "px";
-      input.focus();
-    });
-  });
+  // Welcome Cards Click to Prompt — with animation and full display support
+  bindWelcomeCards();
 }
 
 function closeAllModals() {
@@ -1115,9 +1107,35 @@ async function prepareImage(file) {
 
 function showImagePreview() {
   if (!state.selectedImage) return;
-  if (imagePreview) imagePreview.src = state.selectedImage.dataURL;
+  const thumb = document.querySelector(".attachment-thumb");
+  const docIcon = thumb?.querySelector(".attachment-doc");
+
+  if (imagePreview) {
+    imagePreview.src = state.selectedImage.dataURL;
+    imagePreview.style.display = "block";
+  }
+  if (docIcon) docIcon.style.display = "none";
   if (imageFileName) imageFileName.textContent = state.selectedImage.name;
-  if (imagePreviewContainer) imagePreviewContainer.classList.remove("hidden");
+  if (imagePreviewContainer) {
+    imagePreviewContainer.classList.remove("hidden");
+    imagePreviewContainer.classList.add("has-image");
+  }
+}
+
+function showDocumentPreview(fileName) {
+  const thumb = document.querySelector(".attachment-thumb");
+  const docIcon = thumb?.querySelector(".attachment-doc");
+
+  if (imagePreview) {
+    imagePreview.removeAttribute("src");
+    imagePreview.style.display = "none";
+  }
+  if (docIcon) docIcon.style.display = "flex";
+  if (imageFileName) imageFileName.textContent = fileName;
+  if (imagePreviewContainer) {
+    imagePreviewContainer.classList.remove("hidden");
+    imagePreviewContainer.classList.remove("has-image");
+  }
 }
 
 function updateImageMode() {
@@ -1130,10 +1148,25 @@ function resetAttachment() {
   state.selectedDocument = null;
   state.imageMode = "analyze";
 
+  const thumb = document.querySelector(".attachment-thumb");
+  const docIcon = thumb?.querySelector(".attachment-doc");
+
   if (imageInput) imageInput.value = "";
   if (documentInput) documentInput.value = "";
-  if (imagePreview) imagePreview.removeAttribute("src");
-  if (imagePreviewContainer) imagePreviewContainer.classList.add("hidden");
+  if (imagePreview) {
+    imagePreview.removeAttribute("src");
+    imagePreview.style.display = "";
+  }
+  if (docIcon) docIcon.style.display = "";
+  if (imagePreviewContainer) {
+    imagePreviewContainer.classList.add("hidden");
+    imagePreviewContainer.classList.remove("has-image");
+    // Add exit animation
+    imagePreviewContainer.style.animation = "attachmentSlideOut 0.3s ease forwards";
+    setTimeout(() => {
+      imagePreviewContainer.style.animation = "";
+    }, 300);
+  }
 }
 
 
@@ -1160,9 +1193,7 @@ async function handleDocumentSelection(event) {
     };
     state.selectedImage = null;
 
-    if (imagePreviewContainer) imagePreviewContainer.classList.remove("hidden");
-    if (imagePreview) imagePreview.removeAttribute("src");
-    if (imageFileName) imageFileName.textContent = file.name;
+    showDocumentPreview(file.name);
     if (imageModeLabel) imageModeLabel.textContent = "تحليل المستند";
 
     showToast(`تم إرفاق المستند: ${file.name}`);
@@ -1473,7 +1504,7 @@ function cleanAssistantReply(text) {
 
 
 /* =========================================================
-   14. MESSAGE RENDERING & MARKDOWN
+   14. MESSAGE RENDERING & MARKDOWN — Enhanced with animations & full apps display
    ========================================================= */
 function renderMessages() {
   if (!chat) return;
@@ -1482,7 +1513,30 @@ function renderMessages() {
   if (!state.messages.length) {
     if (welcome) {
       welcome.style.display = "";
+      // Reset animations for welcome cards to replay
+      welcome.style.animation = "none";
+      void welcome.offsetHeight; // trigger reflow
+      welcome.style.animation = "";
+
+      // Replay card entrance animations
+      const cards = welcome.querySelectorAll(".welcome-card");
+      cards.forEach((card, i) => {
+        card.style.animation = "none";
+        void card.offsetHeight;
+        card.style.animation = `cardEntrance 0.6s var(--ease-smooth) forwards`;
+        card.style.animationDelay = `${0.1 + i * 0.08}s`;
+      });
+
+      const info = welcome.querySelector(".welcome-info");
+      if (info) {
+        info.style.animation = "none";
+        void info.offsetHeight;
+        info.style.animation = "infoSectionIn 0.8s var(--ease-smooth) 0.8s forwards";
+      }
+
       chat.appendChild(welcome);
+      // Re-bind welcome card clicks after re-append
+      bindWelcomeCards();
     }
     return;
   }
@@ -1490,6 +1544,26 @@ function renderMessages() {
   if (welcome) welcome.style.display = "none";
   state.messages.forEach(renderMessage);
   scrollToBottom();
+}
+
+function bindWelcomeCards() {
+  document.querySelectorAll(".welcome-card[data-prompt]").forEach(card => {
+    // Remove old listeners by cloning? Instead, check if already bound
+    if (card.dataset.bound === "1") return;
+    card.dataset.bound = "1";
+    card.addEventListener("click", () => {
+      if (!input) return;
+      input.value = card.dataset.prompt || "";
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 180) + "px";
+      input.focus();
+      // Add click animation
+      card.style.transform = "scale(0.96)";
+      setTimeout(() => {
+        card.style.transform = "";
+      }, 150);
+    });
+  });
 }
 
 function renderMessage(message, index) {
@@ -1572,63 +1646,6 @@ function speakText(text) {
   showToast("جاري القراءة الصوتية...");
 }
 
-function renderMarkdown(text) {
-  let html = escapeHTML(text);
-
-  // Multi-line code blocks
-  html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
-    const displayLang = lang || "code";
-    return `
-      <div class="code-block-wrapper">
-        <div class="code-header">
-          <span>${displayLang}</span>
-          <button class="copy-code-btn" type="button" onclick="copyCodeFromBlock(this)">📋 نسخ الكود</button>
-        </div>
-        <pre><code class="language-${displayLang}">${code.trim()}</code></pre>
-      </div>
-    `;
-  });
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-  // Bold & Italic
-  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-
-  // Headings
-  html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
-  html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
-  html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
-
-  // Unordered list
-  html = html.replace(/^\s*[-*]\s+(.*$)/gim, "<li>$1</li>");
-  html = html.replace(/(<li>.*<\/li>)/gim, "<ul>$1</ul>");
-  html = html.replace(/<\/ul>\s*<ul>/gim, "");
-
-  // Line breaks to paragraphs
-  const paragraphs = html.split(/\n\n+/);
-  html = paragraphs.map(p => {
-    const trimmed = p.trim();
-    if (trimmed.startsWith("<h") || trimmed.startsWith("<ul") || trimmed.startsWith("<div")) {
-      return trimmed;
-    }
-    return `<p>${trimmed.replace(/\n/g, "<br>")}</p>`;
-  }).join("");
-
-  return html;
-}
-
-window.copyCodeFromBlock = function(btn) {
-  const pre = btn.closest(".code-block-wrapper")?.querySelector("pre code");
-  if (pre) {
-    navigator.clipboard.writeText(pre.innerText || pre.textContent);
-    btn.textContent = "✓ تم النسخ!";
-    setTimeout(() => { btn.textContent = "📋 نسخ الكود"; }, 2000);
-    showToast("تم نسخ الكود البرمجي!");
-  }
-};
-
 function escapeHTML(str) {
   return String(str || "")
     .replace(/&/g, "&amp;")
@@ -1637,6 +1654,250 @@ function escapeHTML(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+function renderMarkdown(text) {
+  if (typeof text !== "string") return "";
+  if (!text.trim()) return "";
+
+  // 1. Extract code blocks first to protect them from other transformations
+  const codeBlocks = [];
+  const inlineCodes = [];
+
+  // Protect ``` code blocks with placeholder
+  let working = text.replace(/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g, (m, lang, code) => {
+    const id = codeBlocks.length;
+    codeBlocks.push({
+      lang: (lang || "code").trim().toLowerCase() || "code",
+      code: code
+    });
+    return `__CODE_BLOCK_${id}__`;
+  });
+
+  // Protect inline `code` with placeholder (avoid matching empty)
+  working = working.replace(/`([^`\n]{1,200})`/g, (m, code) => {
+    const id = inlineCodes.length;
+    inlineCodes.push(code);
+    return `__INLINE_CODE_${id}__`;
+  });
+
+  // 2. Escape remaining HTML
+  working = escapeHTML(working);
+
+  // 3. Restore inline code as safe <code> (content already escaped)
+  working = working.replace(/__INLINE_CODE_(\d+)__/g, (m, id) => {
+    const raw = inlineCodes[Number(id)] || "";
+    return `<code>${escapeHTML(raw)}</code>`;
+  });
+
+  // 4. Process markdown line by line for better structure
+  // Split into blocks by double newline, but keep code placeholders intact
+  const blocks = working.split(/\n{2,}/);
+
+  const processedBlocks = blocks.map(blockRaw => {
+    const block = blockRaw.trim();
+    if (!block) return "";
+
+    // If block is a code block placeholder alone, render it directly
+    const codeMatch = block.match(/^__CODE_BLOCK_(\d+)__$/);
+    if (codeMatch) {
+      const cb = codeBlocks[Number(codeMatch[1])];
+      if (!cb) return "";
+      const safeLang = escapeHTML(cb.lang);
+      const safeCode = escapeHTML(cb.code.trim());
+      const displayLang = safeLang === "code" ? "code" : safeLang;
+      return `<div class="code-block-wrapper"><div class="code-header"><span class="code-lang">${displayLang}</span><button class="copy-code-btn" type="button" data-copy-target>📋 نسخ الكود</button></div><pre><code class="language-${displayLang}">${safeCode}</code></pre></div>`;
+    }
+
+    // If block contains code placeholder inside text (rare), replace inline
+    let b = block;
+    b = b.replace(/__CODE_BLOCK_(\d+)__/g, (m, id) => {
+      const cb = codeBlocks[Number(id)];
+      if (!cb) return "";
+      const safeLang = escapeHTML(cb.lang);
+      const safeCode = escapeHTML(cb.code.trim());
+      const displayLang = safeLang === "code" ? "code" : safeLang;
+      return `<div class="code-block-wrapper"><div class="code-header"><span class="code-lang">${displayLang}</span><button class="copy-code-btn" type="button" data-copy-target>📋 نسخ الكود</button></div><pre><code class="language-${displayLang}">${safeCode}</code></pre></div>`;
+    });
+
+    // If block already starts with code wrapper, return as is
+    if (b.startsWith("<div class=\"code-block-wrapper\">")) {
+      return b;
+    }
+
+    // Headings
+    if (/^###\s+/.test(b)) {
+      return `<h3>${formatInline(b.replace(/^###\s+/, ""))}</h3>`;
+    }
+    if (/^##\s+/.test(b)) {
+      return `<h2>${formatInline(b.replace(/^##\s+/, ""))}</h2>`;
+    }
+    if (/^#\s+/.test(b)) {
+      return `<h1>${formatInline(b.replace(/^#\s+/, ""))}</h1>`;
+    }
+
+    // Check for unordered list block
+    const lines = b.split("\n");
+    const isUnorderedList = lines.every(l => {
+      const t = l.trim();
+      return !t || /^[-*•]\s+/.test(t) || /^__INLINE_CODE_/.test(t) === false && /^[-*]\s+/.test(t);
+    }) && lines.some(l => /^[-*•]\s+/.test(l.trim()));
+
+    // More robust list detection
+    const ulItems = [];
+    const olItems = [];
+    let isUl = false;
+    let isOl = false;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (/^[-*•]\s+/.test(trimmed)) {
+        isUl = true;
+        ulItems.push(trimmed.replace(/^[-*•]\s+/, ""));
+      } else if (/^\d+\.\s+/.test(trimmed)) {
+        isOl = true;
+        olItems.push(trimmed.replace(/^\d+\.\s+/, ""));
+      } else {
+        // Not a list item, break list detection
+        isUl = false;
+        isOl = false;
+        break;
+      }
+    }
+
+    if (isUl && ulItems.length) {
+      const lis = ulItems.map(item => `<li>${formatInline(item)}</li>`).join("");
+      return `<ul>${lis}</ul>`;
+    }
+    if (isOl && olItems.length) {
+      const lis = olItems.map(item => `<li>${formatInline(item)}</li>`).join("");
+      return `<ol>${lis}</ol>`;
+    }
+
+    // Check for mixed content with list lines inside paragraph
+    // If block contains lines starting with - or * but also other text, treat as list + paragraph
+    const hasListLines = lines.some(l => /^[-*•]\s+/.test(l.trim()) || /^\d+\.\s+/.test(l.trim()));
+    if (hasListLines) {
+      let html = "";
+      let currentUl = [];
+      let currentOl = [];
+      let paragraphBuffer = [];
+
+      const flushParagraph = () => {
+        if (paragraphBuffer.length) {
+          html += `<p>${formatInline(paragraphBuffer.join("<br>"))}</p>`;
+          paragraphBuffer = [];
+        }
+      };
+      const flushUl = () => {
+        if (currentUl.length) {
+          html += `<ul>${currentUl.map(i => `<li>${formatInline(i)}</li>`).join("")}</ul>`;
+          currentUl = [];
+        }
+      };
+      const flushOl = () => {
+        if (currentOl.length) {
+          html += `<ol>${currentOl.map(i => `<li>${formatInline(i)}</li>`).join("")}</ol>`;
+          currentOl = [];
+        }
+      };
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          flushParagraph();
+          flushUl();
+          flushOl();
+          continue;
+        }
+        if (/^[-*•]\s+/.test(trimmed)) {
+          flushParagraph();
+          flushOl();
+          currentUl.push(trimmed.replace(/^[-*•]\s+/, ""));
+        } else if (/^\d+\.\s+/.test(trimmed)) {
+          flushParagraph();
+          flushUl();
+          currentOl.push(trimmed.replace(/^\d+\.\s+/, ""));
+        } else {
+          flushUl();
+          flushOl();
+          paragraphBuffer.push(trimmed);
+        }
+      }
+      flushParagraph();
+      flushUl();
+      flushOl();
+      return html;
+    }
+
+    // Regular paragraph with line breaks
+    return `<p>${formatInline(b.replace(/\n/g, "<br>"))}</p>`;
+  });
+
+  let finalHtml = processedBlocks.filter(Boolean).join("");
+
+  // Cleanup: remove empty <p></p>
+  finalHtml = finalHtml.replace(/<p>\s*<\/p>/g, "");
+
+  // If finalHtml is empty but original had content, fallback to simple paragraph
+  if (!finalHtml.trim() && text.trim()) {
+    finalHtml = `<p>${formatInline(escapeHTML(text).replace(/\n/g, "<br>"))}</p>`;
+  }
+
+  return finalHtml;
+}
+
+function formatInline(str) {
+  if (!str) return "";
+  let s = String(str);
+
+  // Links [text](url) – must be after escaping, so we look for escaped brackets? Actually we escaped earlier, so [ and ] remain? escapeHTML doesn't escape [ ] ( ) – so we can still detect
+  s = s.replace(/\[([^\]]{1,120})\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Bold **text**
+  s = s.replace(/\*\*([^*]{1,500}?)\*\*/g, "<strong>$1</strong>");
+
+  // Italic *text* (avoid matching already bold or list markers)
+  s = s.replace(/(^|[^*])\*([^*\n]{1,300}?)\*(?=[^*]|$)/g, (m, pre, content) => {
+    // Avoid if content contains only spaces
+    if (!content.trim()) return m;
+    return `${pre}<em>${content}</em>`;
+  });
+
+  // Highlight ==text== (optional)
+  s = s.replace(/==([^=]{1,200}?)==/g, "<mark>$1</mark>");
+
+  return s;
+}
+
+window.copyCodeFromBlock = function(btn) {
+  const wrapper = btn.closest(".code-block-wrapper");
+  const codeEl = wrapper?.querySelector("pre code");
+  if (codeEl) {
+    const text = codeEl.innerText || codeEl.textContent || "";
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = "✓ تم النسخ!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = original || "📋 نسخ الكود";
+        btn.classList.remove("copied");
+      }, 2000);
+      showToast("تم نسخ الكود البرمجي!");
+    }).catch(() => {
+      showToast("تعذر النسخ، انسخ يدوياً");
+    });
+  }
+};
+
+// Delegated handler for dynamically created copy buttons (better than inline onclick)
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-copy-target]");
+  if (btn) {
+    e.preventDefault();
+    window.copyCodeFromBlock(btn);
+  }
+});
 
 
 /* =========================================================
