@@ -76,3 +76,62 @@ GROQ_VISION_MODEL=qwen/qwen3.8-27b
 ## ملاحظة عن المجانية
 
 Vercel Blob له حدود استخدام في خطة Hobby، وGroq له حدود/أسعار بحسب الحساب والنموذج. لذلك لا يوجد ضمان لاستخدام غير محدود مجانًا. هذه البنية لا تحتاج OpenAI API.
+
+## 🔍 SEO والفهرسة في Google
+
+المشروع مجهّز بالكامل للفهرسة والظهور في محركات البحث (تم التنفيذ في 2026-09-22):
+
+| الملف | الوظيفة |
+|---|---|
+| `robots.txt` | يسمح بالزحف لكل الصفحات العامة (`Allow: /`) ويمنع `/api/` فقط، ويحتوي رابط الـ Sitemap بالدومين الحقيقي. |
+| `sitemap.xml` | يضم كل الصفحات العامة: الرئيسية، عن المنصة، الأسئلة الشائعة، سياسة الخصوصية. |
+| `index.html` | عنوان ووصف فريدان، `meta robots` = index,follow، Canonical، Open Graph، Twitter Cards، وبيانات منظمة Schema.org (WebSite + SoftwareApplication + Person + WebPage) مع `lang="ar"` و`dir="rtl"`. |
+| `about.html` | صفحة تعريفية حقيقية بمحتوى عربي منظم (H1/H2/H3) وروابط داخلية وبيانات منظمة AboutPage. |
+| `faq.html` | صفحة أسئلة شائعة حقيقية مع بيانات منظمة FAQPage مطابقة للأسئلة المعروضة. |
+| `privacy.html` | سياسة خصوصية واضحة مع بيانات منظمة من نوع PrivacyPolicy. |
+| `404.html` | صفحة خطأ مخصصة تُرجع حالة 404 حقيقية (لمنع Soft-404) ومعها `noindex`. |
+| `web.webmanifest` | ملف PWA بالعربية (rtl) مع أيقونات 32/192/512. |
+| `images/` | صورة مشاركة Open Graph بحجم 1200×630 (`og-image.jpg`) وأيقونات التطبيق. |
+| `vercel.json` | تفعيل Clean URLs (مثل `/about`) + ترويسات: `X-Robots-Tag: noindex` على `/api/*` وكاش آمن للصور وترويسات أمان خفيفة. لا يمس API routes أو البيئة. |
+| `page.css` | تنسيقات الصفحات العامة الجديدة بنفس هوية التصميم القائمة. |
+
+### تغيير الدومين (عند ربط دومين مخصص)
+
+الدومين الحالي المستخدم في كل الروابط هو دومين النشر الفعلي: `https://t-m-d-ai.vercel.app`.
+عند ربط دومين خاص (مثلاً `https://yourdomain.com`) استبدله في الملفات التالية فقط:
+
+```bash
+grep -rl "t-m-d-ai.vercel.app" . --exclude-dir=.git
+# ثم استبدله في: index.html, about.html, faq.html, privacy.html, 404.html,
+# sitemap.xml, robots.txt
+```
+
+### خطوات النشر على Vercel
+
+1. ارفع المشروع إلى GitHub (هذا المستودع) أو استخدم Vercel CLI.
+2. من [vercel.com](https://vercel.com) ← **Add New… → Project** ← اختر المستودع.
+3. لا يلزم أي إعداد بناء (Framework: Other/Static) — المشروع يعمل كما هو مع مجلد `api/`.
+4. أضف Environment Variables من Settings → Environment Variables: `GROQ_API_KEY` وبقية المتغيرات المذكورة أعلاه.
+5. اضغط **Deploy**. للنشر اليدوي عبر CLI: `npm i -g vercel && vercel --prod`.
+6. لربط دومين مخصص: Settings → Domains ← أضف دومينك وحدّث الروابط كما في الفقرة السابقة.
+
+### إضافة الموقع إلى Google Search Console
+
+1. ادخل [search.google.com/search-console](https://search.google.com/search-console) وسجّل الدخول بحساب Google.
+2. اضغط **Add property** واختر نوع **URL prefix** وأدخل `https://t-m-d-ai.vercel.app` (أو دومينك).
+3. للتحقق: انسخ كود التحقق واختر طريقة **HTML tag** — أضف الـ meta في `<head>` بملف `index.html` ثم Deploy وأعد المحاولة. (يمكن أيضًا التحقق عبر DNS إذا استخدمت دومينًا مخصصًا.)
+4. ملاحظة: لا يمكن إضافة الموقع تلقائيًا من داخل الكود؛ التحقق يتطلب حسابك في Google.
+
+### إرسال الـ Sitemap
+
+1. في Search Console افتح الخاصية ← من القائمة الجانبية **Sitemaps**.
+2. اكتب `sitemap.xml` في حقل Add a new sitemap واضغط **Submit**.
+3. ستظهر حالة Success وستُفهرس الصفحات خلال ساعات إلى أيام.
+
+### فحص صفحة وطلب الفهرسة (URL Inspection)
+
+1. في Search Console افتح **URL Inspection** من الأعلى.
+2. الصق رابط الصفحة (مثلاً `https://t-m-d-ai.vercel.app/`) واضغط Enter.
+3. راجع تبويبات: Coverage/Indexing وMobile Usability وRich Results (للتأكد من سلامة Schema).
+4. اضغط **Request Indexing** لطلب فهرسة فورية، وكرر ذلك لكل صفحة مهمة بعد كل نشر كبير.
+5. من تبويب **View tested page / Screenshot** تأكد أن Google يرى المحتوى كما تريده.

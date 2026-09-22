@@ -6,20 +6,47 @@
   <meta name="theme-color" content="#06080f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="T.M.D_AI_Pro — منصة الذكاء الاصطناعي الاحترافية، تطوير وتصميم المطور ياسين عمرو عبد الرحيم">
+  <meta name="description" content="T.M.D_AI_Pro — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها، بواجهة متجاوبة وتصميم كوني فريد. تطوير وتصميم ياسين عمرو عبد الرحيم.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="ياسين عمرو عبد الرحيم">
+  <meta name="keywords" content="ذكاء اصطناعي, مساعد ذكي, محادثة ذكاء اصطناعي, تحليل ملفات, تحليل صور, T.M.D_AI_Pro">
 
-  <title>T.M.D_AI_Pro — المساعد الذكي الاحترافي</title>
+  <title>T.M.D_AI_Pro — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور</title>
+  <link rel="canonical" href="https://t-m-d-ai.vercel.app/">
 
-  <!-- ================= FAVICON ================= -->
+  <!-- ================= Open Graph ================= -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="T.M.D_AI_Pro">
+  <meta property="og:locale" content="ar_AR">
+  <meta property="og:title" content="T.M.D_AI_Pro — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور">
+  <meta property="og:description" content="محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — منصة ذكاء اصطناعي عربية احترافية بواجهة متجاوبة وتصميم كوني فريد.">
+  <meta property="og:url" content="https://t-m-d-ai.vercel.app/">
+  <meta property="og:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="شعار منصة T.M.D AI PRO على خلفية كونية">
+
+  <!-- ================= Twitter / X Cards ================= -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="T.M.D_AI_Pro — مساعد الذكاء الاصطناعي العربي">
+  <meta name="twitter:description" content="محادثة ذكية فورية، تحليل مستندات، وفهم صور — منصة ذكاء اصطناعي عربية احترافية.">
+  <meta name="twitter:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
+
+  <!-- ================= FAVICON & PWA ================= -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/web.webmanifest">
 
   <!-- ================= GOOGLE FONTS ================= -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- ================= MAMMOTH (DOCX) ================= -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <!-- ================= MAMMOTH (DOCX) =================
+       defer: يُحمَّل دون حجب رسم الصفحة، ويكون جاهزًا قبل تفاعل المستخدم -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 
   <!-- ================= STYLESHEET ================= -->
   <link rel="stylesheet" href="/style.css">
@@ -33,9 +60,77 @@
       } catch (e) {}
     })();
   </script>
+
+  <!-- ================= Structured Data (Schema.org) ================= -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://t-m-d-ai.vercel.app/#website",
+        "url": "https://t-m-d-ai.vercel.app/",
+        "name": "T.M.D_AI_Pro",
+        "alternateName": "TMD AI Pro",
+        "description": "منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية وتحليل المستندات والصور.",
+        "inLanguage": "ar",
+        "publisher": { "@id": "https://t-m-d-ai.vercel.app/#person" },
+        "image": "https://t-m-d-ai.vercel.app/images/og-image.jpg"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://t-m-d-ai.vercel.app/#app",
+        "name": "T.M.D_AI_Pro",
+        "url": "https://t-m-d-ai.vercel.app/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "description": "مساعد ذكاء اصطناعي عربي للمحادثة الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءة النصوص منها، مع تخصيص كامل للواجهة.",
+        "inLanguage": "ar",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": { "@id": "https://t-m-d-ai.vercel.app/#person" },
+        "creator": { "@id": "https://t-m-d-ai.vercel.app/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://t-m-d-ai.vercel.app/#person",
+        "name": "ياسين عمرو عبد الرحيم",
+        "alternateName": "Yassin Amr Abdelrahim",
+        "jobTitle": "مهندس ومصمم ومطور برمجيات",
+        "description": "المطور والمصمم والمهندس الحصري لمنصة T.M.D_AI_Pro."
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://t-m-d-ai.vercel.app/#webpage",
+        "url": "https://t-m-d-ai.vercel.app/",
+        "name": "T.M.D_AI_Pro — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور",
+        "isPartOf": { "@id": "https://t-m-d-ai.vercel.app/#website" },
+        "about": { "@id": "https://t-m-d-ai.vercel.app/#app" },
+        "inLanguage": "ar",
+        "primaryImageOfPage": { "@type": "ImageObject", "url": "https://t-m-d-ai.vercel.app/images/og-image.jpg" }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body data-theme="dark">
+
+  <a class="skip-link" href="#mainContent">تخطي إلى المحتوى الرئيسي</a>
+
+  <noscript>
+    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#06080f;color:#f3f6fc;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
+      <div>
+        <p style="font-size:1.4rem;font-weight:900;margin-bottom:10px;color:#f3f6fc;">T.M.D_AI_Pro — منصة الذكاء الاصطناعي العربية</p>
+        <p style="color:#9aa5b8;margin-bottom:14px;">محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — يتطلب تفعيل JavaScript في المتصفح.</p>
+        <p><a href="/about" style="color:#00f2fe;">عن المنصة</a> · <a href="/faq" style="color:#00f2fe;">الأسئلة الشائعة</a> · <a href="/privacy" style="color:#00f2fe;">سياسة الخصوصية</a></p>
+      </div>
+    </div>
+  </noscript>
 
   <!-- ==================================================
        BACKGROUND LAYERS (خلفية النجوم والتخصيص)
@@ -341,6 +436,44 @@
 
           </div>
 
+
+          <!-- ==================================================
+               SEO INFO SECTION — محتوى تعريفي حقيقي قابل للفهرسة
+          ================================================== -->
+          <section class="welcome-info" aria-labelledby="aboutPlatformTitle">
+            <h2 class="info-title" id="aboutPlatformTitle">ما الذي يقدمه T.M.D_AI_Pro؟</h2>
+            <p class="info-lead">
+              منصة ذكاء اصطناعي عربية متكاملة تجمع بين المحادثة الفورية السريعة، وتحليل المستندات
+              والملفات، وفهم الصور وقراءة النصوص منها — داخل واجهة كونية تفاعلية قابلة للتخصيص
+              بالكامل، صممها وهندسها المطور ياسين عمرو عبد الرحيم.
+            </p>
+
+            <div class="info-grid">
+              <div class="info-card">
+                <h3>💬 محادثة ذكية فورية</h3>
+                <p>نماذج ذكاء اصطناعي متقدمة (GPT OSS 120B و20B) تجيب عن أسئلتك في البرمجة والعلوم والكتابة بإجابات منظمة ومنسّقة بسرعة فائقة.</p>
+              </div>
+              <div class="info-card">
+                <h3>📄 تحليل المستندات</h3>
+                <p>ارفع ملفات PDF وWord وTXT والأكواد حتى 15MB لتستخرج المنصة محتواها وتلخصه وتحلله بدقة واحترافية.</p>
+              </div>
+              <div class="info-card">
+                <h3>🖼️ رؤية وتحليل الصور</h3>
+                <p>نموذج Qwen متعدد الوسائط يصف الصور بالتفصيل، ويقرأ النصوص منها، ويقترح تعديلات دقيقة عليها.</p>
+              </div>
+              <div class="info-card">
+                <h3>🎨 تخصيص وخصوصية</h3>
+                <p>خلفيات نجوم متحركة أو صورتك الخاصة، مظهر داكن وفاتح، ومحادثاتك تُحفظ في جهازك أنت فقط دون خوادم تخزين.</p>
+              </div>
+            </div>
+
+            <nav class="info-links" aria-label="روابط داخلية مهمة">
+              <a href="/about">عن المنصة</a>
+              <a href="/faq">الأسئلة الشائعة</a>
+              <a href="/privacy">سياسة الخصوصية</a>
+            </nav>
+          </section>
+
         </div>
 
       </section>
@@ -362,7 +495,7 @@
           <!-- معاينة المرفق (صورة أو مستند) -->
           <div class="attachment hidden" id="imagePreviewContainer">
             <div class="attachment-thumb">
-              <img id="imagePreview" alt="معاينة المرفق">
+              <img id="imagePreview" alt="معاينة المرفق" loading="lazy" decoding="async">
               <span class="attachment-doc" aria-hidden="true">📄</span>
             </div>
 
@@ -566,7 +699,7 @@
           <div class="custom-bg-preview-wrap hidden" id="uploadedPreviewWrap">
             <div class="custom-bg-preview-title">معاينة الصورة المرفوعة:</div>
             <div class="custom-bg-preview-box">
-              <img id="uploadedPreviewImg" alt="معاينة الخلفية المرفوعة">
+              <img id="uploadedPreviewImg" alt="معاينة الخلفية المرفوعة" loading="lazy" decoding="async">
               <button class="remove-custom-bg-btn" id="removeUploadedBgBtn" type="button" title="حذف هذه الصورة">
                 × إزالة الصورة
               </button>
