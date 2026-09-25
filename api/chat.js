@@ -733,6 +733,149 @@ function callProvider(
 }
 
 
+async function runProviderChain(
+  provider,
+  apiKey,
+  candidates,
+  messages
+) {
+
+  let response = null;
+  let data = {};
+  let usedModel = "";
+
+  for (
+    let i = 0;
+    i < candidates.length;
+    i++
+  ) {
+
+    usedModel = candidates[i];
+
+    response =
+      await callProvider(
+        provider,
+        apiKey,
+        usedModel,
+        messages
+      );
+
+    data =
+      await response
+        .json()
+        .catch(
+          () => ({})
+        );
+
+
+    /*
+     * Retry a single rate-limited request
+     * using the provider's Retry-After header.
+     */
+
+    if (
+      response.status === 429
+    ) {
+
+      const retryAfter =
+        Math.min(
+          8,
+          Math.max(
+            1,
+            Number(
+              response.headers.get(
+                "retry-after"
+              )
+            ) || 2
+          )
+        );
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            retryAfter * 1000
+          )
+      );
+
+      response =
+        await callProvider(
+          provider,
+          apiKey,
+          usedModel,
+          messages
+        );
+
+      data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+    }
+
+
+    /*
+     * Success — stop here.
+     */
+
+    if (
+      response.ok &&
+      !hasProviderBusinessError(
+        provider,
+        data
+      )
+    ) {
+      break;
+    }
+
+
+    /*
+     * Model unavailable (403 / 404 / 400):
+     * try the next candidate in the chain.
+     */
+
+    const canFallback =
+      i < candidates.length - 1 &&
+      [
+        400,
+        403,
+        404
+      ].includes(
+        response.status
+      );
+
+    if (
+      canFallback
+    ) {
+
+      console.warn(
+        `${provider} model ${usedModel} unavailable (HTTP ${response.status}). Falling back to ${candidates[i + 1]}.`
+      );
+
+      continue;
+
+    }
+
+
+    /*
+     * Non-recoverable error — stop.
+     */
+
+    break;
+
+  }
+
+  return {
+    response,
+    data,
+    usedModel
+  };
+
+}
+
+
 function getProviderErrorMessage(
   data
 ) {
@@ -769,6 +912,119 @@ function hasProviderBusinessError(
   );
 
 }
+
+
+/*
+ * أخطاء الرصيد في MiniMax.
+ * الرمز 1008 = insufficient balance، ويصل عادةً مع HTTP 402،
+ * أي أن الحساب المرتبط بـ MINIMAX_API_KEY لا يملك رصيدًا كافيًا
+ * وكل الطلبات سترفض حتى يتم شحن الرصيد.
+ */
+
+const MINIMAX_BILLING_CODES =
+  new Set(
+    [
+      1008
+    ]
+  );
+
+
+const MINIMAX_BILLING_PATTERN =
+  /insufficient\s+balance|insufficient\s+funds|insufficient\s+credit|balance\s+is\s+insufficient|not\s+enough\s+balance|no\s+balance|余额不足/i;
+
+
+function isMiniMaxBillingFailure(
+  status,
+  businessCode,
+  providerMessage
+) {
+
+  if (
+    Number(status) === 402
+  ) {
+
+    return true;
+
+  }
+
+
+  const statusCode =
+    Number(businessCode);
+
+  if (
+    Number.isFinite(statusCode) &&
+    MINIMAX_BILLING_CODES.has(
+      statusCode
+    )
+  ) {
+
+    return true;
+
+  }
+
+
+  return MINIMAX_BILLING_PATTERN.test(
+    String(providerMessage || "")
+  );
+
+}
+
+
+/*
+ * التحويل التلقائي إلى Groq عند نفاد رصيد MiniMax.
+ * مفعّل افتراضيًا، ويمكن إيقافه من Vercel بالمتغير:
+ * MINIMAX_GROQ_FALLBACK=false
+ */
+
+function isMiniMaxFallbackEnabled() {
+
+  const value =
+    String(
+      process.env.MINIMAX_GROQ_FALLBACK ??
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (
+    !value
+  ) {
+
+    return true;
+
+  }
+
+  return ![
+    "0",
+    "false",
+    "no",
+    "off",
+    "disabled"
+  ].includes(
+    value
+  );
+
+}
+
+
+const MINIMAX_BILLING_HELP =
+  "رصيد حساب MiniMax غير كافٍ (402 / الرمز 1008: insufficient balance)، " +
+  "لذلك يرفض MiniMax كل الطلبات حتى يتم شحن الرصيد. الحلول المتاحة: " +
+  "① اشحن رصيد حسابك من platform.minimax.io (Account → Balance / Recharge) ثم أعد المحاولة، " +
+  "② أو تأكد من استخدام المفتاح الصحيح: مفتاح الدفع حسب الاستخدام (API Key) يحتاج رصيدًا، " +
+  "أما مفتاح الاشتراك (Token Plan Subscription Key) فيعمل بنافذة استخدام متجددة — " +
+  "وحدّث MINIMAX_API_KEY في إعدادات Vercel ثم أعد النشر، " +
+  "③ أو اختر أحد نماذج Groq من قائمة النماذج (T.M.D Pro / Fast / Vision) لمواصلة العمل فورًا.";
+
+const MINIMAX_AUTH_HELP =
+  "مفتاح MiniMax غير صالح (الرمز 2049: invalid api key). " +
+  "تأكد من أن المفتاح من نفس المنطقة (api.minimax.io للمنصة العالمية) " +
+  "ومن أنه مفتاح API Key وليس مفتاح اشتراك منتهيًا، ثم حدّث MINIMAX_API_KEY في Vercel وأعد النشر.";
+
+const MINIMAX_QUOTA_HELP =
+  "تم استهلاك حد الاستخدام في خطة MiniMax (الرمز 2056: usage limit exceeded). " +
+  "انتظر بداية نافذة الاستخدام التالية (كل خمس ساعات) أو استخدم رصيد الدفع حسب الاستخدام، " +
+  "أو اختر أحد نماذج Groq من قائمة النماذج لمواصلة العمل فورًا.";
 
 
 function normalizeUsage(
@@ -934,12 +1190,44 @@ function explainGroqError(
 function explainMiniMaxError(
   status,
   model,
-  providerMessage
+  providerMessage,
+  businessCode
 ) {
 
   const detail = providerMessage
     ? `\n\nتفاصيل MiniMax: ${providerMessage}`
     : "";
+
+  const businessStatus =
+    Number(businessCode);
+
+  if (
+    isMiniMaxBillingFailure(
+      status,
+      businessCode,
+      providerMessage
+    )
+  ) {
+
+    return MINIMAX_BILLING_HELP + detail;
+
+  }
+
+  if (
+    businessStatus === 2049
+  ) {
+
+    return MINIMAX_AUTH_HELP + detail;
+
+  }
+
+  if (
+    businessStatus === 2056
+  ) {
+
+    return MINIMAX_QUOTA_HELP + detail;
+
+  }
 
   switch (status) {
 
@@ -1180,7 +1468,7 @@ module.exports =
           : DEFAULT_TEXT_MODEL;
       }
 
-      const provider =
+      let provider =
         getProvider(model);
 
       const apiKey =
@@ -1243,126 +1531,103 @@ module.exports =
       let data = {};
       let usedModel = "";
 
-      for (
-        let i = 0;
-        i < candidates.length;
-        i++
+      const primaryRun =
+        await runProviderChain(
+          provider,
+          apiKey,
+          candidates,
+          messages
+        );
+
+      response = primaryRun.response;
+      data = primaryRun.data;
+      usedModel = primaryRun.usedModel;
+
+
+      /*
+       * MiniMax refused the request because the account
+       * balance is empty (HTTP 402 / code 1008).
+       * Keep the site usable by moving the request to Groq
+       * instead of failing, and tell the user clearly.
+       */
+
+      let billingFallback = null;
+
+      const primaryFailed =
+        !response?.ok ||
+        hasProviderBusinessError(
+          provider,
+          data
+        );
+
+      if (
+        primaryFailed &&
+        provider === "minimax" &&
+        isMiniMaxBillingFailure(
+          response?.status,
+          data?.base_resp?.status_code,
+          getProviderErrorMessage(data)
+        )
       ) {
 
-        usedModel = candidates[i];
-
-        response =
-          await callProvider(
-            provider,
-            apiKey,
-            usedModel,
-            messages
-          );
-
-        data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        /*
-         * Retry a single rate-limited request
-         * using the provider's Retry-After header.
-         */
+        const groqFallbackKey =
+          String(
+            process.env.GROQ_API_KEY ||
+            ""
+          ).trim();
 
         if (
-          response.status === 429
+          groqFallbackKey &&
+          isMiniMaxFallbackEnabled()
         ) {
 
-          const retryAfter =
-            Math.min(
-              8,
-              Math.max(
-                1,
-                Number(
-                  response.headers.get(
-                    "retry-after"
+          const fallbackCandidates =
+            hasImage
+              ? [VISION_MODEL]
+              : [
+                  ...new Set(
+                    [
+                      DEFAULT_TEXT_MODEL,
+                      ...TEXT_FALLBACK_CHAIN
+                    ]
                   )
-                ) || 2
-              )
-            );
+                ];
 
-          await new Promise(
-            (resolve) =>
-              setTimeout(
-                resolve,
-                retryAfter * 1000
-              )
+          console.warn(
+            `MiniMax is out of balance (HTTP ${response?.status} / code ${data?.base_resp?.status_code}). Falling back to Groq (${fallbackCandidates.join(" -> ")}).`
           );
 
-          response =
-            await callProvider(
-              provider,
-              apiKey,
-              usedModel,
+          provider = "groq";
+
+          const fallbackRun =
+            await runProviderChain(
+              "groq",
+              groqFallbackKey,
+              fallbackCandidates,
               messages
             );
 
-          data =
-            await response
-              .json()
-              .catch(
-                () => ({})
-              );
+          if (
+            fallbackRun.response?.ok &&
+            !hasProviderBusinessError(
+              "groq",
+              fallbackRun.data
+            )
+          ) {
+
+            response = fallbackRun.response;
+            data = fallbackRun.data;
+            usedModel = fallbackRun.usedModel;
+
+            billingFallback = {
+              from: "minimax",
+              to: "groq",
+              model: usedModel
+            };
+
+          }
 
         }
-
-
-        /*
-         * Success — stop here.
-         */
-
-        if (
-          response.ok &&
-          !hasProviderBusinessError(
-            provider,
-            data
-          )
-        ) {
-          break;
-        }
-
-
-        /*
-         * Model unavailable (403 / 404 / 400):
-         * try the next candidate in the chain.
-         */
-
-        const canFallback =
-          i < candidates.length - 1 &&
-          [
-            400,
-            403,
-            404
-          ].includes(
-            response.status
-          );
-
-        if (
-          canFallback
-        ) {
-
-          console.warn(
-            `${provider} model ${usedModel} unavailable (HTTP ${response.status}). Falling back to ${candidates[i + 1]}.`
-          );
-
-          continue;
-
-        }
-
-
-        /*
-         * Non-recoverable error — stop.
-         */
-
-        break;
 
       }
 
@@ -1398,7 +1663,8 @@ module.exports =
             ? explainMiniMaxError(
                 upstreamStatus,
                 usedModel,
-                providerMessage
+                providerMessage,
+                data?.base_resp?.status_code
               )
             : explainGroqError(
                 upstreamStatus,
@@ -1406,6 +1672,15 @@ module.exports =
                 hasImage,
                 providerMessage
               );
+
+
+        const minimaxBillingIssue =
+          provider === "minimax" &&
+          isMiniMaxBillingFailure(
+            upstreamStatus,
+            data?.base_resp?.status_code,
+            providerMessage
+          );
 
 
         console.error(
@@ -1420,10 +1695,25 @@ module.exports =
             model:
               usedModel,
 
+            billing:
+              minimaxBillingIssue,
+
             message:
               providerMessage
           }
         );
+
+
+        if (
+          minimaxBillingIssue
+        ) {
+
+          console.error(
+            "MINIMAX_BALANCE_EXHAUSTED: recharge the MiniMax account or switch the site to a Groq model. " +
+            "Set MINIMAX_GROQ_FALLBACK=false to disable automatic Groq fallback."
+          );
+
+        }
 
 
         return sendJSON(
@@ -1435,9 +1725,11 @@ module.exports =
               false,
 
             code:
-              provider === "minimax"
-                ? "MINIMAX_API_ERROR"
-                : "GROQ_API_ERROR",
+              minimaxBillingIssue
+                ? "MINIMAX_INSUFFICIENT_BALANCE"
+                : provider === "minimax"
+                  ? "MINIMAX_API_ERROR"
+                  : "GROQ_API_ERROR",
 
             error:
               friendlyMessage,
@@ -1455,7 +1747,37 @@ module.exports =
             provider,
 
             model:
-              usedModel
+              usedModel,
+
+            ...(minimaxBillingIssue &&
+              isMiniMaxFallbackEnabled()
+              ? {
+
+                  notice:
+                    {
+
+                      type:
+                        "billing",
+
+                      provider:
+                        "minimax",
+
+                      text:
+                        "رصيد MiniMax غير كافٍ (1008). " +
+                        (
+                          String(
+                            process.env.GROQ_API_KEY ||
+                            ""
+                          ).trim()
+                            ? "جرّب إعادة الإرسال؛ سيتم تحويل الطلب تلقائيًا إلى Groq في حال توفر مفتاحه. "
+                            : "أضف GROQ_API_KEY في Vercel ليعمل التحويل التلقائي إلى Groq. "
+                        ) +
+                        "أو اشحن رصيد MiniMax وأعد المحاولة."
+
+                    }
+
+                }
+              : {})
 
           }
         );
@@ -1510,7 +1832,32 @@ module.exports =
             provider,
 
             model:
-              usedModel
+              usedModel,
+
+            ...(billingFallback
+              ? {
+
+                  notice:
+                    {
+
+                      type:
+                        "billing",
+
+                      provider:
+                        "minimax",
+
+                      model:
+                        billingFallback.model,
+
+                      text:
+                        "رصيد MiniMax غير كافٍ (1008)، لذلك تم تحويل هذا الطلب تلقائيًا إلى Groq (" +
+                        billingFallback.model +
+                        ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل T.M.D Max."
+
+                    }
+
+                }
+              : {})
 
           }
         );
@@ -1540,7 +1887,32 @@ module.exports =
           usage:
             normalizeUsage(
               data?.usage
-            )
+            ),
+
+          ...(billingFallback
+            ? {
+
+                notice:
+                  {
+
+                    type:
+                      "billing",
+
+                    provider:
+                      "minimax",
+
+                    model:
+                      billingFallback.model,
+
+                    text:
+                      "رصيد MiniMax غير كافٍ (1008)، لذلك تم تحويل هذا الطلب تلقائيًا إلى Groq (" +
+                      billingFallback.model +
+                      ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل T.M.D Max."
+
+                  }
+
+              }
+            : {})
 
         }
       );

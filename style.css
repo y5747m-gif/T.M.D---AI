@@ -1313,6 +1313,33 @@ html, body {
   color: #ff4d6d;
   background: rgba(255, 77, 109, 0.1) !important;
   border-color: rgba(255, 77, 109, 0.3) !important;
+  white-space: pre-line;
+}
+
+/* Billing / provider notices (e.g. MiniMax balance exhausted) */
+.message-notice {
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  border-radius: 12px;
+  background: rgba(255, 209, 102, 0.1);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+
+.message-notice strong {
+  color: var(--accent-gold);
+}
+
+.message-notice .notice-link {
+  color: var(--accent-cyan);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 
