@@ -1240,6 +1240,19 @@ html, body {
   color: #e2e8f0;
 }
 
+/* Model and usage metadata */
+.message-meta {
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 9px;
+  border: 1px solid var(--line-glass);
+  border-radius: 999px;
+  background: rgba(0, 242, 254, 0.05);
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
 /* Message Actions Toolbar */
 .message-actions {
   display: flex;

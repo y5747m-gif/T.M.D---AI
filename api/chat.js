@@ -2,7 +2,7 @@
 
 /* =========================================================
    T.M.D_AI_Pro
-   FINAL GROQ API
+   Groq + MiniMax API Router
    Vercel Serverless Function
    /api/chat.js
    ========================================================= */
@@ -10,17 +10,31 @@
 const GROQ_URL =
   "https://api.groq.com/openai/v1/chat/completions";
 
+const MINIMAX_URL =
+  "https://api.minimax.io/v1/chat/completions";
+
 
 /* =========================================================
    MODELS
    ========================================================= */
 
-const ALLOWED_MODELS =
+const MINIMAX_MODEL =
+  "MiniMax-M3";
+
+const GROQ_MODELS =
   new Set(
     [
       "openai/gpt-oss-20b",
       "openai/gpt-oss-120b",
       "qwen/qwen3.8-27b"
+    ]
+  );
+
+const ALLOWED_MODELS =
+  new Set(
+    [
+      ...GROQ_MODELS,
+      MINIMAX_MODEL
     ]
   );
 
@@ -33,7 +47,7 @@ const CONFIGURED_TEXT_MODEL =
 
 
 const DEFAULT_TEXT_MODEL =
-  ALLOWED_MODELS.has(CONFIGURED_TEXT_MODEL)
+  GROQ_MODELS.has(CONFIGURED_TEXT_MODEL)
     ? CONFIGURED_TEXT_MODEL
     : "openai/gpt-oss-120b";
 
@@ -607,7 +621,7 @@ function cleanReply(
 
 
 /* =========================================================
-   CALL GROQ
+   PROVIDER CALLS
    ========================================================= */
 
 async function callGroq(
@@ -654,6 +668,152 @@ async function callGroq(
       body: JSON.stringify(payload)
     }
   );
+
+}
+
+
+async function callMiniMax(
+  apiKey,
+  model,
+  messages
+) {
+
+  return fetch(
+    MINIMAX_URL,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT
+          },
+          ...messages
+        ],
+        temperature: 0.35,
+        max_completion_tokens: 1200,
+        thinking: {
+          type: "disabled"
+        },
+        stream: false
+      })
+    }
+  );
+
+}
+
+
+function getProvider(
+  model
+) {
+
+  return model === MINIMAX_MODEL
+    ? "minimax"
+    : "groq";
+
+}
+
+
+function callProvider(
+  provider,
+  apiKey,
+  model,
+  messages
+) {
+
+  return provider === "minimax"
+    ? callMiniMax(apiKey, model, messages)
+    : callGroq(apiKey, model, messages);
+
+}
+
+
+function getProviderErrorMessage(
+  data
+) {
+
+  return String(
+    data?.error?.message ||
+    data?.error?.error?.message ||
+    data?.base_resp?.status_msg ||
+    ""
+  ).trim();
+
+}
+
+
+function hasProviderBusinessError(
+  provider,
+  data
+) {
+
+  if (provider !== "minimax") {
+    return false;
+  }
+
+  const statusCode =
+    Number(
+      data
+        ?.base_resp
+        ?.status_code
+    );
+
+  return (
+    Number.isFinite(statusCode) &&
+    statusCode !== 0
+  );
+
+}
+
+
+function normalizeUsage(
+  usage
+) {
+
+  if (
+    !usage ||
+    typeof usage !== "object"
+  ) {
+    return undefined;
+  }
+
+  const result = {};
+  const fields = [
+    "prompt_tokens",
+    "completion_tokens",
+    "total_tokens"
+  ];
+
+  for (const field of fields) {
+    const value = Number(usage[field]);
+    if (Number.isFinite(value) && value >= 0) {
+      result[field] = value;
+    }
+  }
+
+  const cachedTokens =
+    Number(
+      usage
+        ?.prompt_tokens_details
+        ?.cached_tokens
+    );
+
+  if (
+    Number.isFinite(cachedTokens) &&
+    cachedTokens >= 0
+  ) {
+    result.cached_tokens =
+      cachedTokens;
+  }
+
+  return Object.keys(result).length
+    ? result
+    : undefined;
 
 }
 
@@ -771,6 +931,80 @@ function explainGroqError(
 }
 
 
+function explainMiniMaxError(
+  status,
+  model,
+  providerMessage
+) {
+
+  const detail = providerMessage
+    ? `\n\nتفاصيل MiniMax: ${providerMessage}`
+    : "";
+
+  switch (status) {
+
+    case 401:
+      return (
+        "مفتاح MiniMax غير صالح أو منتهي (401). " +
+        "حدّث MINIMAX_API_KEY في إعدادات Vercel ثم أعد النشر." +
+        detail
+      );
+
+    case 403:
+      return (
+        "مفتاح MiniMax لا يملك صلاحية استخدام " +
+        model +
+        " (403). تحقق من تفعيل النموذج وخطة API في منصة MiniMax." +
+        detail
+      );
+
+    case 413:
+      return (
+        "حجم الطلب المرسل إلى MiniMax كبير جدًا (413). " +
+        "قلّل طول الرسالة أو حجم المرفق ثم حاول مجددًا." +
+        detail
+      );
+
+    case 429:
+      return (
+        "تم تجاوز حدود استخدام MiniMax مؤقتًا (429). " +
+        "انتظر قليلًا ثم أعد إرسال الرسالة." +
+        detail
+      );
+
+    case 400:
+    case 404:
+      return (
+        "تعذر استخدام نموذج " +
+        model +
+        " لدى MiniMax (" +
+        status +
+        "). تحقق من اسم النموذج وإعدادات حسابك." +
+        detail
+      );
+
+    default:
+      if (status >= 500) {
+        return (
+          "خدمة MiniMax تواجه مشكلة مؤقتة (" +
+          status +
+          "). أعد المحاولة بعد لحظات." +
+          detail
+        );
+      }
+
+      return (
+        "حدث خطأ أثناء الاتصال بخدمة MiniMax (" +
+        (status || "غير معروف") +
+        ")." +
+        detail
+      );
+
+  }
+
+}
+
+
 /* =========================================================
    MAIN HANDLER
    ========================================================= */
@@ -858,44 +1092,6 @@ module.exports =
     }
 
 
-    /*
-     * API KEY
-     */
-
-    const apiKey =
-      String(
-        process.env.GROQ_API_KEY ||
-        ""
-      ).trim();
-
-
-    if (!apiKey) {
-
-      console.error(
-        "GROQ_API_KEY is missing."
-      );
-
-
-      return sendJSON(
-        res,
-        500,
-        {
-
-          ok:
-            false,
-
-          code:
-            "MISSING_GROQ_API_KEY",
-
-          error:
-            "مفتاح Groq غير موجود في Vercel. أضف GROQ_API_KEY ثم اعمل Redeploy."
-
-        }
-      );
-
-    }
-
-
     try {
 
       /*
@@ -965,57 +1161,82 @@ module.exports =
 
 
       /*
-       * Choose model
+       * Choose model. MiniMax M3 can process both text and
+       * images; other image requests continue to use Groq Vision.
        */
+
+      const requestedModelIsMiniMax =
+        requestedModel === MINIMAX_MODEL;
 
       let model;
 
-
-      if (
-        hasImage
-      ) {
-
-        /*
-         * Images always use Vision.
-         */
-
-        model =
-          VISION_MODEL;
-
+      if (hasImage) {
+        model = requestedModelIsMiniMax
+          ? MINIMAX_MODEL
+          : VISION_MODEL;
       } else {
+        model = ALLOWED_MODELS.has(requestedModel)
+          ? requestedModel
+          : DEFAULT_TEXT_MODEL;
+      }
 
-        model =
-          ALLOWED_MODELS.has(
-            requestedModel
-          )
-            ? requestedModel
-            : DEFAULT_TEXT_MODEL;
+      const provider =
+        getProvider(model);
 
+      const apiKey =
+        String(
+          provider === "minimax"
+            ? process.env.MINIMAX_API_KEY || ""
+            : process.env.GROQ_API_KEY || ""
+        ).trim();
+
+      if (!apiKey) {
+        const isMiniMax =
+          provider === "minimax";
+
+        console.error(
+          isMiniMax
+            ? "MINIMAX_API_KEY is missing."
+            : "GROQ_API_KEY is missing."
+        );
+
+        return sendJSON(
+          res,
+          500,
+          {
+            ok: false,
+            code: isMiniMax
+              ? "MISSING_MINIMAX_API_KEY"
+              : "MISSING_GROQ_API_KEY",
+            error: isMiniMax
+              ? "مفتاح MiniMax غير موجود في Vercel. أضف MINIMAX_API_KEY ثم أعد النشر."
+              : "مفتاح Groq غير موجود في Vercel. أضف GROQ_API_KEY ثم أعد النشر."
+          }
+        );
       }
 
 
       /*
-       * Build the model candidate chain.
-       *
-       * لأي سبب — نموذج محذوف، أو غير مصرّح
-       * لمفتاحك (403) — نجرّب النموذج التالي
-       * في السلسلة بدل إظهار خطأ 403 للمستخدم.
+       * Groq keeps its text fallback chain. MiniMax requests stay
+       * on MiniMax M3 so selecting it never silently changes provider.
        */
 
-      const candidates = hasImage
-        ? [VISION_MODEL]
-        : [
-            ...new Set(
-              [
-                model,
-                ...TEXT_FALLBACK_CHAIN
-              ]
-            )
-          ];
+      const candidates = provider === "minimax"
+        ? [MINIMAX_MODEL]
+        : hasImage
+          ? [VISION_MODEL]
+          : [
+              ...new Set(
+                [
+                  model,
+                  ...TEXT_FALLBACK_CHAIN
+                ]
+              )
+            ];
 
 
       /*
-       * Call Groq through the fallback chain.
+       * Call the selected provider through its candidate chain.
        */
 
       let response = null;
@@ -1031,7 +1252,8 @@ module.exports =
         usedModel = candidates[i];
 
         response =
-          await callGroq(
+          await callProvider(
+            provider,
             apiKey,
             usedModel,
             messages
@@ -1047,7 +1269,7 @@ module.exports =
 
         /*
          * Retry a single rate-limited request
-         * using Groq's Retry-After header.
+         * using the provider's Retry-After header.
          */
 
         if (
@@ -1076,7 +1298,8 @@ module.exports =
           );
 
           response =
-            await callGroq(
+            await callProvider(
+              provider,
               apiKey,
               usedModel,
               messages
@@ -1097,7 +1320,11 @@ module.exports =
          */
 
         if (
-          response.ok
+          response.ok &&
+          !hasProviderBusinessError(
+            provider,
+            data
+          )
         ) {
           break;
         }
@@ -1123,7 +1350,7 @@ module.exports =
         ) {
 
           console.warn(
-            `Groq model ${usedModel} unavailable (HTTP ${response.status}). Falling back to ${candidates[i + 1]}.`
+            `${provider} model ${usedModel} unavailable (HTTP ${response.status}). Falling back to ${candidates[i + 1]}.`
           );
 
           continue;
@@ -1146,63 +1373,86 @@ module.exports =
        * the exact fix, instead of a bare 403.
        */
 
+      const providerBusinessError =
+        hasProviderBusinessError(
+          provider,
+          data
+        );
+
       if (
-        !response.ok
+        !response.ok ||
+        providerBusinessError
       ) {
 
-        const groqMessage =
-          data?.error?.message ||
-          data?.error?.error?.message ||
-          "";
+        const upstreamStatus =
+          response.ok
+            ? 502
+            : response.status;
+
+        const providerMessage =
+          getProviderErrorMessage(data);
 
 
         const friendlyMessage =
-          explainGroqError(
-            response.status,
-            usedModel,
-            hasImage,
-            groqMessage
-          );
+          provider === "minimax"
+            ? explainMiniMaxError(
+                upstreamStatus,
+                usedModel,
+                providerMessage
+              )
+            : explainGroqError(
+                upstreamStatus,
+                usedModel,
+                hasImage,
+                providerMessage
+              );
 
 
         console.error(
-          "Groq API Error",
+          `${provider === "minimax" ? "MiniMax" : "Groq"} API Error`,
           {
             status:
-              response.status,
+              upstreamStatus,
+
+            upstreamCode:
+              data?.base_resp?.status_code,
 
             model:
               usedModel,
 
             message:
-              groqMessage
+              providerMessage
           }
         );
 
 
         return sendJSON(
           res,
-          response.status >=
-            400
-            ? response.status
-            : 502,
+          upstreamStatus,
           {
 
             ok:
               false,
 
             code:
-              "GROQ_API_ERROR",
+              provider === "minimax"
+                ? "MINIMAX_API_ERROR"
+                : "GROQ_API_ERROR",
 
             error:
               friendlyMessage,
 
             detail:
-              groqMessage ||
+              providerMessage ||
               undefined,
 
             upstreamStatus:
               response.status,
+
+            upstreamCode:
+              data?.base_resp?.status_code,
+
+            provider,
 
             model:
               usedModel
@@ -1248,10 +1498,16 @@ module.exports =
               false,
 
             code:
-              "EMPTY_GROQ_REPLY",
+              provider === "minimax"
+                ? "EMPTY_MINIMAX_REPLY"
+                : "EMPTY_GROQ_REPLY",
 
             error:
-              "لم يرجع Groq إجابة نصية.",
+              provider === "minimax"
+                ? "لم يرجع MiniMax إجابة نصية."
+                : "لم يرجع Groq إجابة نصية.",
+
+            provider,
 
             model:
               usedModel
@@ -1276,8 +1532,15 @@ module.exports =
 
           reply,
 
+          provider,
+
           model:
-            usedModel
+            usedModel,
+
+          usage:
+            normalizeUsage(
+              data?.usage
+            )
 
         }
       );

@@ -2,6 +2,10 @@
 node_modules/
 .vercel/
 
+# Local environment files (never commit API keys)
+.env*
+!.env.example
+
 # Logs
 *.log
 
