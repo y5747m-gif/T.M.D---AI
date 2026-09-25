@@ -18,7 +18,10 @@ const state = {
   selectedImage: null,
   selectedDocument: null,
   imageMode: "analyze",
-  lastCreatorResponseIndex: -1
+  lastCreatorResponseIndex: -1,
+  // Set to true after MiniMax reports an empty balance (code 1008),
+  // so the UI can warn the user before the next attempt.
+  minimaxBillingBlocked: localStorage.getItem("tmd_minimax_billing") === "1"
 };
 
 const MODELS = {
@@ -1007,7 +1010,9 @@ function updateModelUI() {
   if (state.model === MODELS.vision) {
     modelName.textContent = "T.M.D Vision 27B";
   } else if (state.model === MODELS.minimax) {
-    modelName.textContent = "T.M.D Max — MiniMax M3";
+    modelName.textContent = state.minimaxBillingBlocked
+      ? "T.M.D Max — MiniMax M3 (⚠️ الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
+      : "T.M.D Max — MiniMax M3";
   } else if (state.model === MODELS.fast) {
     modelName.textContent = "T.M.D Fast 20B";
   } else {
@@ -1254,6 +1259,23 @@ function fileToDataURL(file) {
  * Translate HTTP errors into clear Arabic guidance
  * instead of showing a bare status code like "403".
  */
+/*
+ * Track the MiniMax billing state so the model selector can warn
+ * the user that requests will be served by Groq automatically.
+ */
+function setMiniMaxBillingBlocked(blocked) {
+  const next = Boolean(blocked);
+  if (state.minimaxBillingBlocked === next) return;
+  state.minimaxBillingBlocked = next;
+  try {
+    if (next) localStorage.setItem("tmd_minimax_billing", "1");
+    else localStorage.removeItem("tmd_minimax_billing");
+  } catch (err) {
+    console.warn("Failed to persist MiniMax billing state:", err);
+  }
+  updateModelUI();
+}
+
 function describeHttpError(status) {
   const usingMiniMax = state.model === MODELS.minimax;
   const provider = usingMiniMax ? "MiniMax" : "Groq";
@@ -1262,6 +1284,8 @@ function describeHttpError(status) {
   switch (status) {
     case 401:
       return `خدمة ${provider} ترفض المفتاح (401). حدّث ${keyName} في إعدادات Vercel ثم أعد النشر.`;
+    case 402:
+      return `رصيد حساب MiniMax غير كافٍ (402 / insufficient balance). اشحن الرصيد من platform.minimax.io أو اختر أحد نماذج Groq من قائمة النماذج.`;
     case 403:
       return `تم رفض الوصول (403). مفتاح ${provider} لا يملك صلاحية النموذج المطلوب — تحقق من صلاحيات النموذج أو حدّث المفتاح في Vercel ثم أعد النشر.`;
     case 404:
@@ -1370,10 +1394,18 @@ async function sendMessage() {
     removeLoadingMessage(loadingId);
 
     if (!response.ok) {
-      throw new Error(
+      const httpError = new Error(
         data?.error ||
         describeHttpError(response.status)
       );
+      // The backend may attach a billing/provider notice to the error.
+      if (data?.notice && typeof data.notice.text === "string") {
+        httpError.notice = data.notice.text;
+      }
+      if (data?.code === "MINIMAX_INSUFFICIENT_BALANCE") {
+        setMiniMaxBillingBlocked(true);
+      }
+      throw httpError;
     }
 
     if (!data?.ok) {
@@ -1387,13 +1419,33 @@ async function sendMessage() {
       throw new Error("لم يرجع النموذج إجابة نصية.");
     }
 
+    /*
+     * The backend may report that MiniMax has no balance left and
+     * that the request was served by Groq instead.
+     */
+    const notice = data?.notice && typeof data.notice.text === "string"
+      ? { type: data.notice.type || "info", text: data.notice.text }
+      : null;
+
     state.messages.push({
       role: "assistant",
       content: reply,
       model: typeof data.model === "string" ? data.model : model,
       provider: data.provider === "minimax" ? "minimax" : "groq",
-      usage: data.usage && typeof data.usage === "object" ? data.usage : undefined
+      usage: data.usage && typeof data.usage === "object" ? data.usage : undefined,
+      notice: notice || undefined
     });
+
+    if (notice) {
+      showToast(notice.text);
+    }
+
+    // Remember whether MiniMax has run out of balance.
+    if (data.provider === "minimax") {
+      setMiniMaxBillingBlocked(false);
+    } else if (notice?.type === "billing") {
+      setMiniMaxBillingBlocked(true);
+    }
 
     saveMessages();
     renderMessages();
@@ -1406,7 +1458,10 @@ async function sendMessage() {
       showToast("تم إيقاف المعالجة.");
     } else {
       showToast(error?.message || "حدث خطأ أثناء الاتصال.");
-      addErrorMessage(error?.message || "تعذر إكمال الرد، يرجى المحاولة مجددًا.");
+      addErrorMessage(
+        error?.message || "تعذر إكمال الرد، يرجى المحاولة مجددًا.",
+        error?.notice
+      );
     }
   } finally {
     state.busy = false;
@@ -1518,6 +1573,14 @@ function renderMessage(message, index) {
 
   const content = document.createElement("div");
   content.className = "message-content";
+
+  // Provider notice (billing / fallback)
+  if (message.notice && typeof message.notice.text === "string") {
+    const notice = document.createElement("div");
+    notice.className = "message-notice";
+    notice.textContent = `ℹ️ ${message.notice.text}`;
+    content.appendChild(notice);
+  }
 
   // Attached Image
   if (message.image) {
@@ -1703,13 +1766,14 @@ function removeLoadingMessage(id) {
   chat?.querySelector(`[data-loading-id="${id}"]`)?.remove();
 }
 
-function addErrorMessage(message) {
+function addErrorMessage(message, notice) {
   if (!chat) return;
   const wrapper = document.createElement("div");
   wrapper.className = "message assistant";
   wrapper.innerHTML = `
     <div class="message-avatar">!</div>
     <div class="message-content">
+      ${notice ? `<div class="message-notice">ℹ️ ${escapeHTML(notice)}</div>` : ""}
       <div class="message-text error-text">
         ⚠️ ${escapeHTML(message)}
       </div>
