@@ -24,16 +24,15 @@ const state = {
 const MODELS = {
   fast: "openai/gpt-oss-20b",
   smart: "openai/gpt-oss-120b",
-  vision: "qwen/qwen3.8-27b"
+  vision: "qwen/qwen3.8-27b",
+  minimax: "MiniMax-M3"
 };
 
 const VALID_MODELS = new Set([
   MODELS.fast,
   MODELS.smart,
   MODELS.vision,
-  "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b",
-  "qwen/qwen3.8-27b"
+  MODELS.minimax
 ]);
 
 if (!VALID_MODELS.has(state.model)) {
@@ -936,7 +935,8 @@ function bindEvents() {
 
   const settingsModel = document.getElementById("modelSelectSettings");
   settingsModel?.addEventListener("change", () => {
-    state.model = settingsModel.value;
+    const val = settingsModel.value;
+    state.model = VALID_MODELS.has(val) ? val : MODELS.smart;
     localStorage.setItem("tmd_model", state.model);
     if (modelSelect) modelSelect.value = state.model;
     updateModelUI();
@@ -1006,6 +1006,8 @@ function updateModelUI() {
 
   if (state.model === MODELS.vision) {
     modelName.textContent = "T.M.D Vision 27B";
+  } else if (state.model === MODELS.minimax) {
+    modelName.textContent = "T.M.D Max — MiniMax M3";
   } else if (state.model === MODELS.fast) {
     modelName.textContent = "T.M.D Fast 20B";
   } else {
@@ -1253,13 +1255,17 @@ function fileToDataURL(file) {
  * instead of showing a bare status code like "403".
  */
 function describeHttpError(status) {
+  const usingMiniMax = state.model === MODELS.minimax;
+  const provider = usingMiniMax ? "MiniMax" : "Groq";
+  const keyName = usingMiniMax ? "MINIMAX_API_KEY" : "GROQ_API_KEY";
+
   switch (status) {
     case 401:
-      return "خدمة الذكاء الاصطناعي ترفض المفتاح (401). حدّث GROQ_API_KEY في إعدادات Vercel ثم أعد النشر.";
+      return `خدمة ${provider} ترفض المفتاح (401). حدّث ${keyName} في إعدادات Vercel ثم أعد النشر.`;
     case 403:
-      return "تم رفض الوصول (403). مفتاح Groq لا يملك صلاحية النموذج المطلوب — فعّل النموذج في console.groq.com أو حدّث المفتاح في Vercel ثم أعد النشر.";
+      return `تم رفض الوصول (403). مفتاح ${provider} لا يملك صلاحية النموذج المطلوب — تحقق من صلاحيات النموذج أو حدّث المفتاح في Vercel ثم أعد النشر.`;
     case 404:
-      return "النموذج المطلوب غير موجود في خدمة Groq (404). اختر نموذجًا آخر من الإعدادات أو حدّث قائمة النماذج.";
+      return `النموذج المطلوب غير موجود في خدمة ${provider} (404). اختر نموذجًا آخر من الإعدادات أو راجع إعدادات النموذج.`;
     case 413:
       return "حجم الرسالة أو المرفق كبير جدًا (413). جرّب مرفقًا أصغر.";
     case 429:
@@ -1342,7 +1348,10 @@ async function sendMessage() {
     // 2. Normal Request to Backend
     const apiMessages = buildApiMessages();
     const hasImage = Boolean(attachedImage);
-    const model = hasImage ? MODELS.vision : (VALID_MODELS.has(state.model) ? state.model : MODELS.smart);
+    const selectedModel = VALID_MODELS.has(state.model) ? state.model : MODELS.smart;
+    const model = hasImage && selectedModel !== MODELS.minimax
+      ? MODELS.vision
+      : selectedModel;
 
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -1380,7 +1389,10 @@ async function sendMessage() {
 
     state.messages.push({
       role: "assistant",
-      content: reply
+      content: reply,
+      model: typeof data.model === "string" ? data.model : model,
+      provider: data.provider === "minimax" ? "minimax" : "groq",
+      usage: data.usage && typeof data.usage === "object" ? data.usage : undefined
     });
 
     saveMessages();
@@ -1530,6 +1542,28 @@ function renderMessage(message, index) {
     text.className = "message-text";
     text.innerHTML = renderMarkdown(message.content);
     content.appendChild(text);
+
+    // Show the actual provider/model and token usage returned by the API.
+    if (message.role === "assistant" && message.model) {
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+
+      const modelLabels = {
+        [MODELS.smart]: "GPT OSS 120B",
+        [MODELS.fast]: "GPT OSS 20B",
+        [MODELS.vision]: "Qwen Vision 27B",
+        [MODELS.minimax]: "MiniMax M3"
+      };
+
+      const parts = [modelLabels[message.model] || message.model];
+      const totalTokens = Number(message.usage?.total_tokens);
+      if (Number.isFinite(totalTokens) && totalTokens >= 0) {
+        parts.push(`الاستخدام: ${totalTokens.toLocaleString("ar-EG")} توكن`);
+      }
+
+      meta.textContent = parts.join(" • ");
+      content.appendChild(meta);
+    }
 
     // Message Actions Toolbar (Copy & TTS)
     const actions = document.createElement("div");

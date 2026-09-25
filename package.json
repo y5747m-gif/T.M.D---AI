@@ -2,11 +2,13 @@
   "name": "tmd-ai-pro",
   "version": "3.0.0",
   "private": true,
-  "description": "T.M.D_AI_Pro — Professional AI Chat Interface on Groq & Vercel",
+  "description": "T.M.D_AI_Pro — Professional AI Chat Interface on Groq, MiniMax & Vercel",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "test": "node --test",
+    "check": "node --check api/chat.js && node --check app.js && npm test"
   }
 }

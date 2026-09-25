@@ -4,6 +4,7 @@
 
 - **Vercel**
 - **Groq API**
+- **MiniMax API (MiniMax M3)**
 - **Vercel Blob**
 - JavaScript / HTML / CSS فقط في الواجهة
 
@@ -18,19 +19,32 @@
 أضف في Vercel Environment Variables:
 
 1. `GROQ_API_KEY`
-2. `GROQ_MODEL` (اختياري)
-3. `GROQ_VISION_MODEL` (اختياري)
-4. `OWNER_SECRET`
-5. `BLOB_READ_WRITE_TOKEN` (اختياري — لوحة المالك والصور)
+2. `MINIMAX_API_KEY` (لتشغيل MiniMax M3)
+3. `GROQ_MODEL` (اختياري)
+4. `GROQ_VISION_MODEL` (اختياري)
+5. `OWNER_SECRET`
+6. `BLOB_READ_WRITE_TOKEN` (اختياري — لوحة المالك والصور)
 
 القيم المقترحة:
 
 ```text
 GROQ_MODEL=openai/gpt-oss-120b
 GROQ_VISION_MODEL=qwen/qwen3.8-27b
+MINIMAX_API_KEY=ضع_مفتاح_MiniMax_هنا
 ```
 
 > ⚠️ **مهم:** لا تستخدم `llama-3.3-70b-versatile` — أصبح متاحًا لخطة Enterprise فقط على Groq، ولا تستخدم `qwen/qwen3.6-27b` — تم إيقافه من Groq.
+
+## استخدام MiniMax M3
+
+بعد إضافة `MINIMAX_API_KEY` في Vercel وإعادة النشر، اختر من قائمة النماذج:
+
+```text
+T.M.D Max — MiniMax M3 (البرمجة والسياق الطويل)
+```
+
+يرسل الخادم طلبات هذا الخيار فقط إلى واجهة MiniMax الرسمية المتوافقة مع OpenAI:
+`https://api.minimax.io/v1/chat/completions` باستخدام معرّف النموذج الدقيق `MiniMax-M3`. يدعم المسار المحادثات النصية والصور، ولا يُرسل مفتاح MiniMax إلى المتصفح. وتظهر أسفل كل إجابة خانة صغيرة باسم النموذج وإجمالي استهلاك التوكنات إذا أعادتها الخدمة.
 
 ## حل مشكلة 403 (تم رفض الوصول)
 
@@ -38,7 +52,8 @@ GROQ_VISION_MODEL=qwen/qwen3.8-27b
 
 1. **مفتاح Groq:** تأكد أن `GROQ_API_KEY` صالح في [console.groq.com/keys](https://console.groq.com/keys)، وحدّثه في Vercel ثم اضغط **Redeploy**.
 2. **صلاحيات النماذج:** افتح [console.groq.com](https://console.groq.com) ← Settings/Permissions وتأكد أن نماذج `openai/gpt-oss-120b` و `openai/gpt-oss-20b` و `qwen/qwen3.8-27b` مسموحة لمفتاحك.
-3. **السلسلة البديلة:** الخادم يجرّب تلقائيًا نماذج بديلة (`gpt-oss-120b` ثم `gpt-oss-20b`) إذا أعاد Groq خطأ 403/404 لنموذج ما، فيعمل الدردشة النصية حتى لو تعطل نموذج واحد.
+3. **MiniMax:** إذا ظهر الخطأ عند اختيار MiniMax M3، فتحقق من أن `MINIMAX_API_KEY` هو اسم المتغير بالضبط وأن المفتاح يملك صلاحية `MiniMax-M3`، ثم أعد النشر.
+4. **السلسلة البديلة:** الخادم يجرّب تلقائيًا نماذج Groq البديلة (`gpt-oss-120b` ثم `gpt-oss-20b`) إذا أعاد Groq خطأ 403/404 لنموذج ما. أما MiniMax M3 فلا يتحول سرًا إلى مزود آخر عند تعطله.
 
 ## Vercel Blob
 
@@ -69,13 +84,13 @@ GROQ_VISION_MODEL=qwen/qwen3.8-27b
 - تحليل صورة
 - اقتراح تعديلات على صورة
 
-التحليل يتم بواسطة نموذج Groq متعدد الوسائط.
+التحليل يتم بواسطة نموذج Groq متعدد الوسائط افتراضيًا، أو بواسطة MiniMax M3 عندما يكون هو النموذج المحدد.
 
 هذه النسخة لا تدّعي أنها تعدّل ملف الصورة فعليًا؛ وضع "اقتراح تعديلات" يعطي تعليمات دقيقة للتعديل. تنفيذ تعديل/توليد الصورة نفسها يحتاج خدمة صور إضافية.
 
 ## ملاحظة عن المجانية
 
-Vercel Blob له حدود استخدام في خطة Hobby، وGroq له حدود/أسعار بحسب الحساب والنموذج. لذلك لا يوجد ضمان لاستخدام غير محدود مجانًا. هذه البنية لا تحتاج OpenAI API.
+Vercel Blob له حدود استخدام في خطة Hobby، ولكل من Groq وMiniMax حدود/أسعار بحسب الحساب والنموذج. لذلك لا يوجد ضمان لاستخدام غير محدود مجانًا. هذه البنية لا تحتاج OpenAI API.
 
 ## 🔍 SEO والفهرسة في Google
 
@@ -112,7 +127,7 @@ grep -rl "t-m-d-ai.vercel.app" . --exclude-dir=.git
 1. ارفع المشروع إلى GitHub (هذا المستودع) أو استخدم Vercel CLI.
 2. من [vercel.com](https://vercel.com) ← **Add New… → Project** ← اختر المستودع.
 3. لا يلزم أي إعداد بناء (Framework: Other/Static) — المشروع يعمل كما هو مع مجلد `api/`.
-4. أضف Environment Variables من Settings → Environment Variables: `GROQ_API_KEY` وبقية المتغيرات المذكورة أعلاه.
+4. أضف Environment Variables من Settings → Environment Variables: `GROQ_API_KEY` و`MINIMAX_API_KEY` وبقية المتغيرات المذكورة أعلاه.
 5. اضغط **Deploy**. للنشر اليدوي عبر CLI: `npm i -g vercel && vercel --prod`.
 6. لربط دومين مخصص: Settings → Domains ← أضف دومينك وحدّث الروابط كما في الفقرة السابقة.
 
