@@ -75,11 +75,12 @@ public class OverlayService extends Service {
         web.loadUrl("https://t-m-d-ai.vercel.app/assistant.html?android=1");
         overlay.addView(web, new FrameLayout.LayoutParams(-1, -1));
 
-        int width = Math.min(dp(390), Resources.getSystem().getDisplayMetrics().widthPixels - dp(20));
-        int height = Math.min(dp(650), Resources.getSystem().getDisplayMetrics().heightPixels - dp(80));
+        // نافذة صغيرة فعلية، وليست لوحة ملء الشاشة. يمكن للمستخدم سحبها من الرأس.
+        int width = Math.min(dp(350), Resources.getSystem().getDisplayMetrics().widthPixels - dp(20));
+        int height = Math.min(dp(520), Resources.getSystem().getDisplayMetrics().heightPixels - dp(80));
         params = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.END; params.x = dp(10); params.y = dp(55);
         overlay.setOnTouchListener(new DragTouch());
