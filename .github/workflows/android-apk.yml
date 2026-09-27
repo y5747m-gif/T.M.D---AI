@@ -1,0 +1,35 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, arena/01a0e10a-t-m-d-ai]
+    paths:
+      - 'android-app/**'
+      - 'floating-assistant.js'
+      - '.github/workflows/android-apk.yml'
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Build installable APK
+        run: gradle assembleRelease --stacktrace
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk ../TMD-AI.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TMD-AI-Android-APK
+          path: TMD-AI.apk
+          if-no-files-found: error
