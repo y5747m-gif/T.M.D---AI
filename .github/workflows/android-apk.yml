@@ -3,10 +3,11 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, arena/01a0e149-t-m-d-ai]
+    branches: [main, arena/01a0e156-t-m-d-ai]
     paths:
       - 'android-app/**'
       - 'floating-assistant.js'
+      - 'floating-assistant.css'
       - '.github/workflows/android-apk.yml'
 
 jobs:
@@ -28,8 +29,10 @@ jobs:
         run: gradle assembleRelease --stacktrace
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk ../TMD-AI.apk
-      - uses: actions/upload-artifact@v4
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
         with:
           name: TMD-AI-Android-APK
           path: TMD-AI.apk
           if-no-files-found: error
+          retention-days: 30
