@@ -6,22 +6,138 @@
    =========================================================================== */
 
 /* =========================================================
-   1. GLOBAL STATE
+   1. GLOBAL STATE + SAFE LOCAL STORAGE
    ========================================================= */
+const STORAGE_KEYS = {
+  messages: "tmd_messages",
+  conversations: "tmd_conversations",
+  theme: "tmd_theme",
+  model: "tmd_model",
+  minimaxBilling: "tmd_minimax_billing",
+  floatingBubble: "tmd_float_enabled"
+};
+
+function safeGetItem(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    console.warn("LocalStorage read failed:", key, error);
+    return null;
+  }
+}
+
+function safeSetItem(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    console.warn("LocalStorage write failed:", key, error);
+    return false;
+  }
+}
+
+function safeRemoveItem(key) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.warn("LocalStorage remove failed:", key, error);
+  }
+}
+
+function safeReadJSON(key, fallback) {
+  const raw = safeGetItem(key);
+  if (raw == null || raw === "") return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn("Invalid JSON in LocalStorage; resetting key:", key, error);
+    safeRemoveItem(key);
+    return fallback;
+  }
+}
+
+function safeRole(role) {
+  return role === "assistant" || role === "user" || role === "error" ? role : "assistant";
+}
+
+function sanitizeMessageForStorage(message) {
+  if (!message || typeof message !== "object") return null;
+  const role = safeRole(message.role);
+  const content = typeof message.content === "string" ? message.content.slice(0, 20000) : "";
+  if (!content && !message.fileName && !message.imageName) return null;
+
+  const clean = {
+    role,
+    content
+  };
+
+  if (typeof message.fileName === "string") clean.fileName = message.fileName.slice(0, 180);
+  if (typeof message.imageName === "string") clean.imageName = message.imageName.slice(0, 180);
+  if (typeof message.model === "string") clean.model = message.model.slice(0, 80);
+  if (message.provider === "groq" || message.provider === "minimax") clean.provider = message.provider;
+  if (message.notice && typeof message.notice.text === "string") {
+    clean.notice = {
+      type: typeof message.notice.type === "string" ? message.notice.type.slice(0, 40) : "info",
+      text: message.notice.text.slice(0, 800)
+    };
+  }
+  if (message.usage && typeof message.usage === "object") {
+    clean.usage = {};
+    ["prompt_tokens", "completion_tokens", "total_tokens", "cached_tokens"].forEach((key) => {
+      const value = Number(message.usage[key]);
+      if (Number.isFinite(value) && value >= 0) clean.usage[key] = value;
+    });
+    if (!Object.keys(clean.usage).length) delete clean.usage;
+  }
+
+  // لا نحفظ بيانات الصور أو نصوص الملفات الطويلة في LocalStorage حفاظًا على الخصوصية والأداء.
+  return clean;
+}
+
+function sanitizeMessagesForStorage(messages, limit = 50) {
+  if (!Array.isArray(messages)) return [];
+  return messages
+    .map(sanitizeMessageForStorage)
+    .filter(Boolean)
+    .slice(-limit);
+}
+
+function sanitizeConversationsForStorage(conversations) {
+  if (!Array.isArray(conversations)) return [];
+  return conversations
+    .map((conversation) => {
+      if (!conversation || typeof conversation !== "object") return null;
+      const messages = sanitizeMessagesForStorage(conversation.messages, 50);
+      const title = typeof conversation.title === "string" && conversation.title.trim()
+        ? conversation.title.trim().slice(0, 80)
+        : "محادثة جديدة";
+      return {
+        id: Number.isFinite(Number(conversation.id)) ? Number(conversation.id) : Date.now(),
+        title,
+        messages,
+        active: Boolean(conversation.active)
+      };
+    })
+    .filter(Boolean)
+    .slice(-30);
+}
+
 const state = {
-  messages: JSON.parse(localStorage.getItem("tmd_messages") || "[]"),
-  conversations: JSON.parse(localStorage.getItem("tmd_conversations") || "[]"),
-  theme: localStorage.getItem("tmd_theme") || "dark",
-  model: localStorage.getItem("tmd_model") || "openai/gpt-oss-120b",
+  messages: sanitizeMessagesForStorage(safeReadJSON(STORAGE_KEYS.messages, []), 50),
+  conversations: sanitizeConversationsForStorage(safeReadJSON(STORAGE_KEYS.conversations, [])),
+  theme: safeGetItem(STORAGE_KEYS.theme) === "light" ? "light" : "dark",
+  model: safeGetItem(STORAGE_KEYS.model) || "openai/gpt-oss-120b",
+  floatingBubbleEnabled: safeGetItem(STORAGE_KEYS.floatingBubble) !== "0",
   busy: false,
   controller: null,
+  abortReason: "",
   selectedImage: null,
   selectedDocument: null,
   imageMode: "analyze",
   lastCreatorResponseIndex: -1,
   // Set to true after MiniMax reports an empty balance (code 1008),
   // so the UI can warn the user before the next attempt.
-  minimaxBillingBlocked: localStorage.getItem("tmd_minimax_billing") === "1"
+  minimaxBillingBlocked: safeGetItem(STORAGE_KEYS.minimaxBilling) === "1"
 };
 
 const MODELS = {
@@ -37,6 +153,8 @@ const VALID_MODELS = new Set([
   MODELS.vision,
   MODELS.minimax
 ]);
+
+const REQUEST_TIMEOUT_MS = 45000;
 
 /* شعار المساعد (شرارة ب نمط Gemini) — معرّف فريد لكل نسخة حتى لا تتعارض التدرجات */
 let __tmdSparkSeq = 0;
@@ -55,7 +173,7 @@ function botSparkHTML() {
 
 if (!VALID_MODELS.has(state.model)) {
   state.model = MODELS.smart;
-  localStorage.setItem("tmd_model", state.model);
+  safeSetItem(STORAGE_KEYS.model, state.model);
 }
 
 
@@ -663,7 +781,7 @@ class UserBackgroundManager {
       this.applySettings();
       showToast("تم تعيين صورتك المخصصة بنجاح!");
     } catch (err) {
-      console.error("Background compression error:", err);
+      console.warn("Background compression error:", err);
       showToast("تعذر تحميل الصورة، يرجى اختيار صورة أخرى.");
     }
   }
@@ -724,7 +842,7 @@ let addImageButton, analyzeDocumentButton, imageEditButton;
 let imagePreviewContainer, imagePreview, imageFileName, imageModeLabel, removeImage;
 let historyList, newChat;
 let settingsBtn, modalBackdrop, modalClose;
-let themeSelect, modelSelect, modelName;
+let themeSelect, modelSelect, modelName, floatBubbleToggle;
 let toast, sidebar, openSidebar, closeSidebar, sidebarBackdrop;
 let exportChatBtn, clearChatBtn, clearAllHistoryBtn;
 let scrollBottomBtn;
@@ -751,6 +869,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMessages();
   setupTextarea();
   setupScrollBottom();
+  setupVisualViewportFix();
+  syncFloatingBubbleToggle();
+  updateComposerState();
 });
 
 function cacheElements() {
@@ -785,6 +906,7 @@ function cacheElements() {
   themeSelect = document.getElementById("themeSelect");
   modelSelect = document.getElementById("modelSelect");
   modelName = document.getElementById("modelName");
+  floatBubbleToggle = document.getElementById("floatBubbleToggle");
 
   toast = document.getElementById("toast");
   sidebar = document.getElementById("sidebar");
@@ -894,6 +1016,10 @@ function bindEvents() {
 
   // تثبيت المساعد العائم فوق كل التطبيقات (زر الشريط العلوي + الإعدادات + التلميح السريع)
   const pinFloatingAssistant = () => {
+    if (state.floatingBubbleEnabled === false) {
+      showToast("فعّل خيار «إظهار فقاعة T.M.D AI» من الإعدادات أولًا.");
+      return;
+    }
     const api = window.__tmdFloatingAssistant;
     if (api && typeof api.pin === "function") {
       api.pin();
@@ -944,13 +1070,17 @@ function bindEvents() {
   // Theme Sync & Toggles
   themeSelect?.addEventListener("change", () => {
     state.theme = themeSelect.value === "light" ? "light" : "dark";
-    localStorage.setItem("tmd_theme", state.theme);
+    safeSetItem(STORAGE_KEYS.theme, state.theme);
     applyTheme();
+  });
+
+  floatBubbleToggle?.addEventListener("change", () => {
+    setFloatingBubbleEnabled(Boolean(floatBubbleToggle.checked));
   });
 
   const toggleTheme = () => {
     state.theme = state.theme === "light" ? "dark" : "light";
-    localStorage.setItem("tmd_theme", state.theme);
+    safeSetItem(STORAGE_KEYS.theme, state.theme);
     applyTheme();
     showToast(state.theme === "light" ? "تم التبديل للمظهر الفاتح" : "تم التبديل للمظهر الداكن");
   };
@@ -962,7 +1092,7 @@ function bindEvents() {
   modelSelect?.addEventListener("change", () => {
     const val = modelSelect.value;
     state.model = VALID_MODELS.has(val) ? val : MODELS.smart;
-    localStorage.setItem("tmd_model", state.model);
+    safeSetItem(STORAGE_KEYS.model, state.model);
     updateModelUI();
     const settingsModel = document.getElementById("modelSelectSettings");
     if (settingsModel) settingsModel.value = state.model;
@@ -972,7 +1102,7 @@ function bindEvents() {
   settingsModel?.addEventListener("change", () => {
     const val = settingsModel.value;
     state.model = VALID_MODELS.has(val) ? val : MODELS.smart;
-    localStorage.setItem("tmd_model", state.model);
+    safeSetItem(STORAGE_KEYS.model, state.model);
     if (modelSelect) modelSelect.value = state.model;
     updateModelUI();
   });
@@ -985,6 +1115,7 @@ function bindEvents() {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 180) + "px";
       input.focus();
+      updateComposerState();
     });
   });
 }
@@ -1005,6 +1136,7 @@ function setupTextarea() {
   input.addEventListener("input", () => {
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 180) + "px";
+    updateComposerState();
   });
 }
 
@@ -1024,6 +1156,66 @@ function setupScrollBottom() {
   });
 }
 
+function setupVisualViewportFix() {
+  if (!window.visualViewport || !document.documentElement) return;
+  const isIOSLike = /iP(hone|ad|od)/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!isIOSLike) return;
+
+  const update = () => {
+    const viewport = window.visualViewport;
+    const focused = document.activeElement === input;
+    const inset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+    document.documentElement.style.setProperty("--keyboard-inset", focused && inset > 60 ? `${Math.round(inset)}px` : "0px");
+    document.body.classList.toggle("keyboard-adjust", focused && inset > 60);
+  };
+
+  window.visualViewport.addEventListener("resize", update);
+  window.visualViewport.addEventListener("scroll", update);
+  input?.addEventListener("focus", update);
+  input?.addEventListener("blur", () => {
+    document.documentElement.style.setProperty("--keyboard-inset", "0px");
+    document.body.classList.remove("keyboard-adjust");
+  });
+  update();
+}
+
+function updateComposerState() {
+  if (!sendButton) return;
+  if (state.busy) {
+    sendButton.disabled = false;
+    return;
+  }
+  const hasText = Boolean(input?.value?.trim());
+  const hasAttachment = Boolean(state.selectedImage || state.selectedDocument);
+  sendButton.disabled = !(hasText || hasAttachment);
+}
+
+function syncFloatingBubbleToggle() {
+  if (floatBubbleToggle) {
+    floatBubbleToggle.checked = state.floatingBubbleEnabled !== false;
+  }
+}
+
+function setFloatingBubbleEnabled(enabled) {
+  state.floatingBubbleEnabled = Boolean(enabled);
+  safeSetItem(STORAGE_KEYS.floatingBubble, state.floatingBubbleEnabled ? "1" : "0");
+  syncFloatingBubbleToggle();
+
+  const api = window.__tmdFloatingAssistant;
+  if (api && typeof api.setEnabled === "function") {
+    api.setEnabled(state.floatingBubbleEnabled);
+  } else {
+    window.dispatchEvent(new CustomEvent("tmd-floating-enabled-change", {
+      detail: { enabled: state.floatingBubbleEnabled }
+    }));
+  }
+
+  showToast(state.floatingBubbleEnabled
+    ? "تم إظهار فقاعة T.M.D AI."
+    : "تم إخفاء فقاعة T.M.D AI. يمكنك إعادتها من الإعدادات.");
+}
+
 
 /* =========================================================
    9. THEME & MODEL UI
@@ -1033,10 +1225,14 @@ function applyTheme() {
   document.documentElement.dataset.theme = state.theme;
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#f0f3fa" : "#050912");
 }
 
 function updateModelUI() {
   if (modelSelect) modelSelect.value = state.model;
+  const settingsModel = document.getElementById("modelSelectSettings");
+  if (settingsModel) settingsModel.value = state.model;
   if (!modelName) return;
 
   if (state.model === MODELS.vision) {
@@ -1102,7 +1298,7 @@ async function handleImageSelection(event) {
     updateImageMode();
     showToast("تم إرفاق الصورة بنجاح.");
   } catch (error) {
-    console.error("Image selection error:", error);
+    console.warn("Image selection error:", error);
     showToast(error?.message || "تعذر قراءة الصورة.");
   }
 }
@@ -1157,6 +1353,7 @@ function showImagePreview() {
   if (imagePreview) imagePreview.src = state.selectedImage.dataURL;
   if (imageFileName) imageFileName.textContent = state.selectedImage.name;
   if (imagePreviewContainer) imagePreviewContainer.classList.remove("hidden");
+  updateComposerState();
 }
 
 function updateImageMode() {
@@ -1173,6 +1370,7 @@ function resetAttachment() {
   if (documentInput) documentInput.value = "";
   if (imagePreview) imagePreview.removeAttribute("src");
   if (imagePreviewContainer) imagePreviewContainer.classList.add("hidden");
+  updateComposerState();
 }
 
 
@@ -1212,8 +1410,9 @@ async function handleDocumentSelection(event) {
       input.style.height = Math.min(input.scrollHeight, 180) + "px";
     }
     input?.focus();
+    updateComposerState();
   } catch (error) {
-    console.error("Document error:", error);
+    console.warn("Document error:", error);
     state.selectedDocument = null;
     showToast(error?.message || "تعذر قراءة الملف.");
   }
@@ -1300,8 +1499,8 @@ function setMiniMaxBillingBlocked(blocked) {
   if (state.minimaxBillingBlocked === next) return;
   state.minimaxBillingBlocked = next;
   try {
-    if (next) localStorage.setItem("tmd_minimax_billing", "1");
-    else localStorage.removeItem("tmd_minimax_billing");
+    if (next) safeSetItem(STORAGE_KEYS.minimaxBilling, "1");
+    else safeRemoveItem(STORAGE_KEYS.minimaxBilling);
   } catch (err) {
     console.warn("Failed to persist MiniMax billing state:", err);
   }
@@ -1349,6 +1548,11 @@ async function sendMessage() {
 
   state.busy = true;
   state.controller = new AbortController();
+  state.abortReason = "";
+  const timeoutId = window.setTimeout(() => {
+    state.abortReason = "timeout";
+    state.controller?.abort();
+  }, REQUEST_TIMEOUT_MS);
   setSendingState(true);
 
   // Build User Message
@@ -1422,7 +1626,15 @@ async function sendMessage() {
       signal: state.controller.signal
     });
 
-    const data = await response.json().catch(() => ({}));
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      if (response.ok) {
+        throw new Error("تعذر قراءة رد الخادم، حاول مرة أخرى.");
+      }
+      data = {};
+    }
     removeLoadingMessage(loadingId);
 
     if (!response.ok) {
@@ -1484,20 +1696,29 @@ async function sendMessage() {
     saveConversation();
   } catch (error) {
     removeLoadingMessage(loadingId);
-    console.error("T.M.D_AI_Pro Message Error:", error);
 
     if (error?.name === "AbortError") {
-      showToast("تم إيقاف المعالجة.");
+      if (state.abortReason === "timeout") {
+        const message = "استغرق الطلب وقتًا أطول من المتوقع، حاول مرة أخرى.";
+        showToast(message);
+        addErrorMessage(message);
+      } else {
+        showToast("تم إيقاف المعالجة.");
+      }
     } else {
-      showToast(error?.message || "حدث خطأ أثناء الاتصال.");
+      console.warn("T.M.D_AI_Pro Message Error:", error?.message || error);
+      const message = error?.message || "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.";
+      showToast(message);
       addErrorMessage(
-        error?.message || "تعذر إكمال الرد، يرجى المحاولة مجددًا.",
+        message,
         error?.notice
       );
     }
   } finally {
+    window.clearTimeout(timeoutId);
     state.busy = false;
     state.controller = null;
+    state.abortReason = "";
     setSendingState(false);
   }
 }
@@ -1819,17 +2040,22 @@ function addErrorMessage(message, notice) {
 function setSendingState(sending) {
   if (!sendButton) return;
   if (sending) {
+    sendButton.disabled = false;
     sendButton.classList.add("stop");
     sendButton.innerHTML = `<span style="font-size:1.1rem;">■</span>`;
     sendButton.setAttribute("aria-label", "إيقاف");
+    sendButton.setAttribute("title", "إيقاف الطلب الحالي");
   } else {
     sendButton.classList.remove("stop");
     sendButton.innerHTML = `<svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`;
     sendButton.setAttribute("aria-label", "إرسال");
+    sendButton.setAttribute("title", "إرسال (Enter)");
+    updateComposerState();
   }
 }
 
 function stopRequest() {
+  state.abortReason = "manual";
   if (state.controller) state.controller.abort();
 }
 
@@ -1846,7 +2072,7 @@ function scrollToBottom() {
 function saveMessages() {
   try {
     state.messages = state.messages.slice(-50);
-    localStorage.setItem("tmd_messages", JSON.stringify(state.messages));
+    safeSetItem(STORAGE_KEYS.messages, JSON.stringify(sanitizeMessagesForStorage(state.messages, 50)));
   } catch (error) {
     console.warn("Storage quota fallback:", error);
     const lightweight = state.messages.map(m => ({
@@ -1855,7 +2081,7 @@ function saveMessages() {
       fileName: m.fileName
     }));
     try {
-      localStorage.setItem("tmd_messages", JSON.stringify(lightweight.slice(-25)));
+      safeSetItem(STORAGE_KEYS.messages, JSON.stringify(lightweight.slice(-25)));
     } catch {}
   }
 }
@@ -1884,7 +2110,7 @@ function saveConversation() {
       c.active = (idx === state.conversations.length - 1);
     });
 
-    localStorage.setItem("tmd_conversations", JSON.stringify(state.conversations));
+    safeSetItem(STORAGE_KEYS.conversations, JSON.stringify(sanitizeConversationsForStorage(state.conversations)));
     renderHistory();
   } catch (e) {
     console.warn("Could not save conversation:", e);
@@ -1940,7 +2166,7 @@ function createNewChat() {
   resetAttachment();
   renderMessages();
   saveMessages();
-  localStorage.setItem("tmd_conversations", JSON.stringify(state.conversations));
+  safeSetItem(STORAGE_KEYS.conversations, JSON.stringify(sanitizeConversationsForStorage(state.conversations)));
   renderHistory();
   sidebar?.classList.remove("open");
   sidebarBackdrop?.classList.remove("show");
@@ -1967,8 +2193,8 @@ function clearAllConversations() {
   }
   state.messages = [];
   state.conversations = [];
-  localStorage.removeItem("tmd_messages");
-  localStorage.removeItem("tmd_conversations");
+  safeRemoveItem(STORAGE_KEYS.messages);
+  safeRemoveItem(STORAGE_KEYS.conversations);
   resetAttachment();
   renderMessages();
   renderHistory();
@@ -2006,6 +2232,7 @@ function exportCurrentChat() {
    17. MODALS & UTILITIES
    ========================================================= */
 function openSettings() {
+  syncFloatingBubbleToggle();
   modalBackdrop?.classList.remove("hidden");
 }
 
@@ -2041,6 +2268,7 @@ window.TMDAI = {
   stopRequest,
   togglePlusMenu,
   closePlusMenu,
+  setFloatingBubbleEnabled,
   showToast
 };
 

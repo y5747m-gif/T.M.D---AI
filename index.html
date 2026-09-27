@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#050912">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="T.M.D AI">
   <meta name="description" content="T.M.D_AI_Pro — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها، بواجهة متجاوبة وتصميم كوني فريد. تطوير وتصميم ياسين عمرو عبد الرحيم.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="ياسين عمرو عبد الرحيم">
@@ -303,6 +304,12 @@
 
 
         <div class="topbar-left">
+
+          <!-- زر تثبيت التطبيق كـ PWA على الهاتف -->
+          <button class="topbar-action-btn install-app-btn" id="installAppBtn" type="button" title="تثبيت T.M.D AI كتطبيق على الهاتف" hidden>
+            <span class="topbar-btn-icon">📲</span>
+            <span class="topbar-btn-text">تثبيت التطبيق</span>
+          </button>
 
           <!-- زر تثبيت المساعد العائم فوق كل التطبيقات -->
           <button class="topbar-action-btn pin-assistant-btn" id="pinAssistantBtn" type="button" title="تثبيت المساعد كنافذة عائمة فوق كل التطبيقات — يبقى يعمل دون البقاء داخل الموقع">
@@ -822,6 +829,27 @@
           </select>
         </div>
 
+        <div class="setting setting--action" id="installSettingRow" hidden>
+          <div class="setting-info">
+            <label class="setting-label">تثبيت T.M.D AI كتطبيق</label>
+            <span class="setting-desc" id="installSettingDesc">احصل على تجربة مستقلة بدون واجهة المتصفح قدر الإمكان.</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="installFromSettingsBtn" type="button">
+            📲 تثبيت التطبيق
+          </button>
+        </div>
+
+        <div class="setting setting--action">
+          <div class="setting-info">
+            <label class="setting-label" for="floatBubbleToggle">إظهار فقاعة T.M.D AI</label>
+            <span class="setting-desc">إظهار أو إخفاء الفقاعة العائمة المتصلة فعليًا بالمساعد الذكي.</span>
+          </div>
+          <label class="toggle-switch" title="إظهار فقاعة T.M.D AI">
+            <input type="checkbox" id="floatBubbleToggle" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
         <div class="setting setting--action">
           <div class="setting-info">
             <label class="setting-label">تخصيص الخلفية الشخصية</label>
@@ -912,7 +940,7 @@
       window.pdfjsLib = pdfjs;
       window.pdfjsReady = Promise.resolve(pdfjs);
     } catch (error) {
-      console.error("PDF.js initialization failed:", error);
+      console.warn("PDF.js initialization failed:", error);
       window.pdfjsReady = Promise.reject(error);
     }
   </script>
@@ -920,6 +948,7 @@
   <!-- ==================================================
        APPLICATION JAVASCRIPT
   ================================================== -->
+  <script defer src="/pwa.js"></script>
   <script src="/app.js"></script>
 
 

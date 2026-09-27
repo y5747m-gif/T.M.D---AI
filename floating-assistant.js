@@ -18,12 +18,14 @@
   /* ============ إعدادات عامة ============ */
   const STORE_KEY = "tmd_float_state";
   const CHAT_KEY = "tmd_float_chat";
+  const ENABLE_KEY = "tmd_float_enabled";
   // رابط مطلق حتى يستمر العمل من داخل نافذة التثبيت العائمة (PiP).
   const API_URL = new URL("/api/chat", window.location.href).href;
   const SITE_URL = new URL("/", window.location.href).href;
   const TEXT_MODEL = "openai/gpt-oss-120b";
   const VISION_MODEL = "qwen/qwen3.8-27b";
   const MAX_TURNS = 14;
+  const REQUEST_TIMEOUT_MS = 45000;
 
   const SYSTEM_PROMPT =
     "أنت T.M.D_AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة عائمة فوق بقية التطبيقات. " +
@@ -82,6 +84,8 @@
     listening: false,
     sharing: false,
     pinned: false,
+    enabled: true,
+    abortReason: "",
     controller: null,
     stream: null,
     messages: [],
@@ -98,6 +102,7 @@
         const raw = localStorage.getItem(key);
         return raw ? JSON.parse(raw) : fallback;
       } catch (e) {
+        try { localStorage.removeItem(key); } catch (err) { /* تجاهل */ }
         return fallback;
       }
     },
@@ -105,8 +110,33 @@
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (e) { /* تجاهل */ }
+    },
+    readFlag(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw == null) return fallback;
+        return raw !== "0" && raw !== "false";
+      } catch (e) {
+        return fallback;
+      }
+    },
+    writeFlag(key, value) {
+      try { localStorage.setItem(key, value ? "1" : "0"); } catch (e) { /* تجاهل */ }
     }
   };
+
+  state.enabled = store.readFlag(ENABLE_KEY, true);
+
+  function persistableMessages(messages) {
+    if (!Array.isArray(messages)) return [];
+    return messages
+      .filter((m) => m && typeof m.content === "string")
+      .map((m) => ({
+        role: m.role === "user" || m.role === "assistant" || m.role === "error" ? m.role : "assistant",
+        content: m.content.slice(0, 12000)
+      }))
+      .slice(-MAX_TURNS * 2);
+  }
 
   /* ============ مزامنة المحادثة بين النوافذ ============ */
   const channel = "BroadcastChannel" in window ? new BroadcastChannel("tmd_float_sync") : null;
@@ -123,7 +153,7 @@
 
   function broadcastChat() {
     if (channel) {
-      try { channel.postMessage({ type: "chat", messages: state.messages }); } catch (e) { /* تجاهل */ }
+      try { channel.postMessage({ type: "chat", messages: persistableMessages(state.messages) }); } catch (e) { /* تجاهل */ }
     }
   }
 
@@ -202,6 +232,32 @@
     setTimeout(() => el.fabTag.classList.remove("is-visible"), 2600);
   }
 
+  function applyEnabledState() {
+    fab.hidden = !state.enabled;
+    fab.setAttribute("aria-hidden", state.enabled ? "false" : "true");
+    if (!state.enabled) {
+      closeWin();
+      fab.classList.remove("is-pinned");
+    }
+  }
+
+  function setEnabled(value) {
+    state.enabled = Boolean(value);
+    store.writeFlag(ENABLE_KEY, state.enabled);
+    applyEnabledState();
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === ENABLE_KEY) {
+      state.enabled = event.newValue !== "0" && event.newValue !== "false";
+      applyEnabledState();
+    }
+  });
+
+  window.addEventListener("tmd-floating-enabled-change", (event) => {
+    setEnabled(Boolean(event.detail?.enabled));
+  });
+
   function escapeHTML(text) {
     return String(text)
       .replace(/&/g, "&amp;")
@@ -224,7 +280,7 @@
   }
 
   function saveChat() {
-    store.write(CHAT_KEY, state.messages.slice(-MAX_TURNS * 2));
+    store.write(CHAT_KEY, persistableMessages(state.messages));
     broadcastChat();
   }
 
@@ -512,19 +568,57 @@
   }
 
   function pushError(text) {
-    state.messages.push({ role: "error", content: text });
-    bubble({ role: "error", content: text });
+    const safe = String(text || "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.");
+    state.messages.push({ role: "error", content: safe });
+    bubble({ role: "error", content: safe });
     scrollDown();
     saveChat();
   }
 
+  function describeHttpError(status, data) {
+    if (status === 408) return "استغرق الطلب وقتًا أطول من المتوقع، حاول مرة أخرى.";
+    if (status === 429) return "تم تجاوز حدود الاستخدام مؤقتًا، حاول بعد قليل.";
+    if ([500, 502, 503, 504].includes(Number(status))) return "الخدمة غير متاحة حاليًا، حاول بعد قليل.";
+    if (status === 413) return "حجم الرسالة أو لقطة الشاشة كبير جدًا، جرّب تقليل المحتوى.";
+    if (status === 401 || status === 403) return "تعذر الوصول إلى خدمة الذكاء الاصطناعي حاليًا، حاول لاحقًا.";
+    return (data && typeof data.error === "string" && data.error.trim())
+      ? data.error.trim()
+      : "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.";
+  }
+
+  function setSendBusy(busy) {
+    if (busy) {
+      el.send.disabled = false;
+      el.send.classList.add("is-stop");
+      el.send.title = "إيقاف الطلب";
+      el.send.innerHTML = '<span style="font-size:1.05rem;line-height:1">■</span>';
+    } else {
+      el.send.classList.remove("is-stop");
+      el.send.title = "إرسال";
+      el.send.innerHTML = ICONS.send;
+      updateSendAvailability();
+    }
+  }
+
+  function updateSendAvailability() {
+    if (state.busy) {
+      el.send.disabled = false;
+      return;
+    }
+    el.send.disabled = !el.input.value.trim();
+  }
+
   async function send() {
     if (state.busy) {
+      state.abortReason = "manual";
       if (state.controller) state.controller.abort();
       return;
     }
     const text = el.input.value.trim();
-    if (!text) return;
+    if (!text) {
+      updateSendAvailability();
+      return;
+    }
 
     stopSpeaking();
     const image = captureFrame();
@@ -537,10 +631,15 @@
     scrollDown();
 
     state.busy = true;
-    el.send.disabled = true;
+    state.abortReason = "";
+    setSendBusy(true);
     setStatus("… يفكّر");
     const typing = addTyping();
     state.controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      state.abortReason = "timeout";
+      state.controller?.abort();
+    }, REQUEST_TIMEOUT_MS);
 
     try {
       const response = await fetch(API_URL, {
@@ -553,11 +652,16 @@
         signal: state.controller.signal
       });
 
-      const data = await response.json().catch(() => ({}));
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        if (response.ok) throw new Error("تعذر قراءة رد الخادم، حاول مرة أخرى.");
+      }
       typing.remove();
 
       if (!response.ok || !data || data.ok === false) {
-        throw new Error((data && data.error) || "تعذّر الحصول على رد (" + response.status + ").");
+        throw new Error(describeHttpError(response.status, data));
       }
 
       const reply = (typeof data.reply === "string" ? data.reply : "").trim();
@@ -571,14 +675,22 @@
     } catch (error) {
       typing.remove();
       if (error && error.name === "AbortError") {
-        setStatus("تم إيقاف الطلب");
+        if (state.abortReason === "timeout") {
+          pushError("استغرق الطلب وقتًا أطول من المتوقع، حاول مرة أخرى.");
+        } else {
+          setStatus("تم إيقاف الطلب");
+        }
+      } else if (error && /Failed to fetch|NetworkError|Load failed/i.test(String(error.message || ""))) {
+        pushError("تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.");
       } else {
-        pushError((error && error.message) || "حدث خطأ غير متوقع.");
+        pushError((error && error.message) || "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.");
       }
     } finally {
+      window.clearTimeout(timeoutId);
       state.busy = false;
       state.controller = null;
-      el.send.disabled = false;
+      state.abortReason = "";
+      setSendBusy(false);
       if (!state.listening) setStatus(pinnedLabel());
     }
   }
@@ -591,6 +703,9 @@
      غير ذلك: نافذة مستقلة مدمجة عبر assistant.html
   ========================================================== */
   async function pin() {
+    if (!state.enabled) {
+      setEnabled(true);
+    }
     if (state.pinned && pipWindow) {
       try { pipWindow.close(); } catch (e) { /* تجاهل */ }
       return;
@@ -789,6 +904,7 @@
 
   /* ============ فتح/إغلاق ============ */
   function openWin() {
+    if (!state.enabled) return;
     // في APK لا تبقى نافذة WebView كبيرة وشفافة فوق التطبيقات: تتسع فقط
     // عندما يفتح المستخدم الفقاعة، كي تبقى بقية واجهة الهاتف قابلة للمس.
     if (!state.pinned) setNativeOverlayExpanded(true);
@@ -812,6 +928,7 @@
   }
 
   function toggleWin() {
+    if (!state.enabled) return;
     if (state.pinned) {
       flashFabTag();
       setStatus("📌 مثبّت فوق التطبيقات — أوقف التثبيت من زر الدبوس بالنافذة العائمة");
@@ -877,7 +994,7 @@
   });
 
   el.send.addEventListener("click", send);
-  el.input.addEventListener("input", autoGrow);
+  el.input.addEventListener("input", () => { autoGrow(); updateSendAvailability(); });
   el.input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -947,9 +1064,14 @@
     if (Array.isArray(saved)) {
       state.messages = saved
         .filter((m) => m && typeof m.content === "string")
-        .map((m) => ({ role: m.role, content: m.content }));
+        .map((m) => ({
+          role: m.role === "user" || m.role === "assistant" || m.role === "error" ? m.role : "assistant",
+          content: m.content
+        }));
     }
     renderAll();
+    updateSendAvailability();
+    applyEnabledState();
   })();
 
   if (ttsSupported && typeof window.speechSynthesis.getVoices === "function") {
@@ -966,7 +1088,7 @@
   }
   // assistant.html هو نافذة مستقلة في الويب/PWA، لكنه داخل APK هو محتوى
   // الفقاعة؛ لذلك لا نفتحه تلقائياً ولا نحجب واجهة الهاتف بمستطيل كبير.
-  if (isMiniApp && !isAndroidApp) {
+  if (isMiniApp && !isAndroidApp && state.enabled) {
     document.documentElement.classList.add("tmd-standalone");
     openWin();
     fab.setAttribute("aria-label", "إغلاق المساعد العائم");
@@ -982,6 +1104,7 @@
     pin,
     unpin,
     ask(text) {
+      if (!state.enabled) setEnabled(true);
       openWin();
       el.input.value = String(text || "");
       autoGrow();
@@ -989,6 +1112,8 @@
     },
     shareScreen: toggleShare,
     stopShare,
+    setEnabled,
+    isEnabled() { return state.enabled; },
     speak,
     stopSpeaking,
     state

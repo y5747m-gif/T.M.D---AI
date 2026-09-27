@@ -92,6 +92,11 @@ const CONFIGURED_VISION_MODEL =
 const VISION_MODEL =
   "qwen/qwen3.8-27b";
 
+const MAX_TEXT_CHARS = 120000;
+const MAX_TOTAL_TEXT_CHARS = 160000;
+const MAX_IMAGE_DATA_URL_CHARS = 2700000;
+const IMAGE_DATA_URL_PATTERN = /^data:image\/(?:png|jpe?g|webp|gif);base64,[a-z0-9+/=\s]+$/i;
+
 
 /* =========================================================
    SYSTEM PROMPT
@@ -191,7 +196,7 @@ function parseBody(
 
 function cleanText(
   value,
-  max = 120000
+  max = MAX_TEXT_CHARS
 ) {
 
   if (
@@ -312,10 +317,7 @@ function normalizeContent(
               {
 
                 url:
-                  part.image_url.url.slice(
-                    0,
-                    2700000
-                  )
+                  part.image_url.url
 
               }
 
@@ -458,6 +460,57 @@ function containsImage(
     }
   );
 
+}
+
+
+function validateMessages(messages) {
+
+  let totalTextChars = 0;
+  let imageCount = 0;
+
+  for (const message of messages) {
+
+    if (typeof message.content === "string") {
+      totalTextChars += message.content.length;
+      continue;
+    }
+
+    if (Array.isArray(message.content)) {
+      for (const part of message.content) {
+
+        if (part?.type === "text") {
+          totalTextChars += String(part.text || "").length;
+        }
+
+        if (part?.type === "image_url") {
+          imageCount += 1;
+          const url = String(part?.image_url?.url || "");
+
+          if (!url) {
+            return { ok: false, status: 400, code: "INVALID_IMAGE", error: "لم يتم إرسال صورة صالحة." };
+          }
+
+          if (url.length > MAX_IMAGE_DATA_URL_CHARS) {
+            return { ok: false, status: 413, code: "IMAGE_TOO_LARGE", error: "حجم الصورة كبير جدًا. أرسل صورة أصغر." };
+          }
+
+          if (!IMAGE_DATA_URL_PATTERN.test(url)) {
+            return { ok: false, status: 400, code: "INVALID_IMAGE_DATA_URL", error: "صيغة الصورة غير صحيحة. استخدم صورة PNG أو JPG أو WEBP أو GIF بصيغة Data URL." };
+          }
+        }
+      }
+    }
+  }
+
+  if (imageCount > 1) {
+    return { ok: false, status: 400, code: "TOO_MANY_IMAGES", error: "يدعم الطلب صورة واحدة فقط في كل رسالة." };
+  }
+
+  if (totalTextChars > MAX_TOTAL_TEXT_CHARS) {
+    return { ok: false, status: 413, code: "TEXT_TOO_LARGE", error: "حجم النص المرسل كبير جدًا. اختصر الرسالة أو الملف ثم حاول مجددًا." };
+  }
+
+  return { ok: true };
 }
 
 
@@ -1420,6 +1473,27 @@ module.exports =
             error:
               "لم يتم إرسال أي رسالة."
 
+          }
+        );
+
+      }
+
+      const validation =
+        validateMessages(
+          messages
+        );
+
+      if (
+        !validation.ok
+      ) {
+
+        return sendJSON(
+          res,
+          validation.status,
+          {
+            ok: false,
+            code: validation.code,
+            error: validation.error
           }
         );
 

@@ -820,3 +820,62 @@
     animation: none !important;
   }
 }
+
+/* ==========================================================
+   PWA/mobile refinements for the floating AI bubble
+========================================================== */
+
+.tmd-fab[hidden] {
+  display: none !important;
+}
+
+.tmd-mini__send.is-stop {
+  background: linear-gradient(135deg, #e11d48, #c2410c);
+  box-shadow: 0 0 16px rgba(255, 92, 116, 0.35);
+}
+
+@media (max-width: 480px) {
+  .tmd-mini {
+    inset-inline: max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right));
+    inset-block-end: calc(82px + env(safe-area-inset-bottom));
+    max-height: min(620px, calc(100dvh - 104px - env(safe-area-inset-bottom)));
+  }
+
+  .tmd-mini__body {
+    min-height: 160px;
+  }
+
+  .tmd-mini__tools {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tmd-tool {
+    min-width: 96px;
+  }
+
+  .tmd-fab {
+    inset-block-end: calc(18px + env(safe-area-inset-bottom));
+    inset-inline-end: calc(14px + env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 360px) {
+  .tmd-mini__head {
+    gap: 6px;
+    padding-inline: 9px;
+  }
+
+  .tmd-mini__title {
+    font-size: 12.5px;
+  }
+
+  .tmd-mini__head-btn {
+    width: 27px;
+    height: 27px;
+  }
+
+  .tmd-mini__foot {
+    padding-inline: 9px;
+  }
+}
