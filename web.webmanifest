@@ -2,15 +2,15 @@
   "name": "T.M.D_AI_Pro — المساعد الذكي الاحترافي",
   "short_name": "TMD AI Pro",
   "description": "منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية وتحليل المستندات والصور، بتطوير وتصميم ياسين عمرو عبد الرحيم.",
-  "id": "/assistant.html",
-  "start_url": "/assistant.html",
+  "id": "/",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#06080f",
-  "theme_color": "#06080f",
+  "background_color": "#050912",
+  "theme_color": "#050912",
   "categories": ["productivity", "utilities", "education"],
   "icons": [
     {
@@ -31,7 +31,7 @@
       "purpose": "any"
     },
     {
-      "src": "/images/icon-512.png",
+      "src": "/images/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

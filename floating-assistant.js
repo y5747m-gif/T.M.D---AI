@@ -1,10 +1,13 @@
 /* ==========================================================
-   T.M.D_AI — الأداة العائمة (Floating Mini Assistant)
+   T.M.D_AI — المساعد العائم فوق كل التطبيقات
    ----------------------------------------------------------
-   • زر عائم قابل للسحب يظهر فوق الواجهة في أي صفحة.
-   • شاشة مصغّرة من T.M.D_AI للدردشة السريعة دون مغادرة الصفحة.
-   • مشاركة الشاشة مع المساعد وتحليل ما يراه المستخدم.
-   • تحدّث صوتي: المساعد ينطق الرد، والمستخدم يتحدث بالميكروفون.
+   • فقاعة عائمة قابلة للسحب مع شعار الشرارة (ب نمط Gemini).
+   • زر «تثبيت» 📌: يرفع المساعد إلى نافذة عائمة دائمة تبقى
+     فوق كل البرامج والتطبيقات (Document Picture-in-Picture)
+     وهي متصلة بالموقع — دون بقاء المستخدم داخل T.M.D_AI.
+   • على المتصفحات التي لا تدعم ذلك: نافذة مستقلة مدمجة.
+   • دردشة سريعة + مشاركة شاشة + نطق + ميكروفون.
+   • مزامنة المحادثة بين النوافذ عبر BroadcastChannel.
    ملف مستقل تمامًا — لا يعتمد على app.js.
    ========================================================== */
 (function () {
@@ -15,23 +18,15 @@
   /* ============ إعدادات عامة ============ */
   const STORE_KEY = "tmd_float_state";
   const CHAT_KEY = "tmd_float_chat";
-  const API_URL = "/api/chat";
+  // رابط مطلق حتى يستمر العمل من داخل نافذة التثبيت العائمة (PiP).
+  const API_URL = new URL("/api/chat", window.location.href).href;
+  const SITE_URL = new URL("/", window.location.href).href;
   const TEXT_MODEL = "openai/gpt-oss-120b";
   const VISION_MODEL = "qwen/qwen3.8-27b";
   const MAX_TURNS = 14;
-  let deferredInstallPrompt = null;
-
-  // يحتفظ المتصفح بهذا الحدث حتى يضغط المستخدم زر تثبيت التطبيق المصغر.
-  window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    deferredInstallPrompt = event;
-    document.querySelectorAll("[data-el=installBtn]").forEach((button) => {
-      button.hidden = false;
-    });
-  });
 
   const SYSTEM_PROMPT =
-    "أنت T.M.D_AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة مصغّرة عائمة فوق موقع المستخدم. " +
+    "أنت T.M.D_AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة عائمة فوق بقية التطبيقات. " +
     "أجب بإيجاز وبأسلوب محادثة طبيعي مناسب للقراءة الصوتية (2-5 جمل غالبًا) ما لم يطلب المستخدم التفصيل. " +
     "تجنّب الإفراط في الرموز والتنسيق لأن ردّك يُقرأ بصوت مسموع. " +
     "إذا أُرسلت لك لقطة من شاشة المستخدم فحلّلها بدقة وصف ما تراه وساعده عمليًا فيما يفعله. " +
@@ -44,6 +39,40 @@
     "ساعدني في الخطوة التالية"
   ];
 
+  /* ============ شعار الشرارة (ب نمط Gemini) ============ */
+  let sparkSeq = 0;
+  function sparkSVG(className) {
+    const gid = "tmdSparkGrad" + (++sparkSeq);
+    return (
+      '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<defs>' +
+      '<linearGradient id="' + gid + '" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">' +
+      '<stop offset="0" stop-color="#4285f4"/>' +
+      '<stop offset="0.48" stop-color="#9b72cb"/>' +
+      '<stop offset="1" stop-color="#d96570"/>' +
+      "</linearGradient>" +
+      "</defs>" +
+      '<path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 ' +
+      'C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#' + gid + ')"/>' +
+      "</svg>"
+    );
+  }
+
+  /* أيقونات خطية موحّدة (بدل الرموز التعبيرية) */
+  const ICONS = {
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg>',
+    unpin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/><line x1="3" y1="3" x2="21" y2="21"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    screen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>',
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>',
+    speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>',
+    site: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>'
+  };
+
   /* ============ الحالة ============ */
   const state = {
     open: false,
@@ -52,12 +81,16 @@
     speak: true,
     listening: false,
     sharing: false,
+    pinned: false,
     controller: null,
     stream: null,
     messages: [],
     fab: null,
     win: null
   };
+
+  let pipWindow = null; // نافذة التثبيت فوق التطبيقات (Document PiP)
+  let pendingReopen = false; // إعادة فتح النافذة بالموقع بعد إلغاء التثبيت بزر الدبوس
 
   const store = {
     read(key, fallback) {
@@ -75,61 +108,84 @@
     }
   };
 
+  /* ============ مزامنة المحادثة بين النوافذ ============ */
+  const channel = "BroadcastChannel" in window ? new BroadcastChannel("tmd_float_sync") : null;
+  if (channel) {
+    channel.onmessage = (event) => {
+      const data = event && event.data;
+      if (!data || data.type !== "chat" || state.busy) return;
+      if (Array.isArray(data.messages)) {
+        state.messages = data.messages.filter((m) => m && typeof m.content === "string");
+        renderAll();
+      }
+    };
+  }
+
+  function broadcastChat() {
+    if (channel) {
+      try { channel.postMessage({ type: "chat", messages: state.messages }); } catch (e) { /* تجاهل */ }
+    }
+  }
+
   /* ============ بناء الواجهة ============ */
   const fab = document.createElement("button");
   fab.type = "button";
   fab.className = "tmd-fab";
   fab.setAttribute("aria-label", "فتح مساعد T.M.D_AI العائم");
-  fab.title = "T.M.D_AI — مساعد عائم (اسحب لتحريكه)";
+  fab.title = "T.M.D_AI — المساعد العائم (اسحب لتحريكه)";
   fab.innerHTML =
     '<span class="tmd-fab__ring"></span>' +
-    '<span class="tmd-fab__icon">🤖</span>' +
-    '<span class="tmd-fab__badge" data-el="badge">●</span>';
+    '<span class="tmd-fab__ring tmd-fab__ring--gold"></span>' +
+    '<span class="tmd-fab__icon">' + sparkSVG() + "</span>" +
+    '<span class="tmd-fab__badge" data-el="badge">●</span>' +
+    '<span class="tmd-fab__tag" data-el="fabTag">المساعد مثبّت فوق التطبيقات ✓</span>';
 
   const win = document.createElement("section");
   win.className = "tmd-mini";
   win.setAttribute("role", "dialog");
-  win.setAttribute("aria-label", "شاشة T.M.D_AI المصغّرة");
-  win.innerHTML = `
-    <header class="tmd-mini__head" data-el="head">
-      <div class="tmd-mini__avatar">🤖</div>
-      <div class="tmd-mini__titles">
-        <div class="tmd-mini__title">T.M.D_AI — مساعد عائم</div>
-        <div class="tmd-mini__status" data-el="status">جاهز للدردشة</div>
-      </div>
-      <button type="button" class="tmd-mini__head-btn tmd-install-btn" data-el="installBtn" title="تنزيل المساعد المصغر">⬇</button>
-      <button type="button" class="tmd-mini__head-btn" data-el="clear" title="محادثة جديدة">🗑</button>
-      <button type="button" class="tmd-mini__head-btn" data-el="collapse" title="تصغير">–</button>
-      <button type="button" class="tmd-mini__head-btn" data-el="close" title="إغلاق">✕</button>
-    </header>
+  win.setAttribute("aria-label", "نافذة T.M.D_AI العائمة");
+  win.innerHTML =
+    '<header class="tmd-mini__head" data-el="head">' +
+    '<div class="tmd-mini__avatar">' + sparkSVG() + "</div>" +
+    '<div class="tmd-mini__titles">' +
+    '<div class="tmd-mini__title">T.M.D_AI — المساعد العائم</div>' +
+    '<div class="tmd-mini__status" data-el="status">جاهز للدردشة</div>' +
+    "</div>" +
+    '<button type="button" class="tmd-mini__head-btn tmd-pin-btn" data-el="pinBtn" title="تثبيت فوق كل التطبيقات — نافذة عائمة دائمة تبقى أمامك أثناء استخدام أي برنامج آخر">' + ICONS.pin + "</button>" +
+    '<button type="button" class="tmd-mini__head-btn" data-el="clear" title="محادثة جديدة">' + ICONS.trash + "</button>" +
+    '<button type="button" class="tmd-mini__head-btn" data-el="collapse" title="تصغير">' + ICONS.minus + "</button>" +
+    '<button type="button" class="tmd-mini__head-btn" data-el="close" title="إغلاق">' + ICONS.close + "</button>" +
+    "</header>" +
 
-    <div class="tmd-mini__screen" data-el="screenBox">
-      <video data-el="video" muted playsinline autoplay></video>
-      <span class="tmd-mini__screen-tag">مشاركة الشاشة نشطة</span>
-    </div>
+    '<div class="tmd-mini__screen" data-el="screenBox">' +
+    '<video data-el="video" muted playsinline autoplay></video>' +
+    '<span class="tmd-mini__screen-tag">مشاركة الشاشة نشطة</span>' +
+    "</div>" +
 
-    <div class="tmd-mini__body" data-el="body"></div>
+    '<div class="tmd-mini__body" data-el="body"></div>' +
 
-    <div class="tmd-mini__chips" data-el="chips"></div>
+    '<div class="tmd-mini__chips" data-el="chips"></div>' +
 
-    <div class="tmd-mini__tools">
-      <button type="button" class="tmd-tool" data-el="shareBtn">🖥️ <span>مشاركة الشاشة</span></button>
-      <button type="button" class="tmd-tool" data-el="micBtn">🎙️ <span>تحدّث</span></button>
-      <button type="button" class="tmd-tool" data-el="speakBtn">🔊 <span>النطق</span></button>
-    </div>
+    '<div class="tmd-mini__tools">' +
+    '<button type="button" class="tmd-tool" data-el="shareBtn">' + ICONS.screen + "<span>مشاركة الشاشة</span></button>" +
+    '<button type="button" class="tmd-tool" data-el="micBtn">' + ICONS.mic + "<span>تحدّث</span></button>" +
+    '<button type="button" class="tmd-tool" data-el="speakBtn">' + ICONS.speak + "<span>النطق</span></button>" +
+    "</div>" +
 
-    <div class="tmd-mini__foot">
-      <textarea class="tmd-mini__input" data-el="input" rows="1"
-        placeholder="اكتب رسالتك أو تحدّث بالميكروفون…"></textarea>
-      <button type="button" class="tmd-mini__send" data-el="send" title="إرسال">➤</button>
-    </div>
-  `;
+    '<div class="tmd-mini__foot">' +
+    '<textarea class="tmd-mini__input" data-el="input" rows="1" placeholder="اكتب رسالتك أو تحدّث بالميكروفون…"></textarea>' +
+    '<button type="button" class="tmd-mini__send" data-el="send" title="إرسال">' + ICONS.send + "</button>" +
+    "</div>" +
+
+    '<a class="tmd-open-site" data-el="openSite" href="/" title="فتح موقع T.M.D_AI الكامل">' + ICONS.site + "<span>الموقع الكامل</span></a>";
 
   const el = {};
   win.querySelectorAll("[data-el]").forEach((node) => {
     el[node.dataset.el] = node;
   });
   el.badge = fab.querySelector("[data-el=badge]");
+  el.fabTag = fab.querySelector("[data-el=fabTag]");
+  el.openSite.href = SITE_URL;
 
   document.body.appendChild(fab);
   document.body.appendChild(win);
@@ -139,6 +195,11 @@
   /* ============ أدوات مساعدة ============ */
   function setStatus(text) {
     el.status.textContent = text;
+  }
+
+  function flashFabTag() {
+    el.fabTag.classList.add("is-visible");
+    setTimeout(() => el.fabTag.classList.remove("is-visible"), 2600);
   }
 
   function escapeHTML(text) {
@@ -152,7 +213,7 @@
   function renderRich(text) {
     let html = escapeHTML(text);
     html = html.replace(/```[a-zA-Z0-9_-]*\n?([\s\S]*?)```/g, (m, code) =>
-      `<pre><code>${code.trim()}</code></pre>`);
+      "<pre><code>" + code.trim() + "</code></pre>");
     html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
     html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     return html;
@@ -164,15 +225,19 @@
 
   function saveChat() {
     store.write(CHAT_KEY, state.messages.slice(-MAX_TURNS * 2));
+    broadcastChat();
   }
 
   function savePrefs() {
+    const view = win.ownerDocument.defaultView || window;
     const rect = win.getBoundingClientRect();
     store.write(STORE_KEY, {
       speak: state.speak,
       fab: { top: fab.style.top || "", left: fab.style.left || "" },
       win: { top: win.style.top || "", left: win.style.left || "" },
-      winW: rect.width
+      winW: rect.width,
+      vw: view.innerWidth,
+      vh: view.innerHeight
     });
   }
 
@@ -180,7 +245,13 @@
   function bubble(message) {
     const node = document.createElement("div");
     const kind = message.role === "user" ? "user" : (message.role === "error" ? "err" : "ai");
-    node.className = `tmd-msg tmd-msg--${kind}`;
+    node.className = "tmd-msg tmd-msg--" + kind;
+    if (message.role === "assistant") {
+      const avatar = document.createElement("span");
+      avatar.className = "tmd-msg__spark";
+      avatar.innerHTML = sparkSVG();
+      node.appendChild(avatar);
+    }
     if (message.image) {
       const img = document.createElement("img");
       img.src = message.image;
@@ -200,8 +271,9 @@
       bubble({
         role: "assistant",
         content:
-          "مرحبًا 👋 أنا T.M.D_AI في نافذة مصغّرة.\n" +
-          "اكتب لي، أو اضغط 🎙️ وتحدّث معي، أو شارك شاشتك عبر 🖥️ لأرى ما تعمل عليه وأساعدك مباشرة."
+          "مرحبًا 👋 أنا T.M.D_AI في نافذة عائمة.\n" +
+          "اكتب لي، أو اضغط 🎙️ وتحدّث معي، أو شارك شاشتك لأرى ما تعمل عليه.\n" +
+          "واضغط زر التثبيت 📌 بالأعلى لأبقى فوق كل التطبيقات أثناء عملك."
       });
     }
     state.messages.forEach(bubble);
@@ -211,7 +283,9 @@
   function addTyping() {
     const node = document.createElement("div");
     node.className = "tmd-msg tmd-msg--ai";
-    node.innerHTML = '<span class="tmd-typing"><span></span><span></span><span></span></span>';
+    node.innerHTML =
+      '<span class="tmd-msg__spark">' + sparkSVG() + "</span>" +
+      '<span class="tmd-typing"><span></span><span></span><span></span></span>';
     el.body.appendChild(node);
     scrollDown();
     return node;
@@ -242,8 +316,13 @@
     const arabic = voices.find((v) => /ar/i.test(v.lang));
     if (arabic) utter.voice = arabic;
     utter.onstart = () => setStatus("🔊 يتحدث الآن…");
-    utter.onend = () => setStatus(state.sharing ? "🖥️ يشاهد شاشتك" : "جاهز للدردشة");
+    utter.onend = () => setStatus(pinnedLabel());
     window.speechSynthesis.speak(utter);
+  }
+
+  function pinnedLabel() {
+    if (state.sharing) return "🖥️ يشاهد شاشتك";
+    return state.pinned ? "📌 مثبّت فوق التطبيقات" : "جاهز للدردشة";
   }
 
   /* ============ التعرف على الكلام (STT) ============ */
@@ -292,7 +371,7 @@
   function stopListening() {
     state.listening = false;
     el.micBtn.classList.remove("is-rec");
-    if (!state.busy) setStatus(state.sharing ? "🖥️ يشاهد شاشتك" : "جاهز للدردشة");
+    if (!state.busy) setStatus(pinnedLabel());
   }
 
   function toggleMic() {
@@ -319,12 +398,13 @@
       stopShare();
       return;
     }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    const media = (win.ownerDocument.defaultView || window).navigator.mediaDevices;
+    if (!media || !media.getDisplayMedia) {
       pushError("متصفحك لا يدعم مشاركة الشاشة.");
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
+      const stream = await media.getDisplayMedia({
         video: { frameRate: 5 },
         audio: false
       });
@@ -360,7 +440,7 @@
     el.shareBtn.classList.remove("is-active");
     el.shareBtn.querySelector("span").textContent = "مشاركة الشاشة";
     el.badge.classList.remove("is-on");
-    setStatus("جاهز للدردشة");
+    setStatus(pinnedLabel());
   }
 
   function captureFrame() {
@@ -443,7 +523,7 @@
       typing.remove();
 
       if (!response.ok || !data || data.ok === false) {
-        throw new Error((data && data.error) || `تعذّر الحصول على رد (${response.status}).`);
+        throw new Error((data && data.error) || "تعذّر الحصول على رد (" + response.status + ").");
       }
 
       const reply = (typeof data.reply === "string" ? data.reply : "").trim();
@@ -465,13 +545,140 @@
       state.busy = false;
       state.controller = null;
       el.send.disabled = false;
-      if (!state.listening) {
-        setStatus(state.sharing ? "🖥️ يشاهد شاشتك" : "جاهز للدردشة");
-      }
+      if (!state.listening) setStatus(pinnedLabel());
     }
   }
 
-  /* ============ السحب والإفلات ============ */
+  /* ==========================================================
+     التثبيت فوق كل التطبيقات (الفقاعة الدائمة)
+     ----------------------------------------------------------
+     Chrome/Edge (كمبيوتر): Document Picture-in-Picture
+     نافذة دائمة فوق كل النوافذ، متصلة بالموقع الأصلي.
+     غير ذلك: نافذة مستقلة مدمجة عبر assistant.html
+  ========================================================== */
+  async function pin() {
+    if (state.pinned && pipWindow) {
+      try { pipWindow.close(); } catch (e) { /* تجاهل */ }
+      return;
+    }
+    if ("documentPictureInPicture" in window && window.documentPictureInPicture) {
+      try {
+        const width = Math.max(340, Math.min(430, Math.round(window.screen.width * 0.28)));
+        const height = Math.max(500, Math.min(720, Math.round(window.screen.height * 0.82)));
+        pipWindow = await window.documentPictureInPicture.requestWindow({ width, height });
+        adoptPipWindow(pipWindow);
+        return;
+      } catch (e) {
+        /* إن فشل: نستخدم النافذة المستقلة */
+      }
+    }
+    openPopupWindow();
+  }
+
+  function adoptPipWindow(pip) {
+    const doc = pip.document;
+    doc.documentElement.lang = "ar";
+    doc.documentElement.dir = "rtl";
+    doc.documentElement.dataset.theme = document.documentElement.dataset.theme || "dark";
+    doc.title = "T.M.D_AI — مساعد عائم";
+
+    /* نسخ التنسيقات إلى نافذة التثبيت */
+    Array.prototype.forEach.call(document.styleSheets, (sheet) => {
+      try {
+        if (sheet.href) {
+          const link = doc.createElement("link");
+          link.rel = "stylesheet";
+          link.href = sheet.href;
+          doc.head.appendChild(link);
+        } else if (sheet.ownerNode && sheet.ownerNode.tagName === "STYLE") {
+          const style = doc.createElement("style");
+          style.textContent = Array.prototype.map.call(sheet.cssRules, (r) => r.cssText).join("\n");
+          doc.head.appendChild(style);
+        }
+      } catch (e) { /* ورقة خارجية محمية — تجاهل */ }
+    });
+
+    doc.body.className = "tmd-pip-body";
+
+    const shell = doc.createElement("div");
+    shell.className = "tmd-pip-shell";
+    doc.body.appendChild(shell);
+
+    /* نقل نافذة المحادثة نفسها إلى النافذة العائمة */
+    shell.appendChild(win);
+    win.classList.add("is-open", "is-pinned");
+    win.classList.remove("is-collapsed");
+    state.collapsed = false;
+    state.open = true;
+    state.pinned = true;
+
+    fab.classList.add("is-pinned");
+    el.pinBtn.classList.add("is-active");
+    el.pinBtn.title = "إلغاء التثبيت وإعادة المساعد إلى الموقع";
+    el.pinBtn.innerHTML = ICONS.unpin;
+    setStatus("📌 مثبّت فوق التطبيقات");
+    flashFabTag();
+
+    bubble({
+      role: "assistant",
+      content: "تم التثبيت 📌 أنا الآن نافذة عائمة فوق كل التطبيقات، وسأبقى متصلًا وأعمل أثناء استخدامك أي برنامج آخر. (تبقى متصلًا بالموقع الأصلي ما دام تبويبه مفتوحًا)"
+    });
+    scrollDown();
+    setTimeout(() => el.input.focus(), 150);
+
+    doc.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        try { pip.close(); } catch (e) { /* تجاهل */ }
+      }
+    });
+
+    pip.addEventListener("pagehide", () => unpin(), { once: true });
+  }
+
+  function unpin() {
+    if (!state.pinned) return;
+    state.pinned = false;
+    pipWindow = null;
+
+    try {
+      win.classList.remove("is-pinned");
+      document.body.appendChild(win);
+    } catch (e) { /* الصفحة الأصلية أُغلقت — تجاهل */ }
+
+    win.classList.remove("is-open");
+    state.open = false;
+    fab.classList.remove("is-pinned");
+    if (pendingReopen) {
+      pendingReopen = false;
+      openWin();
+    }
+    el.pinBtn.classList.remove("is-active");
+    el.pinBtn.title = "تثبيت فوق كل التطبيقات — نافذة عائمة دائمة تبقى أمامك أثناء استخدام أي برنامج آخر";
+    el.pinBtn.innerHTML = ICONS.pin;
+    setStatus(pinnedLabel());
+  }
+
+  function openPopupWindow() {
+    const w = Math.min(420, Math.round(window.screen.availWidth * 0.9) || 400);
+    const h = Math.min(680, Math.round(window.screen.availHeight * 0.9) || 620);
+    const opened = window.open(
+      new URL("/assistant.html", window.location.href).href,
+      "tmd-assistant",
+      "popup=yes,width=" + w + ",height=" + h
+    );
+    if (opened) {
+      closeWin();
+      bubble({
+        role: "assistant",
+        content: "فتحنا المساعد في نافذة مستقلة 🗗 استمر في عملك وسيبقى يعمل بجانبك.\nللحصول على النافذة العائمة فوق كل التطبيقات استخدم Chrome أو Edge على الكمبيوتر."
+      });
+      scrollDown();
+    } else {
+      pushError("تعذّر فتح النافذة العائمة. اسمح بالنوافذ المنبثقة لهذا الموقع ثم أعد المحاولة.");
+    }
+  }
+
+  /* ============ السحب والإفلات (يعمل داخل أي مستند) ============ */
   function makeDraggable(handle, target, onEnd) {
     let startX = 0;
     let startY = 0;
@@ -490,18 +697,21 @@
       startY = point.clientY;
       baseLeft = rect.left;
       baseTop = rect.top;
-      target.style.top = `${rect.top}px`;
-      target.style.left = `${rect.left}px`;
+      target.style.top = rect.top + "px";
+      target.style.left = rect.left + "px";
       target.style.right = "auto";
       target.style.bottom = "auto";
       target.style.insetInlineEnd = "auto";
       target.style.insetBlockEnd = "auto";
-      document.addEventListener("pointermove", move);
-      document.addEventListener("pointerup", up);
+      const doc = handle.ownerDocument || document;
+      doc.addEventListener("pointermove", move);
+      doc.addEventListener("pointerup", up);
+      doc.addEventListener("pointercancel", up);
     }
 
     function move(event) {
       if (!active) return;
+      const view = target.ownerDocument.defaultView || window;
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
@@ -509,22 +719,38 @@
         target.classList.add("is-dragging");
       }
       const rect = target.getBoundingClientRect();
-      const left = Math.min(Math.max(4, baseLeft + dx), window.innerWidth - rect.width - 4);
-      const top = Math.min(Math.max(4, baseTop + dy), window.innerHeight - rect.height - 4);
-      target.style.left = `${left}px`;
-      target.style.top = `${top}px`;
+      const left = Math.min(Math.max(4, baseLeft + dx), view.innerWidth - rect.width - 4);
+      const top = Math.min(Math.max(4, baseTop + dy), view.innerHeight - rect.height - 4);
+      target.style.left = left + "px";
+      target.style.top = top + "px";
     }
 
     function up() {
       active = false;
       target.classList.remove("is-dragging");
-      document.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerup", up);
+      const doc = handle.ownerDocument || document;
+      doc.removeEventListener("pointermove", move);
+      doc.removeEventListener("pointerup", up);
+      doc.removeEventListener("pointercancel", up);
       if (onEnd) onEnd(moved);
       savePrefs();
     }
 
     handle.addEventListener("pointerdown", down);
+  }
+
+  /* التصاق الفقاعة بأقرب حافة بعد السحب */
+  function snapFabToEdge() {
+    const view = fab.ownerDocument.defaultView || window;
+    const rect = fab.getBoundingClientRect();
+    const middle = rect.left + rect.width / 2;
+    const edge = middle < view.innerWidth / 2 ? 10 : view.innerWidth - rect.width - 10;
+    fab.classList.add("is-snapping");
+    fab.style.left = edge + "px";
+    setTimeout(() => {
+      fab.classList.remove("is-snapping");
+      savePrefs();
+    }, 260);
   }
 
   /* ============ فتح/إغلاق ============ */
@@ -548,48 +774,50 @@
   }
 
   function toggleWin() {
+    if (state.pinned) {
+      flashFabTag();
+      setStatus("📌 مثبّت فوق التطبيقات — أوقف التثبيت من زر الدبوس بالنافذة العائمة");
+      return;
+    }
     if (state.open) closeWin();
     else openWin();
   }
 
   function autoGrow() {
     el.input.style.height = "auto";
-    el.input.style.height = `${Math.min(el.input.scrollHeight, 96)}px`;
+    el.input.style.height = Math.min(el.input.scrollHeight, 96) + "px";
   }
 
   /* ============ الربط ============ */
   makeDraggable(fab, fab, (moved) => {
-    if (!moved) toggleWin();
+    if (moved) snapFabToEdge();
+    else toggleWin();
   });
   makeDraggable(el.head, win);
 
-  el.close.addEventListener("click", closeWin);
-
-  async function installMiniApp() {
-    if (!deferredInstallPrompt) {
-      pushError("للتنزيل على الهاتف، افتح قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");
+  el.close.addEventListener("click", () => {
+    if (state.pinned) {
+      try { if (pipWindow) pipWindow.close(); } catch (e) { /* تجاهل */ }
       return;
     }
-    deferredInstallPrompt.prompt();
-    const choice = await deferredInstallPrompt.userChoice;
-    if (choice && choice.outcome === "accepted") {
-      el.installBtn.hidden = true;
-    }
-    deferredInstallPrompt = null;
-  }
+    closeWin();
+  });
 
-  el.installBtn.addEventListener("click", installMiniApp);
-  window.addEventListener("appinstalled", () => {
-    deferredInstallPrompt = null;
-    el.installBtn.hidden = true;
-    setStatus("تم تنزيل المساعد المصغر ✅");
+  el.pinBtn.addEventListener("click", () => {
+    if (state.pinned) {
+      pendingReopen = true; // إلغاء التثبيت يعيد النافذة مفتوحة داخل الموقع
+      try { if (pipWindow) pipWindow.close(); } catch (e) { unpin(); }
+    } else {
+      pin();
+    }
   });
 
   el.collapse.addEventListener("click", () => {
     state.collapsed = !state.collapsed;
     win.classList.toggle("is-collapsed", state.collapsed);
-    el.collapse.textContent = state.collapsed ? "▢" : "–";
+    el.collapse.innerHTML = state.collapsed ? ICONS.plus : ICONS.minus;
   });
+
   el.clear.addEventListener("click", () => {
     stopSpeaking();
     state.messages = [];
@@ -631,7 +859,7 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && state.open) closeWin();
+    if (event.key === "Escape" && state.open && !state.pinned) closeWin();
     if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "k") {
       event.preventDefault();
       toggleWin();
@@ -650,11 +878,19 @@
     el.speakBtn.classList.toggle("is-active", state.speak);
     el.speakBtn.querySelector("span").textContent = state.speak ? "النطق" : "صامت";
 
-    if (prefs.fab && prefs.fab.top) {
-      fab.style.top = prefs.fab.top;
-      fab.style.left = prefs.fab.left;
-      fab.style.insetInlineEnd = "auto";
-      fab.style.insetBlockEnd = "auto";
+    if (prefs.fab && prefs.fab.top && prefs.vh) {
+      /* إعادة تموضع الفقاعة بالنسبة لأبعاد الشاشة الحالية */
+      const relTop = parseFloat(prefs.fab.top) / prefs.vh;
+      const relLeft = parseFloat(prefs.fab.left) / prefs.vw;
+      if (Number.isFinite(relTop) && Number.isFinite(relLeft)) {
+        const size = fab.getBoundingClientRect().width || 62;
+        const top = Math.min(Math.max(8, relTop * window.innerHeight), window.innerHeight - size - 8);
+        const left = Math.min(Math.max(8, relLeft * window.innerWidth), window.innerWidth - size - 8);
+        fab.style.top = top + "px";
+        fab.style.left = left + "px";
+        fab.style.insetInlineEnd = "auto";
+        fab.style.insetBlockEnd = "auto";
+      }
     }
 
     const saved = store.read(CHAT_KEY, []);
@@ -670,13 +906,18 @@
     window.speechSynthesis.getVoices();
   }
 
-  // عند تشغيل النسخة المثبتة، تظهر المحادثة مباشرة كنافذة صغيرة بدل واجهة T.M.D_AI الكاملة.
+  /* عند تشغيل النسخة المستقلة (نافذة منبثقة أو تطبيق مثبت)
+     تظهر المحادثة مباشرة كنافذة عائمة كاملة الشاشة. */
   const isMiniApp = document.body.classList.contains("tmd-assistant-page");
   const isStandalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
-  if (isStandalone) el.installBtn.hidden = true;
+  if (isStandalone) {
+    el.pinBtn.style.display = "none";
+    el.openSite.style.display = "none";
+  }
   if (isMiniApp) {
+    document.documentElement.classList.add("tmd-standalone");
     openWin();
-    fab.setAttribute("aria-label", "إغلاق المساعد المصغر");
+    fab.setAttribute("aria-label", "إغلاق المساعد العائم");
   }
 
   /* ============ واجهة برمجية عامة ============ */
@@ -684,6 +925,8 @@
     open: openWin,
     close: closeWin,
     toggle: toggleWin,
+    pin,
+    unpin,
     ask(text) {
       openWin();
       el.input.value = String(text || "");

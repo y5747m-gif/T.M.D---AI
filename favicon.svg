@@ -1,58 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0c101d"/>
-      <stop offset="50%" stop-color="#140f2b"/>
-      <stop offset="100%" stop-color="#070913"/>
+    <linearGradient id="seal-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111b40"/>
+      <stop offset="55%" stop-color="#0a1128"/>
+      <stop offset="100%" stop-color="#050913"/>
     </linearGradient>
-    <linearGradient id="grad-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00f2fe"/>
-      <stop offset="50%" stop-color="#7f00ff"/>
-      <stop offset="100%" stop-color="#ff007f"/>
+    <linearGradient id="seal-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6dd8f"/>
+      <stop offset="48%" stop-color="#dfb554"/>
+      <stop offset="100%" stop-color="#b8892c"/>
     </linearGradient>
-    <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffff"/>
-      <stop offset="40%" stop-color="#9d4edd"/>
-      <stop offset="80%" stop-color="#ff007f"/>
-      <stop offset="100%" stop-color="#ffd166"/>
+    <linearGradient id="seal-steel" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3e6ff4"/>
+      <stop offset="100%" stop-color="#8fb0ff"/>
     </linearGradient>
-    <radialGradient id="grad-glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.8"/>
-      <stop offset="50%" stop-color="#7f00ff" stop-opacity="0.3"/>
+    <radialGradient id="seal-halo" cx="50%" cy="46%" r="58%">
+      <stop offset="0%" stop-color="#3e6ff4" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#1b2a6b" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
-    <filter id="glow-blur" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="seal-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <!-- Background Base -->
-  <rect width="100" height="100" rx="26" fill="url(#grad-bg)"/>
-  <rect width="98" height="98" x="1" y="1" rx="25" stroke="url(#grad-ring)" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- قاعدة ملكية داكنة -->
+  <rect width="100" height="100" rx="27" fill="url(#seal-bg)"/>
+  <rect x="2.6" y="2.6" width="94.8" height="94.8" rx="24.5" stroke="url(#seal-gold)" stroke-width="1.8" stroke-opacity="0.9"/>
 
-  <!-- Subtle Ambient Glow -->
-  <circle cx="50" cy="50" r="38" fill="url(#grad-glow)" opacity="0.6"/>
+  <!-- هالة ملكية -->
+  <circle cx="50" cy="50" r="35" fill="url(#seal-halo)"/>
 
-  <!-- Orbital Rings -->
-  <ellipse cx="50" cy="50" rx="38" ry="16" transform="rotate(-30 50 50)" stroke="url(#grad-ring)" stroke-width="1.8" stroke-dasharray="8 4" opacity="0.8"/>
-  <ellipse cx="50" cy="50" rx="38" ry="16" transform="rotate(35 50 50)" stroke="url(#grad-ring)" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.6"/>
+  <!-- الشرارة الذهبية المركزية -->
+  <path filter="url(#seal-glow)"
+        d="M50 20 C51 35 65 49 80 50 C65 51 51 65 50 80 C49 65 35 51 20 50 C35 49 49 35 50 20 Z"
+        fill="url(#seal-gold)"/>
 
-  <!-- Orbital Satellites / Quantum nodes -->
-  <circle cx="20" cy="36" r="3.2" fill="#00ffff" filter="url(#glow-blur)"/>
-  <circle cx="80" cy="64" r="2.8" fill="#ff007f" filter="url(#glow-blur)"/>
-  <circle cx="72" cy="28" r="2.2" fill="#ffd166" filter="url(#glow-blur)"/>
-
-  <!-- Central Core Hexagon / Star Badge -->
-  <polygon points="50,22 74,36 74,64 50,78 26,64 26,36" fill="#0e1324" stroke="url(#grad-ring)" stroke-width="2.2" filter="url(#glow-blur)"/>
-
-  <!-- Central Monogram TMD with sparkling star -->
-  <text x="50" y="54" font-family="'Cairo', 'Space Grotesk', -apple-system, sans-serif" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">TMD</text>
-  <text x="50" y="66" font-family="'Cairo', 'Space Grotesk', -apple-system, sans-serif" font-size="7.5" font-weight="800" fill="#00f2fe" text-anchor="middle" letter-spacing="2.5">AI PRO</text>
-
-  <!-- Sparkle Flare on top -->
-  <path d="M 50 18 Q 50 24 56 24 Q 50 24 50 30 Q 50 24 44 24 Q 50 24 50 18 Z" fill="#ffffff" filter="url(#glow-blur)"/>
+  <!-- شرارة تقنية زرقاء صغيرة -->
+  <path d="M77 14 C77.5 19.2 81.8 23.5 87 24 C81.8 24.5 77.5 28.8 77 34 C76.5 28.8 72.2 24.5 67 24 C72.2 23.5 76.5 19.2 77 14 Z"
+        fill="url(#seal-steel)" opacity="0.95"/>
+  <path d="M24.5 67 C24.8 69.9 27.1 72.2 30 72.5 C27.1 72.8 24.8 75.1 24.5 78 C24.2 75.1 21.9 72.8 19 72.5 C21.9 72.2 24.2 69.9 24.5 67 Z"
+        fill="#8fb0ff" opacity="0.7"/>
 </svg>
