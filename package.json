@@ -9,6 +9,6 @@
   "scripts": {
     "dev": "vercel dev",
     "test": "node --test",
-    "check": "node --check api/chat.js && node --check app.js && npm test"
+    "check": "node --check api/chat.js && node --check api/image.js && node --check api/upload.js && node --check api/settings.js && node --check api/owner-login.js && node --check app.js && node --check floating-assistant.js && node --check pwa.js && node --check service-worker.js && npm test"
   }
 }

@@ -109,12 +109,16 @@ module.exports = async function handler(
     }
 
 
+    const passwordBuffer = Buffer.from(password);
+    const ownerBuffer = Buffer.from(ownerPassword);
+
     const valid =
+      passwordBuffer.length === ownerBuffer.length &&
       crypto.timingSafeEqual(
 
-        Buffer.from(password),
+        passwordBuffer,
 
-        Buffer.from(ownerPassword)
+        ownerBuffer
 
       );
 
