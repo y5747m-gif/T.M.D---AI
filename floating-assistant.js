@@ -393,9 +393,35 @@
   }
 
   /* ============ مشاركة الشاشة ============ */
+  const androidBridge = window.TmdAndroid || null;
+
+  function markShareStarted() {
+    state.sharing = true;
+    el.screenBox.classList.add("is-on");
+    el.shareBtn.classList.add("is-active");
+    el.shareBtn.querySelector("span").textContent = "إيقاف المشاركة";
+    el.badge.classList.add("is-on");
+    setStatus("🖥️ يشاهد شاشتك");
+    bubble({
+      role: "assistant",
+      content: "تم تفعيل مشاركة الشاشة ✅ سأرفق لقطة من شاشتك مع كل رسالة لأفهم ما تعمل عليه. اسألني: ماذا ترى على شاشتي؟"
+    });
+    scrollDown();
+  }
+
+  // يستدعي تطبيق Android هذه الدوال بعد نتيجة نافذة موافقة النظام.
+  window.tmdAndroidScreenShareStarted = markShareStarted;
+  window.tmdAndroidScreenShareStopped = () => stopShare(true);
+  window.tmdAndroidScreenShareDenied = () => pushError("لم يتم السماح بمشاركة الشاشة.");
+
   async function toggleShare() {
     if (state.sharing) {
       stopShare();
+      return;
+    }
+    if (androidBridge) {
+      try { androidBridge.startScreenShare(); }
+      catch (e) { pushError("تعذّر طلب إذن مشاركة الشاشة من Android."); }
       return;
     }
     const media = (win.ownerDocument.defaultView || window).navigator.mediaDevices;
@@ -409,19 +435,9 @@
         audio: false
       });
       state.stream = stream;
-      state.sharing = true;
       el.video.srcObject = stream;
-      el.screenBox.classList.add("is-on");
-      el.shareBtn.classList.add("is-active");
-      el.shareBtn.querySelector("span").textContent = "إيقاف المشاركة";
-      el.badge.classList.add("is-on");
-      setStatus("🖥️ يشاهد شاشتك");
       stream.getVideoTracks()[0].addEventListener("ended", stopShare);
-      bubble({
-        role: "assistant",
-        content: "تم تفعيل مشاركة الشاشة ✅ سأرفق لقطة من شاشتك مع كل رسالة لأفهم ما تعمل عليه. اسألني: ماذا ترى على شاشتي؟"
-      });
-      scrollDown();
+      markShareStarted();
     } catch (e) {
       if (e && e.name !== "NotAllowedError") {
         pushError("تعذّر بدء مشاركة الشاشة: " + (e.message || e.name));
@@ -429,7 +445,10 @@
     }
   }
 
-  function stopShare() {
+  function stopShare(fromNative) {
+    if (androidBridge && !fromNative) {
+      try { androidBridge.stopScreenShare(); } catch (e) { /* تجاهل */ }
+    }
     if (state.stream) {
       state.stream.getTracks().forEach((track) => track.stop());
     }
@@ -444,7 +463,12 @@
   }
 
   function captureFrame() {
-    if (!state.sharing || !el.video.videoWidth) return null;
+    if (!state.sharing) return null;
+    if (androidBridge) {
+      try { return androidBridge.getLatestScreenshot() || null; }
+      catch (e) { return null; }
+    }
+    if (!el.video.videoWidth) return null;
     const maxW = 1280;
     const scale = Math.min(1, maxW / el.video.videoWidth);
     const canvas = document.createElement("canvas");
