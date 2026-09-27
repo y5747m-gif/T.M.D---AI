@@ -2,6 +2,10 @@
 node_modules/
 .vercel/
 
+# Generated Android installation packages (published through GitHub Actions artifacts)
+android-app/release-artifact/
+*.apk
+
 # Local environment files (never commit API keys)
 .env*
 !.env.example

@@ -392,8 +392,18 @@
     }
   }
 
-  /* ============ مشاركة الشاشة ============ */
+  /* ============ مشاركة الشاشة / جسر Android ============ */
+  // لا يظهر هذا الجسر إلا داخل APK. الاستعلام مفيد أثناء تحميل صفحة Android
+  // لكنه لا يمنح أي صلاحيات في المتصفح العادي.
   const androidBridge = window.TmdAndroid || null;
+  const isAndroidApp = Boolean(androidBridge) || new URLSearchParams(window.location.search).get("android") === "1";
+
+  if (isAndroidApp) document.body.classList.add("tmd-android-overlay");
+
+  function setNativeOverlayExpanded(value) {
+    if (!androidBridge || typeof androidBridge.setOverlayExpanded !== "function") return;
+    try { androidBridge.setOverlayExpanded(Boolean(value)); } catch (e) { /* تجاهل */ }
+  }
 
   function markShareStarted() {
     state.sharing = true;
@@ -779,6 +789,9 @@
 
   /* ============ فتح/إغلاق ============ */
   function openWin() {
+    // في APK لا تبقى نافذة WebView كبيرة وشفافة فوق التطبيقات: تتسع فقط
+    // عندما يفتح المستخدم الفقاعة، كي تبقى بقية واجهة الهاتف قابلة للمس.
+    if (!state.pinned) setNativeOverlayExpanded(true);
     state.open = true;
     win.classList.add("is-open");
     win.classList.remove("is-collapsed");
@@ -791,6 +804,7 @@
   function closeWin() {
     state.open = false;
     win.classList.remove("is-open");
+    if (!state.pinned) setNativeOverlayExpanded(false);
     stopSpeaking();
     if (state.listening && recognition) {
       try { recognition.stop(); } catch (e) { /* تجاهل */ }
@@ -813,11 +827,17 @@
   }
 
   /* ============ الربط ============ */
-  makeDraggable(fab, fab, (moved) => {
-    if (moved) snapFabToEdge();
-    else toggleWin();
-  });
-  makeDraggable(el.head, win);
+  if (isAndroidApp) {
+    // حجم نافذة Android يساوي حجم الفقاعة عند الإغلاق؛ تحريك عنصر HTML
+    // داخله لن يحرّك النافذة الأصلية، لذلك نحافظ على لمسة واحدة موثوقة للفتح.
+    fab.addEventListener("click", toggleWin);
+  } else {
+    makeDraggable(fab, fab, (moved) => {
+      if (moved) snapFabToEdge();
+      else toggleWin();
+    });
+    makeDraggable(el.head, win);
+  }
 
   el.close.addEventListener("click", () => {
     if (state.pinned) {
@@ -837,6 +857,12 @@
   });
 
   el.collapse.addEventListener("click", () => {
+    // التصغير في APK يعيد النافذة إلى فقاعة حقيقية صغيرة، بدلاً من ترك
+    // مستطيل شفاف فوق التطبيقات يمنع لمس الشاشة.
+    if (isAndroidApp) {
+      closeWin();
+      return;
+    }
     state.collapsed = !state.collapsed;
     win.classList.toggle("is-collapsed", state.collapsed);
     el.collapse.innerHTML = state.collapsed ? ICONS.plus : ICONS.minus;
@@ -934,14 +960,18 @@
      تظهر المحادثة مباشرة كنافذة عائمة كاملة الشاشة. */
   const isMiniApp = document.body.classList.contains("tmd-assistant-page");
   const isStandalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
-  if (isStandalone) {
+  if (isStandalone || isAndroidApp) {
     el.pinBtn.style.display = "none";
     el.openSite.style.display = "none";
   }
-  if (isMiniApp) {
+  // assistant.html هو نافذة مستقلة في الويب/PWA، لكنه داخل APK هو محتوى
+  // الفقاعة؛ لذلك لا نفتحه تلقائياً ولا نحجب واجهة الهاتف بمستطيل كبير.
+  if (isMiniApp && !isAndroidApp) {
     document.documentElement.classList.add("tmd-standalone");
     openWin();
     fab.setAttribute("aria-label", "إغلاق المساعد العائم");
+  } else if (isAndroidApp) {
+    setNativeOverlayExpanded(false);
   }
 
   /* ============ واجهة برمجية عامة ============ */
