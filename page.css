@@ -16,9 +16,9 @@ body {
   display: flex;
   flex-direction: column;
   background-image:
-    radial-gradient(1100px 520px at 88% -10%, rgba(127, 0, 255, 0.16), transparent 62%),
-    radial-gradient(900px 460px at 8% 4%, rgba(0, 242, 254, 0.10), transparent 60%),
-    radial-gradient(1000px 600px at 50% 110%, rgba(255, 0, 127, 0.08), transparent 60%);
+    radial-gradient(1100px 520px at 88% -10%, rgba(67, 83, 201, 0.16), transparent 62%),
+    radial-gradient(900px 460px at 8% 4%, rgba(109, 155, 255, 0.10), transparent 60%),
+    radial-gradient(1000px 600px at 50% 110%, rgba(217, 164, 65, 0.08), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -54,7 +54,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 11px;
-  box-shadow: 0 0 18px rgba(0, 242, 254, 0.25);
+  box-shadow: 0 0 18px rgba(109, 155, 255, 0.25);
 }
 
 .brand-row-text .pro-badge {
@@ -89,8 +89,8 @@ body {
 
 .page-nav a.active {
   color: var(--accent-cyan);
-  border-color: rgba(0, 242, 254, 0.35);
-  background: rgba(0, 242, 254, 0.08);
+  border-color: rgba(109, 155, 255, 0.35);
+  background: rgba(109, 155, 255, 0.08);
 }
 
 /* ---------- Main content ---------- */
@@ -157,7 +157,7 @@ body {
 .prose a {
   color: var(--accent-cyan);
   text-decoration: none;
-  border-bottom: 1px dashed rgba(0, 242, 254, 0.4);
+  border-bottom: 1px dashed rgba(109, 155, 255, 0.4);
 }
 
 .prose a:hover {
@@ -211,8 +211,8 @@ body {
   padding: 22px;
   border-radius: 18px;
   text-align: center;
-  background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), rgba(127, 0, 255, 0.12));
-  border: 1px solid rgba(0, 242, 254, 0.25);
+  background: linear-gradient(135deg, rgba(109, 155, 255, 0.08), rgba(67, 83, 201, 0.12));
+  border: 1px solid rgba(109, 155, 255, 0.25);
 }
 
 .cta-box p {
@@ -230,13 +230,13 @@ body {
   font-weight: 800;
   text-decoration: none !important;
   border: none !important;
-  box-shadow: 0 8px 26px rgba(0, 242, 254, 0.25);
+  box-shadow: 0 8px 26px rgba(109, 155, 255, 0.25);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .btn-primary-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 242, 254, 0.35);
+  box-shadow: 0 12px 32px rgba(109, 155, 255, 0.35);
   color: #fff !important;
 }
 
@@ -250,7 +250,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 18px rgba(0, 242, 254, 0.35));
+  filter: drop-shadow(0 0 18px rgba(109, 155, 255, 0.35));
 }
 
 .err-actions {

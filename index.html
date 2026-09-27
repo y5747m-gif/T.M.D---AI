@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#06080f">
+  <meta name="theme-color" content="#050912">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="T.M.D_AI_Pro — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها، بواجهة متجاوبة وتصميم كوني فريد. تطوير وتصميم ياسين عمرو عبد الرحيم.">
@@ -124,11 +124,11 @@
   <a class="skip-link" href="#mainContent">تخطي إلى المحتوى الرئيسي</a>
 
   <noscript>
-    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#06080f;color:#f3f6fc;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
+    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#050912;color:#eef2fb;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
       <div>
-        <p style="font-size:1.4rem;font-weight:900;margin-bottom:10px;color:#f3f6fc;">T.M.D_AI_Pro — منصة الذكاء الاصطناعي العربية</p>
-        <p style="color:#9aa5b8;margin-bottom:14px;">محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — يتطلب تفعيل JavaScript في المتصفح.</p>
-        <p><a href="/about" style="color:#00f2fe;">عن المنصة</a> · <a href="/faq" style="color:#00f2fe;">الأسئلة الشائعة</a> · <a href="/privacy" style="color:#00f2fe;">سياسة الخصوصية</a></p>
+        <p style="font-size:1.4rem;font-weight:900;margin-bottom:10px;color:#eef2fb;">T.M.D_AI_Pro — منصة الذكاء الاصطناعي العربية</p>
+        <p style="color:#97a3bd;margin-bottom:14px;">محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — يتطلب تفعيل JavaScript في المتصفح.</p>
+        <p><a href="/about" style="color:#6d9bff;">عن المنصة</a> · <a href="/faq" style="color:#6d9bff;">الأسئلة الشائعة</a> · <a href="/privacy" style="color:#6d9bff;">سياسة الخصوصية</a></p>
       </div>
     </div>
   </noscript>
@@ -171,13 +171,13 @@
                 <polygon points="50,15 82,33 82,67 50,85 18,67 18,33" fill="url(#core-grad-sb)" stroke="url(#stroke-grad-sb)" stroke-width="3"/>
                 <defs>
                   <linearGradient id="core-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.9"/>
-                    <stop offset="100%" stop-color="#7f00ff" stop-opacity="0.9"/>
+                    <stop offset="0%" stop-color="#0e1734" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#0a1128" stop-opacity="0.95"/>
                   </linearGradient>
                   <linearGradient id="stroke-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#00ffff"/>
-                    <stop offset="50%" stop-color="#ff007f"/>
-                    <stop offset="100%" stop-color="#ffd166"/>
+                    <stop offset="0%" stop-color="#6d9bff"/>
+                    <stop offset="55%" stop-color="#4353c9"/>
+                    <stop offset="100%" stop-color="#dfb554"/>
                   </linearGradient>
                 </defs>
                 <text x="50" y="58" font-family="'Cairo', sans-serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">T</text>
@@ -304,6 +304,14 @@
 
         <div class="topbar-left">
 
+          <!-- زر تثبيت المساعد العائم فوق كل التطبيقات -->
+          <button class="topbar-action-btn pin-assistant-btn" id="pinAssistantBtn" type="button" title="تثبيت المساعد كنافذة عائمة فوق كل التطبيقات — يبقى يعمل دون البقاء داخل الموقع">
+            <span class="topbar-btn-icon tmd-spark-btn-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="pinSparkGrad" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4285f4"/><stop offset=".48" stop-color="#9b72cb"/><stop offset="1" stop-color="#d96570"/></linearGradient></defs><path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#pinSparkGrad)"/></svg>
+            </span>
+            <span class="topbar-btn-text">تثبيت المساعد</span>
+          </button>
+
           <!-- زر تخصيص الخلفية والمظهر المباشر -->
           <button class="topbar-action-btn bg-customizer-trigger" id="openBgCustomizerBtn" type="button" title="تخصيص الخلفية لصورتك الخاصة">
             <span class="topbar-btn-icon">🎨</span>
@@ -356,10 +364,10 @@
                     <stop offset="100%" stop-color="#060914"/>
                   </linearGradient>
                   <linearGradient id="hero-grad-poly" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#00f2fe"/>
-                    <stop offset="35%" stop-color="#9d4edd"/>
-                    <stop offset="70%" stop-color="#ff007f"/>
-                    <stop offset="100%" stop-color="#ffd166"/>
+                    <stop offset="0%" stop-color="#6d9bff"/>
+                    <stop offset="40%" stop-color="#4353c9"/>
+                    <stop offset="75%" stop-color="#dfb554"/>
+                    <stop offset="100%" stop-color="#e6c35c"/>
                   </linearGradient>
                   <filter id="hero-glow" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="3" result="blur"/>
@@ -372,7 +380,7 @@
                 <polygon points="60,16 98,38 98,82 60,104 22,82 22,38" fill="url(#hero-grad-bg)" stroke="url(#hero-grad-poly)" stroke-width="2.8" filter="url(#hero-glow)"/>
                 <circle cx="60" cy="60" r="28" fill="none" stroke="url(#hero-grad-poly)" stroke-width="1.2" stroke-dasharray="6 3"/>
                 <text x="60" y="66" font-family="'Cairo', sans-serif" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">TMD</text>
-                <text x="60" y="80" font-family="'Space Grotesk', sans-serif" font-size="8" font-weight="700" fill="#00f2fe" text-anchor="middle" letter-spacing="3">AI PRO</text>
+                <text x="60" y="80" font-family="'Space Grotesk', sans-serif" font-size="8" font-weight="700" fill="#8fb0ff" text-anchor="middle" letter-spacing="3">AI PRO</text>
                 <!-- النجم اللامع فوق الشعار -->
                 <path d="M 60 12 Q 60 17 65 17 Q 60 17 60 22 Q 60 17 55 17 Q 60 17 60 12 Z" fill="#ffffff"/>
               </svg>
@@ -574,6 +582,8 @@
             <span>T.M.D_AI_Pro · تصميم وتطوير <strong>ياسين عمرو عبد الرحيم</strong></span>
             <span class="note-sep">•</span>
             <span class="bg-quick-hint" id="bgQuickHint" role="button">🎨 تخصيص مظهرك الخاص</span>
+            <span class="note-sep">•</span>
+            <span class="bg-quick-hint pin-quick-hint" id="pinQuickHint" role="button">📌 ثبّت المساعد فوق التطبيقات</span>
           </div>
 
         </div>
@@ -819,6 +829,16 @@
           </div>
           <button class="btn btn-secondary btn-sm" id="openBgFromSettingsBtn" type="button">
             🎨 فتح مخصص الخلفية
+          </button>
+        </div>
+
+        <div class="setting setting--action">
+          <div class="setting-info">
+            <label class="setting-label">المساعد العائم فوق التطبيقات</label>
+            <span class="setting-desc">نافذة T.M.D_AI تبقى فوق كل البرامج أثناء عملك — متصلة بالموقع دون فتحه</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="pinFromSettingsBtn" type="button">
+            📌 تثبيت الآن
           </button>
         </div>
 

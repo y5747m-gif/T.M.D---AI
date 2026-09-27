@@ -38,6 +38,21 @@ const VALID_MODELS = new Set([
   MODELS.minimax
 ]);
 
+/* شعار المساعد (شرارة ب نمط Gemini) — معرّف فريد لكل نسخة حتى لا تتعارض التدرجات */
+let __tmdSparkSeq = 0;
+function botSparkHTML() {
+  const gid = "tmdMsgSpark" + (++__tmdSparkSeq);
+  return (
+    '<svg class="bot-spark-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<defs><linearGradient id="' + gid + '" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">' +
+    '<stop offset="0" stop-color="#4285f4"/><stop offset="0.48" stop-color="#9b72cb"/><stop offset="1" stop-color="#d96570"/>' +
+    "</linearGradient></defs>" +
+    '<path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 ' +
+    'C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#' + gid + ')"/>' +
+    "</svg>"
+  );
+}
+
 if (!VALID_MODELS.has(state.model)) {
   state.model = MODELS.smart;
   localStorage.setItem("tmd_model", state.model);
@@ -152,10 +167,10 @@ class StarfieldEngine {
     this.stars = [];
     const colors = [
       "rgba(255, 255, 255,",
-      "rgba(0, 242, 254,",
-      "rgba(255, 209, 102,",
+      "rgba(127, 165, 255,",
+      "rgba(230, 195, 92,",
       "rgba(143, 176, 255,",
-      "rgba(255, 120, 200,"
+      "rgba(217, 164, 65,"
     ];
 
     for (let i = 0; i < count; i++) {
@@ -308,8 +323,8 @@ class StarfieldEngine {
         m.y - m.dy * (m.length / m.speed)
       );
       grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.95})`);
-      grad.addColorStop(0.2, `rgba(0, 242, 254, ${alpha * 0.8})`);
-      grad.addColorStop(1, "rgba(0, 242, 254, 0)");
+      grad.addColorStop(0.2, `rgba(109, 155, 255, ${alpha * 0.8})`);
+      grad.addColorStop(1, "rgba(109, 155, 255, 0)");
 
       this.ctx.strokeStyle = grad;
       this.ctx.lineWidth = 1.8;
@@ -429,11 +444,11 @@ class UserBackgroundManager {
 
     const presets = {
       "animated-stars": "",
-      "nebula": "radial-gradient(circle at 20% 20%, rgba(138,43,226,0.6) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(0,242,254,0.5) 0%, transparent 60%), #070a16",
-      "cyberpunk": "linear-gradient(135deg, rgba(255,0,127,0.45) 0%, rgba(0,242,254,0.35) 100%), #080914",
-      "aurora": "radial-gradient(circle at 50% 10%, rgba(0,255,136,0.4) 0%, rgba(0,242,254,0.35) 40%, transparent 75%), #040912",
+      "nebula": "radial-gradient(circle at 20% 20%, rgba(67,83,201,0.6) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(77,124,254,0.5) 0%, transparent 60%), #070a16",
+      "cyberpunk": "linear-gradient(135deg, rgba(217,164,65,0.45) 0%, rgba(77,124,254,0.35) 100%), #080914",
+      "aurora": "radial-gradient(circle at 50% 10%, rgba(52,211,153,0.4) 0%, rgba(109,155,255,0.35) 40%, transparent 75%), #040912",
       "obsidian": "linear-gradient(180deg, #0e111a 0%, #05060a 100%)",
-      "galaxy-gold": "radial-gradient(circle at 40% 30%, rgba(255,209,102,0.45) 0%, rgba(255,75,43,0.3) 50%, transparent 80%), #0b0714"
+      "galaxy-gold": "radial-gradient(circle at 40% 30%, rgba(230,195,92,0.45) 0%, rgba(194,141,44,0.3) 50%, transparent 80%), #0b0714"
     };
 
     if (preset === "animated-stars" || !presets[preset]) {
@@ -876,6 +891,23 @@ function bindEvents() {
   clearChatBtn?.addEventListener("click", clearCurrentChat);
   exportChatBtn?.addEventListener("click", exportCurrentChat);
   clearAllHistoryBtn?.addEventListener("click", clearAllConversations);
+
+  // تثبيت المساعد العائم فوق كل التطبيقات (زر الشريط العلوي + الإعدادات + التلميح السريع)
+  const pinFloatingAssistant = () => {
+    const api = window.__tmdFloatingAssistant;
+    if (api && typeof api.pin === "function") {
+      api.pin();
+      showToast("📌 جارٍ تثبيت المساعد فوق التطبيقات…");
+    } else {
+      showToast("المساعد العائم لم يجهز بعد، جرّب بعد لحظات.");
+    }
+  };
+  document.getElementById("pinAssistantBtn")?.addEventListener("click", pinFloatingAssistant);
+  document.getElementById("pinQuickHint")?.addEventListener("click", pinFloatingAssistant);
+  document.getElementById("pinFromSettingsBtn")?.addEventListener("click", () => {
+    modalBackdrop?.classList.add("hidden");
+    pinFloatingAssistant();
+  });
 
   // Responsive Sidebar Drawer
   openSidebar?.addEventListener("click", () => {
@@ -1568,7 +1600,8 @@ function renderMessage(message, index) {
   if (message.role === "user") {
     avatar.textContent = "أنت";
   } else {
-    avatar.innerHTML = `<span style="font-size:0.8rem; font-weight:900;">TMD</span>`;
+    avatar.classList.add("is-bot");
+    avatar.innerHTML = botSparkHTML();
   }
 
   const content = document.createElement("div");
@@ -1747,7 +1780,7 @@ function addLoadingMessage() {
   wrapper.className = "message assistant loading-message";
   wrapper.dataset.loadingId = String(id);
   wrapper.innerHTML = `
-    <div class="message-avatar">TMD</div>
+    <div class="message-avatar is-bot">${botSparkHTML()}</div>
     <div class="message-content">
       <div class="message-text">
         <span>جاري المعالجة والتفكير</span>
@@ -1954,7 +1987,7 @@ function exportCurrentChat() {
   text += `---------------------------------------------------\n\n`;
 
   state.messages.forEach(m => {
-    const role = m.role === "user" ? "👤 المستخدم" : "🤖 T.M.D_AI_Pro";
+    const role = m.role === "user" ? "👤 المستخدم" : "✦ T.M.D_AI_Pro";
     text += `${role}:\n${m.content || ""}\n\n`;
   });
 
@@ -2012,3 +2045,4 @@ window.TMDAI = {
 };
 
 console.log("T.M.D_AI_Pro loaded — Engineered & Designed by Yassin Amr Abdelrahim (ياسين عمرو عبد الرحيم)");
+
