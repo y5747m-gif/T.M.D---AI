@@ -19,6 +19,16 @@
   const TEXT_MODEL = "openai/gpt-oss-120b";
   const VISION_MODEL = "qwen/qwen3.8-27b";
   const MAX_TURNS = 14;
+  let deferredInstallPrompt = null;
+
+  // يحتفظ المتصفح بهذا الحدث حتى يضغط المستخدم زر تثبيت التطبيق المصغر.
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    document.querySelectorAll("[data-el=installBtn]").forEach((button) => {
+      button.hidden = false;
+    });
+  });
 
   const SYSTEM_PROMPT =
     "أنت T.M.D_AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة مصغّرة عائمة فوق موقع المستخدم. " +
@@ -87,6 +97,7 @@
         <div class="tmd-mini__title">T.M.D_AI — مساعد عائم</div>
         <div class="tmd-mini__status" data-el="status">جاهز للدردشة</div>
       </div>
+      <button type="button" class="tmd-mini__head-btn tmd-install-btn" data-el="installBtn" title="تنزيل المساعد المصغر">⬇</button>
       <button type="button" class="tmd-mini__head-btn" data-el="clear" title="محادثة جديدة">🗑</button>
       <button type="button" class="tmd-mini__head-btn" data-el="collapse" title="تصغير">–</button>
       <button type="button" class="tmd-mini__head-btn" data-el="close" title="إغلاق">✕</button>
@@ -553,6 +564,27 @@
   makeDraggable(el.head, win);
 
   el.close.addEventListener("click", closeWin);
+
+  async function installMiniApp() {
+    if (!deferredInstallPrompt) {
+      pushError("للتنزيل على الهاتف، افتح قائمة المتصفح ثم اختر إضافة إلى الشاشة الرئيسية.");
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (choice && choice.outcome === "accepted") {
+      el.installBtn.hidden = true;
+    }
+    deferredInstallPrompt = null;
+  }
+
+  el.installBtn.addEventListener("click", installMiniApp);
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    el.installBtn.hidden = true;
+    setStatus("تم تنزيل المساعد المصغر ✅");
+  });
+
   el.collapse.addEventListener("click", () => {
     state.collapsed = !state.collapsed;
     win.classList.toggle("is-collapsed", state.collapsed);
@@ -636,6 +668,15 @@
 
   if (ttsSupported && typeof window.speechSynthesis.getVoices === "function") {
     window.speechSynthesis.getVoices();
+  }
+
+  // عند تشغيل النسخة المثبتة، تظهر المحادثة مباشرة كنافذة صغيرة بدل واجهة T.M.D_AI الكاملة.
+  const isMiniApp = document.body.classList.contains("tmd-assistant-page");
+  const isStandalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+  if (isStandalone) el.installBtn.hidden = true;
+  if (isMiniApp) {
+    openWin();
+    fab.setAttribute("aria-label", "إغلاق المساعد المصغر");
   }
 
   /* ============ واجهة برمجية عامة ============ */

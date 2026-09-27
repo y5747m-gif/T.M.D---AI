@@ -477,11 +477,38 @@
 @media (max-width: 480px) {
   .tmd-mini {
     inset-inline: 10px;
-    inset-block-end: 92px;
+    inset-block-end: max(92px, env(safe-area-inset-bottom));
     width: auto;
-    max-height: calc(100vh - 110px);
+    max-height: calc(100dvh - 110px);
   }
-  .tmd-fab { --fab-size: 56px; inset-block-end: 18px; inset-inline-end: 16px; }
+  .tmd-fab { --fab-size: 56px; inset-block-end: max(18px, env(safe-area-inset-bottom)); inset-inline-end: 16px; }
+}
+
+/* التطبيق المصغر المثبت: لا يعرض واجهة T.M.D_AI الكاملة. */
+.tmd-assistant-page {
+  min-height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #06080f;
+}
+
+.tmd-assistant-page .tmd-fab { display: none; }
+.tmd-assistant-page .tmd-mini {
+  inset-block-end: 18px;
+  inset-inline-end: 18px;
+}
+.tmd-assistant-page .tmd-mini.is-open {
+  display: flex;
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(720px, calc(100dvh - 24px));
+}
+
+@media (max-width: 480px) {
+  .tmd-assistant-page .tmd-mini {
+    inset: 10px 10px max(10px, env(safe-area-inset-bottom));
+    width: auto;
+    max-height: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
