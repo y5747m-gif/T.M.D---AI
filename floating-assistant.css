@@ -659,6 +659,25 @@
   margin: 0;
   overflow: hidden;
   background: #050912;
+  position: relative;
+}
+
+/* توهج حي متعدد الألوان يحدد أطراف نافذة الهاتف دون إزعاج المحتوى */
+.tmd-assistant-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  border: 2px solid #4d7cfe;
+  border-radius: 18px;
+  opacity: .72;
+  filter: drop-shadow(0 0 7px rgba(77,124,254,.65));
+  animation: tmdEdgeGlow 8s linear infinite;
+}
+
+@keyframes tmdEdgeGlow {
+  to { filter: hue-rotate(360deg) drop-shadow(0 0 9px rgba(217,101,112,.7)); }
 }
 
 .tmd-assistant-page .tmd-fab { display: none; }
