@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI lightning mark">
-  <defs>
-    <linearGradient id="edge" x1="28" y1="18" x2="131" y2="142" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".48" stop-color="#bbb"/><stop offset="1" stop-color="#555"/></linearGradient>
-    <linearGradient id="bolt" x1="79" y1="39" x2="84" y2="121" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".53" stop-color="#f4f4f4"/><stop offset="1" stop-color="#bdbdbd"/></linearGradient>
-    <radialGradient id="core" cx=".35" cy=".2" r=".9"><stop stop-color="#303030"/><stop offset=".6" stop-color="#0b0b0b"/><stop offset="1"/></radialGradient>
-  </defs>
-  <path d="M80 8 137 40v62l-57 50-57-50V40L80 8Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3" stroke-linejoin="round"/>
-  <path d="m91 35-39 48h25l-8 42 39-52H83l8-38Z" fill="url(#bolt)" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
-  <circle cx="80" cy="80" r="55" stroke="#fff" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI minimal mark">
+  <rect x="9" y="9" width="142" height="142" rx="42" fill="#111827" stroke="#F5F7FF" stroke-opacity=".25" stroke-width="2"/>
+  <circle cx="80" cy="80" r="42" stroke="#F5F7FF" stroke-opacity=".14"/>
+  <path d="M80 35c3 25 10 36 34 45-24 9-31 20-34 45-3-25-10-36-34-45 24-9 31-20 34-45Z" fill="#F5F7FF"/>
+  <path d="M80 52c2 15 7 22 21 28-14 6-19 13-21 28-2-15-7-22-21-28 14-6 19-13 21-28Z" fill="#A9B2C3"/>
 </svg>
