@@ -253,7 +253,7 @@ function updateSpartaDailyMissionUI() {
 
 /* أيقونات SVG خطية موحّدة مستوحاة من Lucide. */
 const UI_ICONS = {
-  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg>',
+  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-24 12 12)"><ellipse cx="12" cy="12" rx="9" ry="3.8"/><circle cx="4.9" cy="14.4" r="1.3" fill="currentColor" stroke="none"/></g><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
   volume: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>',
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
@@ -338,113 +338,203 @@ function isCreatorOrIdentityQuestion(text) {
 
 
 /* =========================================================
-   3. DYNAMIC INTERACTIVE STARFIELD ENGINE (خلفية النجوم اللامعة)
+   3. DEEP-SPACE STARFIELD ENGINE (خلفية الفضاء العميق)
+   Layered parallax stars, warm nebula glow, twinkle,
+   and occasional shooting stars — rebuilt for the
+   Spartan crimson & gold identity.
    ========================================================= */
 class StarfieldEngine {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext("2d");
-    this.stars = [];
+
+    this.layers = [];
     this.meteors = [];
+    this.nebulae = [];
     this.running = false;
-    this.densityMultiplier = 2; // 1: light, 2: medium, 3: dense
+    this.densityMultiplier = 2; // 1: calm, 2: balanced, 3: dense
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.mouse = { x: -1000, y: -1000, active: false };
-    this.nextMeteorTime = Date.now() + 18000;
+    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+
+    // Pointer parallax (normalized -0.5..0.5, eased every frame).
+    this.pointerTarget = { x: 0, y: 0 };
+    this.pointerEased = { x: 0, y: 0 };
+
+    this.nebulaCanvas = document.createElement("canvas");
+    this.nebulaCtx = this.nebulaCanvas.getContext("2d");
+
+    this.reducedMotion = typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    this.nextMeteorTime = Date.now() + 7000;
+    this.frameHandle = null;
 
     this.init();
   }
 
   init() {
     this.resize();
-    this.createStars();
+    this.createScene();
     this.bindEvents();
     this.start();
   }
 
   setDensity(level) {
-    this.densityMultiplier = Math.max(1, Math.min(3, level));
-    this.createStars();
+    const next = Math.max(1, Math.min(3, level));
+    if (next === this.densityMultiplier && this.layers.length) return;
+    this.densityMultiplier = next;
+    this.createScene();
+    if (!this.running) this.renderFrame(Date.now());
   }
 
   resize() {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = this.width * dpr;
-    this.canvas.height = this.height * dpr;
-    this.ctx.scale(dpr, dpr);
+    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.canvas.width = Math.round(this.width * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
+    // setTransform (instead of scale) keeps repeated resizes from compounding.
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.paintNebulaLayer();
   }
 
-  createStars() {
-    const baseCount = Math.floor((this.width * this.height) / 5000);
-    const count = Math.min(120, Math.max(36, Math.floor(baseCount * (this.densityMultiplier * 0.38))));
+  /* ---------- Scene construction ---------- */
 
-    this.stars = [];
-    // نقاط ضوء هادئة متوافقة مع هوية المنتج.
-    const colors = [
-      "rgba(108, 140, 255,",
-      "rgba(139, 124, 255,",
-      "rgba(103, 217, 232,",
-      "rgba(245, 247, 255,"
+  createScene() {
+    this.createNebulae();
+    this.createStars();
+    this.paintNebulaLayer();
+  }
+
+  createNebulae() {
+    const base = Math.max(this.width, this.height);
+    // Warm, very low intensity glows: ember crimson, aged gold, deep wine.
+    this.nebulae = [
+      { fx: 0.16, fy: 0.24, radius: base * 0.52, color: "rgba(224, 85, 78, 0.085)", driftA: 0.00021, driftR: 0.05 },
+      { fx: 0.82, fy: 0.7, radius: base * 0.46, color: "rgba(217, 164, 91, 0.06)", driftA: 0.00016, driftR: 0.045 },
+      { fx: 0.62, fy: 0.12, radius: base * 0.34, color: "rgba(150, 60, 82, 0.07)", driftA: 0.00027, driftR: 0.035 }
     ];
+  }
 
-    for (let i = 0; i < count; i++) {
-      const isForeground = Math.random() < 0.18; // A small set of slightly larger foreground points.
-      this.stars.push({
-        x: Math.random() * this.width,
-        y: Math.random() * this.height,
-        size: isForeground ? (Math.random() * 1.2 + 0.7) : (Math.random() * 0.8 + 0.25),
-        colorPrefix: colors[Math.floor(Math.random() * colors.length)],
-        baseAlpha: Math.random() * 0.3 + 0.18,
-        twinkleSpeed: Math.random() * 0.04 + 0.015,
-        twinkleOffset: Math.random() * Math.PI * 2,
-        driftX: (Math.random() - 0.5) * 0.15,
-        driftY: (Math.random() - 0.5) * 0.15
-      });
+  paintNebulaLayer() {
+    if (!this.nebulaCtx || !this.width || !this.height) return;
+    this.nebulaCanvas.width = Math.max(1, Math.round(this.width / 2));
+    this.nebulaCanvas.height = Math.max(1, Math.round(this.height / 2));
+    const nctx = this.nebulaCtx;
+    const w = this.nebulaCanvas.width;
+    const h = this.nebulaCanvas.height;
+
+    nctx.clearRect(0, 0, w, h);
+    for (const blob of this.nebulae) {
+      const cx = blob.fx * w;
+      const cy = blob.fy * h;
+      const r = blob.radius / 2;
+      const gradient = nctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      gradient.addColorStop(0, blob.color);
+      gradient.addColorStop(0.55, blob.color.replace(/[\d.]+\)$/, (m) => (parseFloat(m) * 0.45).toFixed(3) + ")"));
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      nctx.fillStyle = gradient;
+      nctx.fillRect(0, 0, w, h);
     }
   }
 
+  createStars() {
+    const area = this.width * this.height;
+    const base = Math.floor(area / 4200);
+    const total = Math.min(220, Math.max(50, Math.floor(base * (this.densityMultiplier * 0.4))));
+
+    // Warm constellation palette matching the crimson & gold identity.
+    const palette = [
+      { color: "246, 241, 236", weight: 0.44 }, // warm white
+      { color: "242, 212, 155", weight: 0.26 }, // champagne
+      { color: "232, 178, 92", weight: 0.16 },  // gold
+      { color: "236, 122, 104", weight: 0.14 }  // ember
+    ];
+
+    const pickColor = () => {
+      let roll = Math.random();
+      for (const entry of palette) {
+        if (roll < entry.weight) return entry.color;
+        roll -= entry.weight;
+      }
+      return palette[0].color;
+    };
+
+    // Three depth layers: far dust, mid field, near sparks.
+    const layerSpecs = [
+      { share: 0.52, depth: 0.22, size: [0.3, 0.75], alpha: [0.1, 0.32], glintChance: 0 },
+      { share: 0.33, depth: 0.55, size: [0.55, 1.1], alpha: [0.16, 0.42], glintChance: 0.06 },
+      { share: 0.15, depth: 1, size: [0.9, 1.8], alpha: [0.26, 0.6], glintChance: 0.3 }
+    ];
+
+    this.layers = layerSpecs.map((spec) => {
+      const count = Math.max(6, Math.round(total * spec.share));
+      const stars = [];
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: spec.size[0] + Math.random() * (spec.size[1] - spec.size[0]),
+          color: pickColor(),
+          baseAlpha: spec.alpha[0] + Math.random() * (spec.alpha[1] - spec.alpha[0]),
+          twinkleSpeed: Math.random() * 0.9 + 0.35,
+          twinkleOffset: Math.random() * Math.PI * 2,
+          driftX: (Math.random() - 0.5) * 0.05 * (0.4 + spec.depth),
+          driftY: (Math.random() - 0.5) * 0.05 * (0.4 + spec.depth),
+          glint: Math.random() < spec.glintChance
+        });
+      }
+      return { depth: spec.depth, stars };
+    });
+  }
+
+  /* ---------- Meteors ---------- */
+
   addMeteor() {
-    const startX = Math.random() * (this.width * 0.8) + (this.width * 0.2);
-    const startY = Math.random() * (this.height * 0.4);
-    const length = Math.random() * 90 + 70;
-    const speed = Math.random() * 6 + 7;
-    const angle = (Math.PI / 4) + (Math.random() * 0.3 - 0.15); // ~45 deg
+    const fromLeft = Math.random() < 0.5;
+    const startX = fromLeft
+      ? Math.random() * this.width * 0.35
+      : this.width * 0.45 + Math.random() * this.width * 0.55;
+    const startY = Math.random() * this.height * 0.35;
+    const speed = Math.random() * 5 + 8;
+    const angle = (Math.PI / 4) + (Math.random() * 0.35 - 0.175);
+    const direction = fromLeft ? 1 : -1;
 
     this.meteors.push({
       x: startX,
       y: startY,
-      length,
+      length: Math.random() * 110 + 80,
       speed,
-      dx: -Math.cos(angle) * speed,
+      dx: Math.cos(angle) * speed * direction,
       dy: Math.sin(angle) * speed,
-      opacity: 1,
       life: 0,
-      maxLife: Math.random() * 45 + 35
+      maxLife: Math.random() * 40 + 38,
+      hue: Math.random() < 0.35 ? "232, 178, 92" : "246, 236, 226"
     });
   }
 
-  bindEvents() {
-    window.addEventListener("resize", () => {
-      this.resize();
-      this.createStars();
-    });
+  /* ---------- Events & lifecycle ---------- */
 
-    window.addEventListener("orientationchange", () => {
-      setTimeout(() => {
+  bindEvents() {
+    let resizeTimer = null;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
         this.resize();
-        this.createStars();
-      }, 200);
-    });
+        this.createScene();
+        if (!this.running) this.renderFrame(Date.now());
+      }, 150);
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     window.addEventListener("mousemove", (e) => {
-      this.mouse.x = e.clientX;
-      this.mouse.y = e.clientY;
-      this.mouse.active = true;
-    });
+      this.pointerTarget.x = (e.clientX / this.width) - 0.5;
+      this.pointerTarget.y = (e.clientY / this.height) - 0.5;
+    }, { passive: true });
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden || this.canvas.style.display === "none") {
@@ -457,54 +547,51 @@ class StarfieldEngine {
 
   start() {
     if (this.running) return;
+    if (this.reducedMotion) {
+      // Static, calm render — no animation loop for reduced-motion users.
+      this.renderFrame(Date.now());
+      return;
+    }
     this.running = true;
     this.animate();
   }
 
   stop() {
     this.running = false;
+    if (this.frameHandle) {
+      cancelAnimationFrame(this.frameHandle);
+      this.frameHandle = null;
+    }
   }
 
-  drawStar(star, time) {
-    const alpha = Math.max(0.1, Math.min(1, star.baseAlpha + Math.sin(time * star.twinkleSpeed + star.twinkleOffset) * 0.45));
-    this.ctx.fillStyle = star.colorPrefix + alpha + ")";
+  /* ---------- Rendering ---------- */
 
-    // Draw main star body
+  drawStar(star, time, offsetX, offsetY) {
+    const twinkle = this.reducedMotion ? 0 : Math.sin(time * 0.0018 * star.twinkleSpeed + star.twinkleOffset) * 0.4;
+    const alpha = Math.max(0.05, Math.min(0.9, star.baseAlpha + twinkle));
+    const x = star.x + offsetX;
+    const y = star.y + offsetY;
+
+    this.ctx.fillStyle = "rgba(" + star.color + ", " + alpha.toFixed(3) + ")";
     this.ctx.beginPath();
-    this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    this.ctx.arc(x, y, star.size, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Foreground points stay crisp to preserve the calm, low-noise visual style.
+    // Bright foreground stars get a soft four-point glint.
+    if (star.glint && alpha > 0.34) {
+      const reach = star.size * 5.2 * alpha;
+      this.ctx.strokeStyle = "rgba(" + star.color + ", " + (alpha * 0.32).toFixed(3) + ")";
+      this.ctx.lineWidth = 0.7;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x - reach, y);
+      this.ctx.lineTo(x + reach, y);
+      this.ctx.moveTo(x, y - reach);
+      this.ctx.lineTo(x, y + reach);
+      this.ctx.stroke();
+    }
   }
 
-  animate() {
-    if (!this.running) return;
-    const now = Date.now();
-    const time = now * 0.002;
-
-    this.ctx.clearRect(0, 0, this.width, this.height);
-
-    // Update & draw stars
-    for (let i = 0; i < this.stars.length; i++) {
-      const star = this.stars[i];
-      star.x += star.driftX;
-      star.y += star.driftY;
-
-      if (star.x < 0) star.x = this.width;
-      if (star.x > this.width) star.x = 0;
-      if (star.y < 0) star.y = this.height;
-      if (star.y > this.height) star.y = 0;
-
-      this.drawStar(star, time);
-    }
-
-    // Occasional shooting meteor
-    if (now > this.nextMeteorTime) {
-      this.addMeteor();
-      this.nextMeteorTime = now + Math.random() * 12000 + 18000;
-    }
-
-    // Render meteors
+  drawMeteors() {
     for (let i = this.meteors.length - 1; i >= 0; i--) {
       const m = this.meteors[i];
       m.x += m.dx;
@@ -512,24 +599,89 @@ class StarfieldEngine {
       m.life++;
 
       const progress = m.life / m.maxLife;
-      const alpha = Math.max(0, 1 - progress);
+      const alpha = Math.max(0, Math.sin(Math.min(1, progress) * Math.PI));
+      const tailX = m.x - m.dx * (m.length / m.speed);
+      const tailY = m.y - m.dy * (m.length / m.speed);
 
-      this.ctx.strokeStyle = `rgba(108, 140, 255, ${alpha * 0.5})`;
-      this.ctx.lineWidth = 1.8;
+      const trail = this.ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+      trail.addColorStop(0, "rgba(" + m.hue + ", " + (alpha * 0.75).toFixed(3) + ")");
+      trail.addColorStop(1, "rgba(" + m.hue + ", 0)");
+
+      this.ctx.strokeStyle = trail;
+      this.ctx.lineWidth = 1.6;
+      this.ctx.lineCap = "round";
       this.ctx.beginPath();
       this.ctx.moveTo(m.x, m.y);
-      this.ctx.lineTo(
-        m.x - m.dx * (m.length / m.speed),
-        m.y - m.dy * (m.length / m.speed)
-      );
+      this.ctx.lineTo(tailX, tailY);
       this.ctx.stroke();
 
-      if (m.life >= m.maxLife) {
+      // Bright head.
+      this.ctx.fillStyle = "rgba(" + m.hue + ", " + alpha.toFixed(3) + ")";
+      this.ctx.beginPath();
+      this.ctx.arc(m.x, m.y, 1.4, 0, Math.PI * 2);
+      this.ctx.fill();
+
+      if (m.life >= m.maxLife || m.x < -m.length || m.x > this.width + m.length || m.y > this.height + m.length) {
         this.meteors.splice(i, 1);
       }
     }
+  }
 
-    requestAnimationFrame(() => this.animate());
+  renderFrame(now) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    // Ease pointer parallax.
+    this.pointerEased.x += (this.pointerTarget.x - this.pointerEased.x) * 0.035;
+    this.pointerEased.y += (this.pointerTarget.y - this.pointerEased.y) * 0.035;
+
+    // Nebula glow: pre-rendered layer, drifting almost imperceptibly.
+    if (this.nebulaCanvas.width > 1) {
+      const driftX = this.reducedMotion ? 0 : Math.sin(now * 0.00003) * 24;
+      const driftY = this.reducedMotion ? 0 : Math.cos(now * 0.000024) * 18;
+      const parX = this.pointerEased.x * -10;
+      const parY = this.pointerEased.y * -10;
+      ctx.drawImage(
+        this.nebulaCanvas,
+        -40 + driftX + parX,
+        -40 + driftY + parY,
+        this.width + 80,
+        this.height + 80
+      );
+    }
+
+    // Star layers, far to near, each with its own parallax strength.
+    for (const layer of this.layers) {
+      const offsetX = this.pointerEased.x * -26 * layer.depth;
+      const offsetY = this.pointerEased.y * -18 * layer.depth;
+
+      for (const star of layer.stars) {
+        if (!this.reducedMotion) {
+          star.x += star.driftX;
+          star.y += star.driftY;
+          if (star.x < -4) star.x = this.width + 4;
+          if (star.x > this.width + 4) star.x = -4;
+          if (star.y < -4) star.y = this.height + 4;
+          if (star.y > this.height + 4) star.y = -4;
+        }
+        this.drawStar(star, now, offsetX, offsetY);
+      }
+    }
+
+    // Occasional shooting star.
+    if (!this.reducedMotion) {
+      if (now > this.nextMeteorTime) {
+        this.addMeteor();
+        this.nextMeteorTime = now + Math.random() * 11000 + 9000;
+      }
+      this.drawMeteors();
+    }
+  }
+
+  animate() {
+    if (!this.running) return;
+    this.renderFrame(Date.now());
+    this.frameHandle = requestAnimationFrame(() => this.animate());
   }
 }
 
@@ -540,7 +692,7 @@ class StarfieldEngine {
 class UserBackgroundManager {
   constructor(starfield) {
     this.starfield = starfield;
-    this.storageKey = "tmd_user_bg_settings_v3";
+    this.storageKey = "tmd_user_bg_settings_v4";
     this.settings = this.loadSettings();
 
     this.layer = document.getElementById("userBgLayer");
@@ -555,13 +707,13 @@ class UserBackgroundManager {
   loadSettings() {
     const defaults = {
       type: "preset",
-      preset: "obsidian",
+      preset: "animated-stars",
       customDataUrl: "",
       customUrl: "",
       dim: 24,
       blur: 0,
       starsOverlay: false,
-      starsDensity: 1
+      starsDensity: 2
     };
 
     try {
@@ -598,7 +750,7 @@ class UserBackgroundManager {
     if (this.starsCanvas) {
       const showStars = (type === "preset" && preset === "animated-stars") || Boolean(starsOverlay);
       this.starsCanvas.style.display = showStars ? "block" : "none";
-      this.starsCanvas.style.opacity = showStars ? "0.55" : "0";
+      this.starsCanvas.style.opacity = showStars ? "0.75" : "0";
       if (showStars) this.starfield?.start();
       else this.starfield?.stop();
     }
@@ -632,11 +784,11 @@ class UserBackgroundManager {
 
     const presets = {
       "animated-stars": "",
-      "nebula": "#121a2f",
+      "nebula": "#1d1430",
       "cyberpunk": "#211d35",
       "aurora": "#10252c",
-      "obsidian": "#0b1020",
-      "galaxy-gold": "#1c1928"
+      "obsidian": "#100b0c",
+      "galaxy-gold": "#241a10"
     };
 
     this.layer.style.backgroundImage = "none";
@@ -773,7 +925,7 @@ class UserBackgroundManager {
     this.removeUploadedBtn?.addEventListener("click", () => {
       this.settings.customDataUrl = "";
       this.settings.type = "preset";
-      this.settings.preset = "obsidian";
+      this.settings.preset = "animated-stars";
       this.settings.starsOverlay = false;
       this.applySettings();
       showToast("تمت إزالة صورتك الخاصة والعودة للخلفية الافتراضية.");
@@ -831,13 +983,13 @@ class UserBackgroundManager {
     this.resetBtn?.addEventListener("click", () => {
       this.settings = {
         type: "preset",
-        preset: "obsidian",
+        preset: "animated-stars",
         customDataUrl: "",
         customUrl: "",
         dim: 24,
         blur: 0,
         starsOverlay: false,
-        starsDensity: 1
+        starsDensity: 2
       };
       this.saveSettings();
       this.applySettings();
@@ -1375,7 +1527,7 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#F7F9FC" : "#0B1020");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FAF6F1" : "#100B0C");
   const themeIcon = state.theme === "light" ? UI_ICONS.moon : UI_ICONS.sun;
   document.querySelectorAll(".theme-icon, .theme-icon-indicator").forEach((node) => {
     node.innerHTML = themeIcon;

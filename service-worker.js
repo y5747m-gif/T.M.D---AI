@@ -6,7 +6,7 @@
    - لا يخزّن /api ولا مفاتيح ولا ردود الذكاء الاصطناعي.
    ========================================================== */
 
-const CACHE_VERSION = "sparta-ai-cache-v2026-09-28-2";
+const CACHE_VERSION = "sparta-ai-cache-v2026-09-28-3";
 const APP_SHELL = [
   "/",
   "/index.html",

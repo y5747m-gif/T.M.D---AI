@@ -1,11 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-labelledby="title desc">
-  <title id="title">SPARTA AI</title>
-  <desc id="desc">A minimal geometric spark representing clear and precise artificial intelligence.</desc>
-  <rect x="9" y="9" width="142" height="142" rx="42" fill="#111827" stroke="#6C8CFF" stroke-opacity=".34" stroke-width="2"/>
-  <circle cx="80" cy="80" r="42" stroke="#A9B2C3" stroke-opacity=".18"/>
-  <path d="M80 35c3 25 10 36 34 45-24 9-31 20-34 45-3-25-10-36-34-45 24-9 31-20 34-45Z" fill="#6C8CFF"/>
-  <path d="M80 51c2 16 7 23 22 29-15 6-20 13-22 29-2-16-7-23-22-29 15-6 20-13 22-29Z" fill="#F5F7FF" fill-opacity=".82"/>
-  <circle cx="37" cy="49" r="4" fill="#67D9E8"/>
-  <circle cx="124" cy="45" r="3" fill="#8B7CFF"/>
-  <circle cx="126" cy="116" r="4" fill="#6C8CFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI">
+  <defs>
+    <radialGradient id="fvCore" cx="38%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#FFC98F"/>
+      <stop offset="42%" stop-color="#E85F53"/>
+      <stop offset="100%" stop-color="#A93438"/>
+    </radialGradient>
+  </defs>
+  <circle cx="80" cy="80" r="72" fill="#181113" stroke="#D9A45B" stroke-opacity=".45" stroke-width="4"/>
+  <g transform="rotate(-24 80 80)">
+    <path d="M24 80a56 23 0 0 1 112 0" stroke="#D9A45B" stroke-opacity=".45" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <circle cx="80" cy="80" r="26" fill="url(#fvCore)"/>
+  <circle cx="70" cy="70" r="6.5" fill="#FFE3B8" fill-opacity=".65"/>
+  <g transform="rotate(-24 80 80)">
+    <path d="M136 80a56 23 0 0 1-112 0" stroke="#D9A45B" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="34" cy="93" r="8.5" fill="#E8B25C"/>
+  </g>
 </svg>

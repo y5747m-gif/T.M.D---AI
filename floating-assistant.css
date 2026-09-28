@@ -5,17 +5,17 @@
 .tmd-fab,
 .tmd-mini,
 .tmd-assistant-page {
-  --tmd-bg: #0b1020;
-  --tmd-surface: #111827;
-  --tmd-card: #151d2e;
-  --tmd-card-hover: #1b263a;
-  --tmd-primary: #6c8cff;
-  --tmd-primary-hover: #809cff;
-  --tmd-secondary: #8b7cff;
-  --tmd-cyan: #67d9e8;
-  --tmd-text: #f5f7ff;
-  --tmd-muted: #a9b2c3;
-  --tmd-subtle: #758096;
+  --tmd-bg: #100b0c;
+  --tmd-surface: #181113;
+  --tmd-card: #1e1518;
+  --tmd-card-hover: #271b1f;
+  --tmd-primary: #e0554e;
+  --tmd-primary-hover: #ea6f68;
+  --tmd-secondary: #d9a45b;
+  --tmd-cyan: #e8b25c;
+  --tmd-text: #f6f1ec;
+  --tmd-muted: #bfb2ab;
+  --tmd-subtle: #8c7f78;
   --tmd-line: rgba(255, 255, 255, 0.08);
   --tmd-line-strong: rgba(255, 255, 255, 0.14);
   --tmd-success: #55c98a;
@@ -31,22 +31,22 @@
 :root[data-theme="light"] .tmd-mini,
 :root[data-theme="light"].tmd-assistant-page,
 :root[data-theme="light"] .tmd-assistant-page {
-  --tmd-bg: #f7f9fc;
+  --tmd-bg: #faf6f1;
   --tmd-surface: #ffffff;
   --tmd-card: #ffffff;
-  --tmd-card-hover: #f2f5fa;
-  --tmd-primary: #526ff5;
-  --tmd-primary-hover: #405de0;
-  --tmd-secondary: #7365e8;
-  --tmd-cyan: #2da8ba;
-  --tmd-text: #172033;
-  --tmd-muted: #667085;
-  --tmd-subtle: #8a94a6;
-  --tmd-line: #e6eaf0;
-  --tmd-line-strong: #d7dce5;
+  --tmd-card-hover: #f4ece4;
+  --tmd-primary: #bb3a3f;
+  --tmd-primary-hover: #a02f34;
+  --tmd-secondary: #8f6a24;
+  --tmd-cyan: #946318;
+  --tmd-text: #2c2225;
+  --tmd-muted: #6f6166;
+  --tmd-subtle: #95867e;
+  --tmd-line: #ebe1d6;
+  --tmd-line-strong: #ddd0c2;
   --tmd-success: #2f9e68;
   --tmd-error: #d84f4f;
-  --tmd-shadow: 0 14px 36px rgba(23, 32, 51, 0.11);
+  --tmd-shadow: 0 14px 36px rgba(44, 34, 37, 0.11);
 }
 
 .tmd-fab *,
@@ -75,11 +75,11 @@
   place-items: center;
   padding: 0;
   isolation: isolate;
-  border: 1px solid rgba(108, 140, 255, 0.32);
+  border: 1px solid rgba(224, 85, 78, 0.32);
   border-radius: 18px;
   color: #fff;
   background: var(--tmd-primary);
-  box-shadow: 0 6px 18px rgba(5, 9, 20, 0.24);
+  box-shadow: 0 6px 18px rgba(13, 7, 8, 0.24);
   cursor: grab;
   touch-action: none;
   transition: transform var(--tmd-fast), background var(--tmd-fast), box-shadow var(--tmd-normal), opacity var(--tmd-normal);
@@ -87,7 +87,7 @@
 
 .tmd-fab:hover {
   background: var(--tmd-primary-hover);
-  box-shadow: 0 8px 20px rgba(5, 9, 20, 0.26);
+  box-shadow: 0 8px 20px rgba(13, 7, 8, 0.26);
   transform: translateY(-2px);
 }
 
@@ -129,7 +129,7 @@
 .tmd-fab__ring {
   position: absolute;
   inset: -5px;
-  border: 1px solid rgba(108, 140, 255, 0.26);
+  border: 1px solid rgba(224, 85, 78, 0.26);
   border-radius: 21px;
   opacity: 0;
   pointer-events: none;
@@ -246,10 +246,10 @@
   place-items: center;
   flex: 0 0 auto;
   padding: 8px;
-  border: 1px solid rgba(108, 140, 255, 0.24);
+  border: 1px solid rgba(224, 85, 78, 0.24);
   border-radius: 11px;
   color: var(--tmd-primary);
-  background: rgba(108, 140, 255, 0.09);
+  background: rgba(224, 85, 78, 0.09);
 }
 
 .tmd-mini__titles {
@@ -341,14 +341,14 @@
   padding: 1px 5px;
   border-radius: 5px;
   color: var(--tmd-primary);
-  background: rgba(108, 140, 255, 0.1);
+  background: rgba(224, 85, 78, 0.1);
   font: 600 0.56rem/1.4 Inter, sans-serif;
 }
 
 .tmd-plan-chip.is-pro {
   color: var(--tmd-primary);
-  border-color: rgba(108, 140, 255, 0.24);
-  background: rgba(108, 140, 255, 0.08);
+  border-color: rgba(224, 85, 78, 0.24);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .tmd-plan-chip.is-empty .tmd-plan-chip__credits {
@@ -388,8 +388,8 @@
 }
 
 .tmd-plan-card--pro {
-  border-color: rgba(108, 140, 255, 0.22);
-  background: rgba(108, 140, 255, 0.07);
+  border-color: rgba(224, 85, 78, 0.22);
+  background: rgba(224, 85, 78, 0.07);
 }
 
 .tmd-plan-card__title {
@@ -403,7 +403,7 @@
   padding: 1px 5px;
   border-radius: 5px;
   color: var(--tmd-primary);
-  background: rgba(108, 140, 255, 0.1);
+  background: rgba(224, 85, 78, 0.1);
   font: 700 0.52rem/1.5 Inter, sans-serif;
 }
 
@@ -496,7 +496,7 @@
   padding: 4px 8px;
   border-radius: 7px;
   color: #fff;
-  background: rgba(5, 9, 18, 0.82);
+  background: rgba(13, 7, 8, 0.82);
   font-size: 0.62rem;
   font-weight: 600;
 }
@@ -556,10 +556,10 @@
   flex: 0 0 auto;
   margin-top: 2px;
   padding: 4px;
-  border: 1px solid rgba(108, 140, 255, 0.18);
+  border: 1px solid rgba(224, 85, 78, 0.18);
   border-radius: 7px;
   color: var(--tmd-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .tmd-msg__spark svg {
@@ -569,9 +569,9 @@
 
 .tmd-msg--user {
   align-self: flex-end;
-  border: 1px solid rgba(108, 140, 255, 0.16);
+  border: 1px solid rgba(224, 85, 78, 0.16);
   border-start-end-radius: 5px;
-  background: rgba(108, 140, 255, 0.11);
+  background: rgba(224, 85, 78, 0.11);
 }
 
 .tmd-msg--err {
@@ -605,7 +605,7 @@
   overflow-x: auto;
   border: 1px solid var(--tmd-line);
   border-radius: 9px;
-  background: #090e1b;
+  background: #0b0708;
   direction: ltr;
   text-align: left;
 }
@@ -708,8 +708,8 @@
 
 .tmd-tool.is-active {
   color: var(--tmd-primary);
-  border-color: rgba(108, 140, 255, 0.26);
-  background: rgba(108, 140, 255, 0.08);
+  border-color: rgba(224, 85, 78, 0.26);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .tmd-tool.is-rec {
@@ -745,7 +745,7 @@
 
 .tmd-mini__input:focus {
   border-color: var(--tmd-primary);
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(224, 85, 78, 0.1);
 }
 
 .tmd-mini__input::placeholder {
@@ -855,7 +855,7 @@
 .tmd-pip-body {
   margin: 0;
   overflow: hidden;
-  background: #0b1020;
+  background: #100b0c;
 }
 
 .tmd-pip-shell {

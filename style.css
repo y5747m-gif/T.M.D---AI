@@ -8,25 +8,25 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --color-bg: #0b1020;
-  --color-bg-secondary: #111827;
-  --color-surface: #151d2e;
-  --color-surface-hover: #1b263a;
-  --color-surface-soft: #151d2e;
-  --color-input: #111827;
-  --color-primary: #6c8cff;
-  --color-primary-hover: #809cff;
-  --color-secondary: #8b7cff;
-  --color-cyan: #67d9e8;
-  --color-text: #f5f7ff;
-  --color-muted: #a9b2c3;
-  --color-subtle: #758096;
+  --color-bg: #100b0c;
+  --color-bg-secondary: #181113;
+  --color-surface: #1e1518;
+  --color-surface-hover: #271b1f;
+  --color-surface-soft: #1e1518;
+  --color-input: #181113;
+  --color-primary: #e0554e;
+  --color-primary-hover: #ea6f68;
+  --color-secondary: #d9a45b;
+  --color-cyan: #e8b25c;
+  --color-text: #f6f1ec;
+  --color-muted: #bfb2ab;
+  --color-subtle: #8c7f78;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-strong: rgba(255, 255, 255, 0.14);
   --color-success: #55c98a;
   --color-warning: #f2c66d;
   --color-error: #f27676;
-  --color-overlay: rgba(4, 8, 18, 0.72);
+  --color-overlay: rgba(12, 6, 7, 0.72);
 
   --radius-xs: 8px;
   --radius-sm: 10px;
@@ -38,7 +38,7 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.14);
   --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.26);
-  --shadow-focus: 0 0 0 3px rgba(108, 140, 255, 0.13);
+  --shadow-focus: 0 0 0 3px rgba(224, 85, 78, 0.13);
 
   --transition-fast: 160ms ease;
   --transition-normal: 220ms cubic-bezier(0.2, 0.75, 0.25, 1);
@@ -71,35 +71,35 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --color-bg: #f7f9fc;
+  --color-bg: #faf6f1;
   --color-bg-secondary: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-hover: #f2f5fa;
+  --color-surface-hover: #f4ece4;
   --color-surface-soft: #ffffff;
   --color-input: #ffffff;
-  --color-primary: #526ff5;
-  --color-primary-hover: #405de0;
-  --color-secondary: #7365e8;
-  --color-cyan: #2da8ba;
-  --color-text: #172033;
-  --color-muted: #667085;
-  --color-subtle: #8a94a6;
-  --color-border: #e6eaf0;
-  --color-border-strong: #d7dce5;
+  --color-primary: #bb3a3f;
+  --color-primary-hover: #a02f34;
+  --color-secondary: #8f6a24;
+  --color-cyan: #946318;
+  --color-text: #2c2225;
+  --color-muted: #6f6166;
+  --color-subtle: #95867e;
+  --color-border: #ebe1d6;
+  --color-border-strong: #ddd0c2;
   --color-success: #2f9e68;
   --color-warning: #b7791f;
   --color-error: #d84f4f;
-  --color-overlay: rgba(23, 32, 51, 0.4);
+  --color-overlay: rgba(44, 34, 37, 0.4);
 
-  --shadow-sm: 0 2px 8px rgba(23, 32, 51, 0.045);
-  --shadow-md: 0 8px 22px rgba(23, 32, 51, 0.075);
-  --shadow-lg: 0 14px 36px rgba(23, 32, 51, 0.11);
-  --shadow-focus: 0 0 0 3px rgba(82, 111, 245, 0.12);
+  --shadow-sm: 0 2px 8px rgba(44, 34, 37, 0.045);
+  --shadow-md: 0 8px 22px rgba(44, 34, 37, 0.075);
+  --shadow-lg: 0 14px 36px rgba(44, 34, 37, 0.11);
+  --shadow-focus: 0 0 0 3px rgba(187, 58, 63, 0.12);
 
   --bg-panel: #ffffff;
   --bg-panel-solid: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #f2f5fa;
+  --bg-card-hover: #f4ece4;
   --bg-input: #ffffff;
 }
 
@@ -174,7 +174,7 @@ select:focus-visible,
 
 ::selection {
   color: #fff;
-  background: rgba(108, 140, 255, 0.65);
+  background: rgba(224, 85, 78, 0.65);
 }
 
 ::-webkit-scrollbar {
@@ -243,18 +243,23 @@ select:focus-visible,
 
 .bg-dim-overlay {
   z-index: -1;
-  background: rgba(5, 9, 19, var(--bg-dim, 0.4));
+  background: rgba(13, 7, 8, var(--bg-dim, 0.4));
   -webkit-backdrop-filter: blur(var(--bg-blur, 0));
   backdrop-filter: blur(var(--bg-blur, 0));
 }
 
 :root[data-theme="light"] .bg-dim-overlay {
-  background: rgba(247, 249, 252, calc(var(--bg-dim, 0.4) * 0.35));
+  background: rgba(250, 246, 241, calc(var(--bg-dim, 0.4) * 0.35));
 }
 
 .stars-canvas {
   z-index: 0;
-  opacity: 0.12 !important;
+  opacity: 0.75;
+}
+
+/* On the light theme the deep-space canvas stays as a faint warm texture. */
+:root[data-theme="light"] .stars-canvas {
+  opacity: 0.3 !important;
 }
 
 /* ---------- 4. Application shell ---------- */
@@ -352,10 +357,10 @@ select:focus-visible,
 
 .brand-badge-pro {
   padding: 1px 6px;
-  border: 1px solid rgba(108, 140, 255, 0.28);
+  border: 1px solid rgba(224, 85, 78, 0.28);
   border-radius: 6px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.1);
+  background: rgba(224, 85, 78, 0.1);
   font-size: 0.62rem;
   letter-spacing: 0.03em;
 }
@@ -380,18 +385,18 @@ select:focus-visible,
   gap: 10px;
   width: 100%;
   padding: 9px 12px;
-  border: 1px solid rgba(108, 140, 255, 0.25);
+  border: 1px solid rgba(224, 85, 78, 0.25);
   border-radius: var(--radius-md);
   color: var(--color-text);
-  background: rgba(108, 140, 255, 0.09);
+  background: rgba(224, 85, 78, 0.09);
   font-weight: 600;
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .new-chat-btn:hover {
-  border-color: rgba(108, 140, 255, 0.46);
-  background: rgba(108, 140, 255, 0.14);
+  border-color: rgba(224, 85, 78, 0.46);
+  background: rgba(224, 85, 78, 0.14);
 }
 
 .new-chat-btn:active {
@@ -528,8 +533,8 @@ select:focus-visible,
 
 .history-item.active {
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.11);
-  border-color: rgba(108, 140, 255, 0.16);
+  background: rgba(224, 85, 78, 0.11);
+  border-color: rgba(224, 85, 78, 0.16);
 }
 
 .empty-history {
@@ -565,8 +570,8 @@ select:focus-visible,
 }
 
 .empty-history-action:hover {
-  border-color: rgba(108, 140, 255, 0.28);
-  background: rgba(108, 140, 255, 0.08);
+  border-color: rgba(224, 85, 78, 0.28);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .developer-card {
@@ -594,10 +599,10 @@ select:focus-visible,
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border: 1px solid rgba(108, 140, 255, 0.2);
+  border: 1px solid rgba(224, 85, 78, 0.2);
   border-radius: 11px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.09);
+  background: rgba(224, 85, 78, 0.09);
 }
 
 .dev-avatar svg {
@@ -747,7 +752,7 @@ select:focus-visible,
 
 .model-selector-wrapper:focus-within,
 .model-selector-wrapper:hover {
-  border-color: rgba(108, 140, 255, 0.36);
+  border-color: rgba(224, 85, 78, 0.36);
 }
 
 .model-pulse-dot,
@@ -1085,7 +1090,7 @@ select:focus-visible,
 }
 
 .welcome-card:hover {
-  border-color: rgba(108, 140, 255, 0.28);
+  border-color: rgba(224, 85, 78, 0.28);
   background: var(--bg-card-hover);
   transform: translateY(-1px);
 }
@@ -1101,18 +1106,18 @@ select:focus-visible,
   border: 1px solid var(--color-border);
   border-radius: 11px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .card--doc .card-icon-wrap,
 .card--creator .card-icon-wrap {
   color: var(--color-secondary);
-  background: rgba(139, 124, 255, 0.08);
+  background: rgba(217, 164, 91, 0.08);
 }
 
 .card--vision .card-icon-wrap {
   color: var(--color-cyan);
-  background: rgba(103, 217, 232, 0.07);
+  background: rgba(232, 178, 92, 0.07);
 }
 
 .card-text {
@@ -1261,8 +1266,8 @@ select:focus-visible,
 .message-avatar.is-bot {
   padding: 6px;
   color: var(--color-primary);
-  border-color: rgba(108, 140, 255, 0.2);
-  background: rgba(108, 140, 255, 0.09);
+  border-color: rgba(224, 85, 78, 0.2);
+  background: rgba(224, 85, 78, 0.09);
 }
 
 .bot-spark-logo {
@@ -1295,9 +1300,9 @@ select:focus-visible,
 .message.user .message-text {
   max-width: min(76%, 620px);
   padding: 11px 15px;
-  border: 1px solid rgba(108, 140, 255, 0.16);
+  border: 1px solid rgba(224, 85, 78, 0.16);
   border-radius: 18px 18px 5px 18px;
-  background: rgba(108, 140, 255, 0.11);
+  background: rgba(224, 85, 78, 0.11);
   line-height: 1.75;
 }
 
@@ -1362,13 +1367,13 @@ select:focus-visible,
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: #090e1b;
+  background: #0b0708;
   direction: ltr;
   text-align: left;
 }
 
 :root[data-theme="light"] .code-block-wrapper {
-  background: #f2f5fa;
+  background: #f4ece4;
 }
 
 .code-header {
@@ -1419,12 +1424,12 @@ select:focus-visible,
   margin: 0;
   padding: 14px 16px;
   overflow-x: auto;
-  color: #dfe5f2;
+  color: #efe5da;
   font: 0.82rem/1.75 "Fira Code", Consolas, monospace;
 }
 
 :root[data-theme="light"] .code-block-wrapper pre {
-  color: #27354e;
+  color: #4a3a34;
 }
 
 .message-image {
@@ -1668,7 +1673,7 @@ select:focus-visible,
 }
 
 .input-shell:focus-within {
-  border-color: rgba(108, 140, 255, 0.55);
+  border-color: rgba(224, 85, 78, 0.55);
   box-shadow: var(--shadow-md), var(--shadow-focus);
 }
 
@@ -1703,8 +1708,8 @@ select:focus-visible,
 
 .circle-button.active {
   color: var(--color-primary);
-  border-color: rgba(108, 140, 255, 0.3);
-  background: rgba(108, 140, 255, 0.1);
+  border-color: rgba(224, 85, 78, 0.3);
+  background: rgba(224, 85, 78, 0.1);
 }
 
 .circle-button:disabled {
@@ -1808,7 +1813,7 @@ select:focus-visible,
   padding: 8px;
   border-radius: 10px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .plus-option-content {
@@ -1946,10 +1951,10 @@ select:focus-visible,
   width: 38px;
   height: 38px;
   padding: 9px;
-  border: 1px solid rgba(108, 140, 255, 0.18);
+  border: 1px solid rgba(224, 85, 78, 0.18);
   border-radius: 12px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .modal-title {
@@ -1994,10 +1999,10 @@ select:focus-visible,
   align-items: flex-start;
   gap: 9px;
   padding: 10px 12px;
-  border: 1px solid rgba(108, 140, 255, 0.18);
+  border: 1px solid rgba(224, 85, 78, 0.18);
   border-radius: 12px;
   color: var(--color-muted);
-  background: rgba(108, 140, 255, 0.065);
+  background: rgba(224, 85, 78, 0.065);
   font-size: 0.74rem;
   line-height: 1.75;
 }
@@ -2075,8 +2080,8 @@ select:focus-visible,
 }
 
 .preset-card.active {
-  border-color: rgba(108, 140, 255, 0.54);
-  background: rgba(108, 140, 255, 0.07);
+  border-color: rgba(224, 85, 78, 0.54);
+  background: rgba(224, 85, 78, 0.07);
   box-shadow: var(--shadow-focus);
 }
 
@@ -2087,7 +2092,7 @@ select:focus-visible,
   border-bottom: 1px solid var(--color-border);
 }
 
-.preview--stars { background: #0b1020; }
+.preview--stars { background: #100b0c; }
 .preview--stars::before {
   content: "";
   position: absolute;
@@ -2095,14 +2100,14 @@ select:focus-visible,
   height: 2px;
   inset: 22px auto auto 28%;
   border-radius: 50%;
-  background: #6c8cff;
-  box-shadow: 74px -8px 0 #f5f7ff, 126px 28px 0 #8b7cff, 188px 4px 0 #67d9e8;
+  background: #e0554e;
+  box-shadow: 74px -8px 0 #f6f1ec, 126px 28px 0 #d9a45b, 188px 4px 0 #e8b25c;
 }
-.preview--nebula { background: #121a2f; }
+.preview--nebula { background: #1d1430; }
 .preview--cyberpunk { background: #211d35; }
 .preview--aurora { background: #10252c; }
-.preview--obsidian { background: #0b1020; }
-.preview--galaxy-gold { background: #1c1928; }
+.preview--obsidian { background: #100b0c; }
+.preview--galaxy-gold { background: #241a10; }
 
 .preset-tag {
   position: absolute;
@@ -2110,8 +2115,8 @@ select:focus-visible,
   inset-block-end: 6px;
   padding: 2px 6px;
   border-radius: 6px;
-  color: #eef2ff;
-  background: rgba(7, 11, 22, 0.75);
+  color: #f8f1e8;
+  background: rgba(16, 9, 10, 0.75);
   font-size: 0.56rem;
 }
 
@@ -2150,8 +2155,8 @@ select:focus-visible,
 }
 
 .upload-dropzone:hover {
-  border-color: rgba(108, 140, 255, 0.46);
-  background: rgba(108, 140, 255, 0.04);
+  border-color: rgba(224, 85, 78, 0.46);
+  background: rgba(224, 85, 78, 0.04);
 }
 
 .dropzone-icon {
@@ -2161,7 +2166,7 @@ select:focus-visible,
   border: 1px solid var(--color-border);
   border-radius: 14px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .upload-dropzone h3 {
@@ -2228,7 +2233,7 @@ select:focus-visible,
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9px;
   color: #fff;
-  background: rgba(21, 29, 46, 0.88);
+  background: rgba(30, 21, 24, 0.88);
   font-size: 0.7rem;
   cursor: pointer;
 }
@@ -2526,10 +2531,10 @@ select:focus-visible,
   height: 72px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(108, 140, 255, 0.24);
+  border: 1px solid rgba(224, 85, 78, 0.24);
   border-radius: 20px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .dev-profile-avatar svg {
@@ -2669,10 +2674,10 @@ select:focus-visible,
   place-items: center;
   padding: 13px;
   margin-bottom: 12px;
-  border: 1px solid rgba(108, 140, 255, 0.2);
+  border: 1px solid rgba(224, 85, 78, 0.2);
   border-radius: 16px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
 }
 
 .pwa-install-icon svg {
@@ -2761,7 +2766,7 @@ select:focus-visible,
     inset: 0;
     z-index: 90;
     display: block;
-    background: rgba(4, 8, 18, 0.68);
+    background: rgba(12, 6, 7, 0.68);
   }
 
   .mobile-menu-btn,
