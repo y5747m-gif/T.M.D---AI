@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#0B1020">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SPARTA AI">
-  <meta name="description" content="SPARTA AI — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها، بواجهة متجاوبة وتصميم كوني فريد. تطوير وتصميم ياسين عمرو عبد الرحيم.">
+  <meta name="description" content="SPARTA AI — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها. تطوير وتصميم ياسين عمرو عبد الرحيم.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="ياسين عمرو عبد الرحيم">
   <meta name="keywords" content="ذكاء اصطناعي, مساعد ذكي, محادثة ذكاء اصطناعي, تحليل ملفات, تحليل صور, SPARTA AI">
@@ -15,55 +15,47 @@
   <title>SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور</title>
   <link rel="canonical" href="https://t-m-d-ai.vercel.app/">
 
-  <!-- ================= Open Graph ================= -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SPARTA AI">
   <meta property="og:locale" content="ar_AR">
   <meta property="og:title" content="SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور">
-  <meta property="og:description" content="محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — منصة ذكاء اصطناعي عربية احترافية بواجهة متجاوبة وتصميم كوني فريد.">
+  <meta property="og:description" content="محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — منصة ذكاء اصطناعي عربية احترافية بواجهة حديثة ومتجاوبة.">
   <meta property="og:url" content="https://t-m-d-ai.vercel.app/">
   <meta property="og:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:alt" content="شعار SPARTA AI بالأبيض والأسود مع برق مدمج">
+  <meta property="og:image:alt" content="شعار SPARTA AI">
 
-  <!-- ================= Twitter / X Cards ================= -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="SPARTA AI — مساعد الذكاء الاصطناعي العربي">
   <meta name="twitter:description" content="محادثة ذكية فورية، تحليل مستندات، وفهم صور — منصة ذكاء اصطناعي عربية احترافية.">
   <meta name="twitter:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
 
-  <!-- ================= FAVICON & PWA ================= -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/web.webmanifest">
 
-  <!-- ================= GOOGLE FONTS ================= -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- ================= MAMMOTH (DOCX) =================
-       defer: يُحمَّل دون حجب رسم الصفحة، ويكون جاهزًا قبل تفاعل المستخدم -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
-
-  <!-- ================= STYLESHEET ================= -->
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/floating-assistant.css">
 
-  <!-- منع وميض المظهر والخلفية المحفوظة -->
   <script>
     (function () {
       try {
         var t = localStorage.getItem("tmd_theme");
-        document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
-      } catch (e) {}
+        document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
+      } catch (e) {
+        document.documentElement.dataset.theme = "dark";
+      }
     })();
   </script>
 
-  <!-- ================= Structured Data (Schema.org) ================= -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -73,7 +65,6 @@
         "@id": "https://t-m-d-ai.vercel.app/#website",
         "url": "https://t-m-d-ai.vercel.app/",
         "name": "SPARTA AI",
-        "alternateName": "SPARTA AI",
         "description": "منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية وتحليل المستندات والصور.",
         "inLanguage": "ar",
         "publisher": { "@id": "https://t-m-d-ai.vercel.app/#person" },
@@ -87,13 +78,9 @@
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript",
-        "description": "مساعد ذكاء اصطناعي عربي للمحادثة الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءة النصوص منها، مع تخصيص كامل للواجهة.",
+        "description": "مساعد ذكاء اصطناعي عربي للمحادثة الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءة النصوص منها.",
         "inLanguage": "ar",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@id": "https://t-m-d-ai.vercel.app/#person" },
         "creator": { "@id": "https://t-m-d-ai.vercel.app/#person" }
       },
@@ -102,272 +89,166 @@
         "@id": "https://t-m-d-ai.vercel.app/#person",
         "name": "ياسين عمرو عبد الرحيم",
         "alternateName": "Yassin Amr Abdelrahim",
-        "jobTitle": "مهندس ومصمم ومطور برمجيات",
-        "description": "المطور والمصمم والمهندس الحصري لمنصة SPARTA AI."
-      },
-      {
-        "@type": "WebPage",
-        "@id": "https://t-m-d-ai.vercel.app/#webpage",
-        "url": "https://t-m-d-ai.vercel.app/",
-        "name": "SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور",
-        "isPartOf": { "@id": "https://t-m-d-ai.vercel.app/#website" },
-        "about": { "@id": "https://t-m-d-ai.vercel.app/#app" },
-        "inLanguage": "ar",
-        "primaryImageOfPage": { "@type": "ImageObject", "url": "https://t-m-d-ai.vercel.app/images/og-image.jpg" }
+        "jobTitle": "مهندس ومصمم ومطور برمجيات"
       }
     ]
   }
   </script>
 </head>
-
 <body data-theme="dark">
-
   <a class="skip-link" href="#mainContent">تخطي إلى المحتوى الرئيسي</a>
 
   <noscript>
-    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#050505;color:#f5f5f3;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
+    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#0B1020;color:#F5F7FF;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
       <div>
-        <p style="font-size:1.4rem;font-weight:900;margin-bottom:10px;color:#f5f5f3;">SPARTA AI — منصة الذكاء الاصطناعي العربية</p>
-        <p style="color:#b5b5b2;margin-bottom:14px;">محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — يتطلب تفعيل JavaScript في المتصفح.</p>
-        <p><a href="/about" style="color:#f5f5f3;">عن المنصة</a> · <a href="/faq" style="color:#f5f5f3;">الأسئلة الشائعة</a> · <a href="/privacy" style="color:#f5f5f3;">سياسة الخصوصية</a></p>
+        <p style="font-size:1.35rem;font-weight:700;margin-bottom:10px;">SPARTA AI</p>
+        <p style="color:#A9B2C3;margin-bottom:14px;">المحادثة وتحليل المستندات والصور يتطلبان تفعيل JavaScript في المتصفح.</p>
+        <p><a href="/about" style="color:#809CFF;">عن المنصة</a> · <a href="/faq" style="color:#809CFF;">الأسئلة الشائعة</a> · <a href="/privacy" style="color:#809CFF;">سياسة الخصوصية</a></p>
       </div>
     </div>
   </noscript>
 
-  <!-- ==================================================
-       BACKGROUND LAYERS (خلفية النجوم والتخصيص)
-  ================================================== -->
-  <!-- طبقة الصورة المخصصة للمستخدم -->
   <div class="user-bg-layer" id="userBgLayer" aria-hidden="true"></div>
-
-  <!-- طبقة تعتيم وضبابية الخلفية للمستخدم -->
   <div class="bg-dim-overlay" id="bgDimOverlay" aria-hidden="true"></div>
-
-  <!-- الكانفاس التفاعلي للنجوم البراقة والشهب المتلألئة -->
   <canvas class="stars-canvas" id="starsCanvas" aria-hidden="true"></canvas>
-
-  <!-- سديم متوهج خلفي -->
   <div class="cosmos-nebula" id="cosmosNebula" aria-hidden="true"></div>
 
-
-  <!-- ==================================================
-       MAIN APP CONTAINER
-  ================================================== -->
   <div class="app" id="appContainer">
-
-    <!-- ==================================================
-         SIDEBAR (القائمة الجانبية المتجاوبة)
-    ================================================== -->
-    <aside class="sidebar" id="sidebar">
-
+    <aside class="sidebar" id="sidebar" aria-label="القائمة الجانبية">
       <div class="sidebar-header">
-
-        <div class="brand" title="SPARTA AI Pro">
-          <!-- الشعار الأيقوني الاحترافي الجديد مع مدارات متحركة -->
+        <div class="brand" title="SPARTA AI">
           <div class="sparta-logo sparta-logo--sm" aria-hidden="true">
-            <span class="sparta-logo__beam"></span>
-            <img src="/images/sparta-mark.svg" width="56" height="56" alt="">
+            <img src="/images/sparta-mark.svg" width="40" height="40" alt="">
           </div>
-
           <div class="brand-info">
             <div class="brand-name">
               <span class="brand-text">SPARTA</span>
               <span class="brand-badge-pro">AI</span>
             </div>
-            <span class="brand-sub">ذكاء اصطناعي عملي · نسخة Pro</span>
+            <span class="brand-sub">مساعدك الذكي للعمل والتفكير</span>
           </div>
-
         </div>
-
         <button class="icon-button close-sidebar-btn" id="closeSidebar" type="button" aria-label="إغلاق القائمة">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
-
       </div>
 
-
-      <!-- زر محادثة جديدة -->
       <button class="new-chat-btn" id="newChat" type="button">
-        <span class="btn-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </span>
         <span class="btn-label">محادثة جديدة</span>
-        <span class="kbd-badge" title="اختصار">Ctrl+K</span>
+        <span class="kbd-badge" title="اختصار لوحة المفاتيح">Ctrl K</span>
       </button>
 
-
-      <!-- عنوان سجل المحادثات -->
       <div class="history-header">
-        <span class="history-title">سجل المحادثات</span>
-        <button class="clear-all-history-btn" id="clearAllHistoryBtn" type="button" title="مسح كل المحادثات">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span class="history-title">المحادثات</span>
+        <button class="clear-all-history-btn" id="clearAllHistoryBtn" type="button" aria-label="مسح كل المحادثات" title="مسح كل المحادثات">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>
+      <div class="history-list" id="history" aria-live="polite"></div>
 
-
-      <!-- قائمة المحادثات -->
-      <div class="history-list" id="history"></div>
-
-
-      <!-- بطاقة المطور السريعة -->
-      <div class="developer-card" id="developerCardBtn" role="button" tabindex="0" title="معلومات المطور">
-        <div class="dev-avatar">
-          <span class="dev-avatar-sparkle">✦</span>
+      <div class="developer-card" id="developerCardBtn" role="button" tabindex="0" aria-label="عرض معلومات المطور">
+        <div class="dev-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg>
         </div>
         <div class="dev-meta">
-          <span class="dev-tag">مهندس ومصمم النظام</span>
+          <span class="dev-tag">تصميم وهندسة المنتج</span>
           <span class="dev-name">ياسين عمرو عبد الرحيم</span>
         </div>
-        <span class="dev-arrow">‹</span>
+        <span class="dev-arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
       </div>
 
-
-      <!-- أسفل القائمة الجانبية -->
       <div class="sidebar-footer">
-
         <button class="footer-btn customizer-btn-sidebar" id="sidebarCustomizerBtn" type="button">
-          <span class="footer-icon">🎨</span>
-          <span class="footer-btn-label">تخصيص الخلفية</span>
+          <span class="footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="10.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="15" cy="7.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="12" r=".5" fill="currentColor"/></svg></span>
+          <span class="footer-btn-label">تخصيص المظهر</span>
         </button>
-
         <button class="footer-btn" id="settingsBtn" type="button">
-          <span class="footer-icon">⚙️</span>
+          <span class="footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg></span>
           <span class="footer-btn-label">الإعدادات</span>
         </button>
-
-        <button class="footer-btn theme-toggle-btn" id="themeTop" type="button" title="تبديل المظهر">
-          <span class="footer-icon theme-icon-indicator">◐</span>
+        <button class="footer-btn theme-toggle-btn" id="themeTop" type="button" aria-label="تبديل المظهر">
+          <span class="footer-icon theme-icon-indicator" aria-hidden="true"></span>
           <span class="footer-btn-label">المظهر</span>
         </button>
-
       </div>
-
     </aside>
 
-    <!-- غطاء خلفي للقائمة في الموبايل -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
 
-
-    <!-- ==================================================
-         MAIN CONTENT AREA
-    ================================================== -->
     <main class="main" id="mainContent">
-
-      <!-- ==================================================
-           TOP NAVIGATION BAR
-      ================================================== -->
       <header class="topbar">
-
         <div class="topbar-right">
-
           <button class="icon-button mobile-menu-btn" id="openSidebar" type="button" aria-label="فتح القائمة">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
-
-          <!-- اختيار النموذج الذكي -->
           <div class="model-selector-wrapper">
             <span class="model-pulse-dot" aria-hidden="true"></span>
             <select id="modelSelect" class="model-select" aria-label="اختيار نموذج الذكاء الاصطناعي">
-              <option value="openai/gpt-oss-120b">SPARTA Core — GPT OSS 120B (الذكي)</option>
-              <option value="MiniMax-M3">SPARTA Max Pro 🔒 — MiniMax M3 (البرمجة والسياق الطويل)</option>
-              <option value="openai/gpt-oss-20b">SPARTA Fast — GPT OSS 20B (السريع)</option>
-              <option value="qwen/qwen3.8-27b">SPARTA Vision — Qwen 3.8 27B (الصور)</option>
+              <option value="openai/gpt-oss-120b">SPARTA Core — GPT OSS 120B</option>
+              <option value="MiniMax-M3">SPARTA Max Pro — MiniMax M3</option>
+              <option value="openai/gpt-oss-20b">SPARTA Fast — GPT OSS 20B</option>
+              <option value="qwen/qwen3.8-27b">SPARTA Vision — Qwen 3.8 27B</option>
             </select>
           </div>
-
-          <!-- شارة النموذج / الحالة -->
-          <div class="status-pill" id="statusPill">
-            <span class="status-light"></span>
+          <div class="status-pill" id="statusPill" aria-live="polite">
+            <span class="status-light" aria-hidden="true"></span>
             <span class="status-name" id="modelName">SPARTA AI</span>
           </div>
-
         </div>
-
 
         <div class="topbar-left">
-
-          <!-- زر تثبيت التطبيق كـ PWA على الهاتف -->
-          <button class="topbar-action-btn install-app-btn" id="installAppBtn" type="button" title="تثبيت SPARTA AI كتطبيق على الهاتف" hidden>
-            <span class="topbar-btn-icon">📲</span>
+          <button class="topbar-action-btn install-app-btn" id="installAppBtn" type="button" title="تثبيت SPARTA AI كتطبيق" hidden>
+            <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg></span>
             <span class="topbar-btn-text">تثبيت التطبيق</span>
           </button>
-
-          <!-- زر تثبيت المساعد العائم فوق كل التطبيقات -->
-          <button class="topbar-action-btn pin-assistant-btn" id="pinAssistantBtn" type="button" title="تثبيت المساعد كنافذة عائمة فوق كل التطبيقات — يبقى يعمل دون البقاء داخل الموقع">
-            <span class="topbar-btn-icon tmd-spark-btn-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="currentColor" stroke="currentColor" stroke-linejoin="round"/></svg>
-            </span>
+          <button class="topbar-action-btn pin-assistant-btn" id="pinAssistantBtn" type="button" title="تثبيت المساعد كنافذة عائمة فوق التطبيقات">
+            <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg></span>
             <span class="topbar-btn-text">تثبيت المساعد</span>
           </button>
-
-          <!-- زر تخصيص الخلفية والمظهر المباشر -->
-          <button class="topbar-action-btn bg-customizer-trigger" id="openBgCustomizerBtn" type="button" title="تخصيص الخلفية لصورتك الخاصة">
-            <span class="topbar-btn-icon">🎨</span>
-            <span class="topbar-btn-text">تخصيص الخلفية</span>
+          <button class="topbar-action-btn bg-customizer-trigger" id="openBgCustomizerBtn" type="button" title="تخصيص المظهر والخلفية">
+            <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="10.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="15" cy="7.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="12" r=".5" fill="currentColor"/></svg></span>
+            <span class="topbar-btn-text">تخصيص المظهر</span>
           </button>
-
-          <!-- زر تصدير المحادثة -->
-          <button class="icon-button" id="exportChatBtn" type="button" title="تصدير المحادثة">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <button class="icon-button" id="exportChatBtn" type="button" aria-label="تصدير المحادثة" title="تصدير المحادثة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           </button>
-
-          <!-- زر مسح المحادثة الحالية -->
-          <button class="icon-button" id="clearChatBtn" type="button" title="مسح المحادثة">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <button class="icon-button" id="clearChatBtn" type="button" aria-label="مسح المحادثة" title="مسح المحادثة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
-
-          <!-- زر تبديل الوضع الليلي/النهاري -->
-          <button class="icon-button" id="themeTopDesktop" type="button" aria-label="تغيير المظهر" title="المظهر">
-            <span class="theme-icon">◐</span>
+          <button class="icon-button" id="themeTopDesktop" type="button" aria-label="تغيير المظهر" title="تغيير المظهر">
+            <span class="theme-icon" aria-hidden="true"></span>
           </button>
-
         </div>
-
       </header>
 
-
-      <!-- ==================================================
-           CHAT STREAM AREA
-      ================================================== -->
-      <section class="chat" id="chat">
-
-        <!-- ==================================================
-             HERO WELCOME SCREEN
-        ================================================== -->
+      <section class="chat" id="chat" aria-live="polite">
         <div class="welcome" id="welcome">
-
-          <!-- الشعار الكوني الاحترافي الكبير -->
           <div class="sparta-logo sparta-logo--hero" aria-label="شعار SPARTA AI">
-            <span class="sparta-logo__beam"></span>
-            <span class="sparta-logo__orbit sparta-logo__orbit--one"></span>
-            <span class="sparta-logo__orbit sparta-logo__orbit--two"></span>
-            <img src="/images/sparta-mark.svg" width="160" height="160" alt="SPARTA AI">
+            <img src="/images/sparta-mark.svg" width="72" height="72" alt="SPARTA AI">
           </div>
 
           <div class="welcome-heading-wrap">
-            <h1 class="welcome-title">
-              مرحباً بك في <span class="brand-highlight">SPARTA AI</span>
-            </h1>
-            <p class="welcome-sub">
-              منصة الذكاء الاصطناعي الفائقة للمحادثة الذكية، تحليل المستندات المعقدة، ورؤية الصور، بسرعة فائقة وتصميم متجاوب.
-            </p>
+            <h1 class="welcome-title">كيف يمكنني مساعدتك؟</h1>
+            <p class="welcome-sub">اكتب سؤالك أو اطلب ما تحتاجه، وسأساعدك على الوصول إلى نتيجة واضحة.</p>
             <div class="creator-badge" id="welcomeCreatorBadge">
-              <span class="creator-sparkle">✨</span>
-              <span>تصميم وهندسة وتطوير المطور: <strong>ياسين عمرو عبد الرحيم</strong></span>
+              <span class="creator-sparkle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg></span>
+              <span>تصميم وهندسة <strong>ياسين عمرو عبد الرحيم</strong></span>
             </div>
           </div>
 
-          <!-- مهمة يومية: متاحة فقط عند تفعيل اشتراك SPARTA Pro المدفوع -->
           <section class="daily-mission" id="dailyMission" aria-labelledby="dailyMissionTitle" data-pro-only="true">
             <div class="daily-mission__light" aria-hidden="true"></div>
-            <div class="daily-mission__mark" aria-hidden="true">
-              <img src="/images/sparta-mark.svg" width="42" height="42" alt="">
-            </div>
+            <div class="daily-mission__mark" aria-hidden="true"><img src="/images/sparta-mark.svg" width="42" height="42" alt=""></div>
             <div class="daily-mission__copy">
-              <span class="daily-mission__eyebrow">ϟ مهمة اليوم · SPARTA PRO</span>
+              <span class="daily-mission__eyebrow">مهمة اليوم · SPARTA PRO</span>
               <h2 id="dailyMissionTitle">حلّل قرارًا واحدًا بوضوح</h2>
               <p id="dailyMissionDescription">حوّل قرارًا مهنيًا أو شخصيًا إلى خيارات، معايير، وخطوة تالية عملية خلال خمس دقائق.</p>
-              <span class="daily-mission__meta" id="dailyMissionMeta">يتجدد التحدي كل يوم · لا تمنح المهمة أرصدة يومية</span>
+              <span class="daily-mission__meta" id="dailyMissionMeta">يتجدد التحدي كل يوم</span>
             </div>
             <div class="daily-mission__action">
               <span class="daily-mission__lock" id="dailyMissionLock">PRO</span>
@@ -375,528 +256,205 @@
             </div>
           </section>
 
-
-          <!-- بطاقات الاقتراحات السريعة -->
-          <div class="welcome-cards-grid">
-
+          <div class="welcome-cards-grid" aria-label="اقتراحات للبدء">
             <button class="welcome-card card--chat" type="button" data-prompt="اشرح لي الذكاء الاصطناعي وتطبيقاته المستقبلية بطريقة مبسطة واحترافية.">
-              <div class="card-icon-wrap">💬</div>
-              <div class="card-text">
-                <strong>محادثة ذكية وتوليد أفكار</strong>
-                <span>اسأل في البرمجة، العلوم، أو أي استفسار تريده.</span>
-              </div>
-              <span class="card-arrow">←</span>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></div>
+              <div class="card-text"><strong>محادثة وتوليد أفكار</strong><span>اسأل في البرمجة، العلوم، أو أي موضوع.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
-
             <button class="welcome-card card--doc" type="button" data-prompt="حلل الملف المرفق واشرح أهم النقاط الرئيسية والاستنتاجات المستخرجة منه.">
-              <div class="card-icon-wrap">📄</div>
-              <div class="card-text">
-                <strong>تحليل الملفات والمستندات</strong>
-                <span>دعم كامل لملفات PDF و Word و TXT والأكواد.</span>
-              </div>
-              <span class="card-arrow">←</span>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></div>
+              <div class="card-text"><strong>تحليل مستند</strong><span>PDF وWord والنصوص وملفات الأكواد.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
-
             <button class="welcome-card card--vision" type="button" data-prompt="حلل هذه الصورة المرفقة واشرح كل ما تراه فيها بالتفصيل واستخرج النصوص.">
-              <div class="card-icon-wrap">🖼️</div>
-              <div class="card-text">
-                <strong>رؤية وتحليل الصور</strong>
-                <span>فهم الصور، قراءة المستندات المصورة واستخراج البيانات.</span>
-              </div>
-              <span class="card-arrow">←</span>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></div>
+              <div class="card-text"><strong>فهم وتحليل صورة</strong><span>وصف الصور واستخراج النصوص والبيانات.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
-
             <button class="welcome-card card--creator" type="button" data-prompt="من صممك وبرمجك ومن هو المطور الذي قام بابتكار وتطوير هذه الأداة؟">
-              <div class="card-icon-wrap">👨‍💻</div>
-              <div class="card-text">
-                <strong>من صمم وبرمج هذه الأداة؟</strong>
-                <span>تعرف على المطور والمصمم المبدع ياسين عمرو عبد الرحيم.</span>
-              </div>
-              <span class="card-arrow">←</span>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6M14.5 4l-5 16"/></svg></div>
+              <div class="card-text"><strong>عن المنصة والمطور</strong><span>تعرف على التصميم والهندسة وراء المنتج.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
-
           </div>
 
-
-          <!-- ==================================================
-               SEO INFO SECTION — محتوى تعريفي حقيقي قابل للفهرسة
-          ================================================== -->
           <section class="welcome-info" aria-labelledby="aboutPlatformTitle">
-            <h2 class="info-title" id="aboutPlatformTitle">ما الذي يقدمه SPARTA AI؟</h2>
-            <p class="info-lead">
-              منصة ذكاء اصطناعي عربية متكاملة تجمع بين المحادثة الفورية السريعة، وتحليل المستندات
-              والملفات، وفهم الصور وقراءة النصوص منها — داخل واجهة كونية تفاعلية قابلة للتخصيص
-              بالكامل، صممها وهندسها المطور ياسين عمرو عبد الرحيم.
-            </p>
-
+            <h2 class="info-title" id="aboutPlatformTitle">ذكاء اصطناعي عملي في مساحة واحدة</h2>
+            <p class="info-lead">تجمع SPARTA AI بين المحادثة السريعة، وتحليل الملفات، وفهم الصور داخل تجربة عربية تحفظ تفضيلاتك ومحادثاتك محليًا.</p>
             <div class="info-grid">
-              <div class="info-card">
-                <h3>💬 محادثة ذكية فورية</h3>
-                <p>نماذج ذكاء اصطناعي متقدمة (GPT OSS 120B و20B) تجيب عن أسئلتك في البرمجة والعلوم والكتابة بإجابات منظمة ومنسّقة بسرعة فائقة.</p>
-              </div>
-              <div class="info-card">
-                <h3>📄 تحليل المستندات</h3>
-                <p>ارفع ملفات PDF وWord وTXT والأكواد حتى 15MB لتستخرج المنصة محتواها وتلخصه وتحلله بدقة واحترافية.</p>
-              </div>
-              <div class="info-card">
-                <h3>🖼️ رؤية وتحليل الصور</h3>
-                <p>نموذج Qwen متعدد الوسائط يصف الصور بالتفصيل، ويقرأ النصوص منها، ويقترح تعديلات دقيقة عليها.</p>
-              </div>
-              <div class="info-card">
-                <h3>🎨 تخصيص وخصوصية</h3>
-                <p>خلفيات نجوم متحركة أو صورتك الخاصة، مظهر داكن وفاتح، ومحادثاتك تُحفظ في جهازك أنت فقط دون خوادم تخزين.</p>
-              </div>
+              <div class="info-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>محادثة ذكية</h3><p>نماذج متقدمة تجيب عن أسئلتك في البرمجة والعلوم والكتابة بإجابات منظمة.</p></div>
+              <div class="info-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>تحليل المستندات</h3><p>ارفع ملفات PDF وWord والنصوص والأكواد حتى 15MB لتحليلها واستخراج أهم ما فيها.</p></div>
+              <div class="info-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>فهم الصور</h3><p>نموذج متعدد الوسائط يصف الصور ويقرأ نصوصها ويساعدك على فهم تفاصيلها.</p></div>
+              <div class="info-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg>تخصيص وخصوصية</h3><p>مظهر داكن وفاتح وخلفيات مخصصة، مع حفظ المحادثات في جهازك فقط.</p></div>
             </div>
-
-            <nav class="info-links" aria-label="روابط داخلية مهمة">
-              <a href="/about">عن المنصة</a>
-              <a href="/faq">الأسئلة الشائعة</a>
-              <a href="/privacy">سياسة الخصوصية</a>
-            </nav>
+            <nav class="info-links" aria-label="روابط داخلية مهمة"><a href="/about">عن المنصة</a><a href="/faq">الأسئلة الشائعة</a><a href="/privacy">سياسة الخصوصية</a></nav>
           </section>
-
         </div>
-
       </section>
 
-
-      <!-- زر النزول لأسفل المحادثة -->
-      <button class="scroll-bottom-btn hidden" id="scrollBottomBtn" type="button" aria-label="النزول للأسفل">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      <button class="scroll-bottom-btn hidden" id="scrollBottomBtn" type="button" aria-label="النزول إلى أحدث رسالة">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
 
-
-      <!-- ==================================================
-           COMPOSER (صندوق كتابة الرسالة)
-      ================================================== -->
       <div class="composer-wrap">
-
         <div class="composer-inner">
-
-          <!-- معاينة المرفق (صورة أو مستند) -->
           <div class="attachment hidden" id="imagePreviewContainer">
             <div class="attachment-thumb">
               <img id="imagePreview" alt="معاينة المرفق" loading="lazy" decoding="async">
-              <span class="attachment-doc" aria-hidden="true">📄</span>
+              <span class="attachment-doc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></span>
             </div>
-
-            <div class="attachment-info">
-              <span class="attachment-name" id="imageFileName">الملف</span>
-              <span class="attachment-mode" id="imageModeLabel">تحليل الصورة</span>
-            </div>
-
-            <button class="attachment-remove" id="removeImage" type="button" aria-label="إزالة المرفق">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+            <div class="attachment-info"><span class="attachment-name" id="imageFileName">الملف</span><span class="attachment-mode" id="imageModeLabel">جاهز للتحليل</span><span class="attachment-size" id="attachmentSize"></span></div>
+            <button class="attachment-remove" id="removeImage" type="button" aria-label="إزالة المرفق"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
           </div>
 
-
-          <!-- غلاف الإدخال -->
           <div class="input-shell">
-
-            <!-- قائمة زر الإضافة ＋ -->
             <div class="plus-menu-wrapper">
-              <button class="circle-button plus-toggle-btn" id="plusButton" type="button" aria-label="إضافة مرفق" aria-expanded="false" title="إرفاق ملف أو صورة">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <button class="circle-button plus-toggle-btn" id="plusButton" type="button" aria-label="إضافة مرفق" aria-expanded="false" aria-controls="plusMenu" title="إرفاق ملف أو صورة">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
               </button>
-
               <div class="plus-menu hidden" id="plusMenu">
                 <div class="plus-menu-title">إضافة إلى المحادثة</div>
-
                 <button class="plus-option" id="analyzeDocumentButton" type="button">
-                  <span class="plus-option-icon">📄</span>
-                  <span class="plus-option-content">
-                    <span class="plus-option-title">تحليل مستند / ملف</span>
-                    <span class="plus-option-desc">PDF و Word و TXT و JSON والأكواد</span>
-                  </span>
+                  <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></span>
+                  <span class="plus-option-content"><span class="plus-option-title">تحليل مستند أو ملف</span><span class="plus-option-desc">PDF وWord وTXT وJSON والأكواد</span></span>
                 </button>
-
                 <button class="plus-option" id="addImageButton" type="button">
-                  <span class="plus-option-icon">🖼️</span>
-                  <span class="plus-option-content">
-                    <span class="plus-option-title">تحليل صورة</span>
-                    <span class="plus-option-desc">قراءة الصور واستخراج النصوص</span>
-                  </span>
+                  <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span>
+                  <span class="plus-option-content"><span class="plus-option-title">تحليل صورة</span><span class="plus-option-desc">فهم الصور واستخراج النصوص</span></span>
                 </button>
-
                 <button class="plus-option" id="imageEditButton" type="button">
-                  <span class="plus-option-icon">✨</span>
-                  <span class="plus-option-content">
-                    <span class="plus-option-title">تجهيز / تعديل صورة</span>
-                    <span class="plus-option-desc">إرسال صورة مع تعليمات مخصصة</span>
-                  </span>
+                  <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg></span>
+                  <span class="plus-option-content"><span class="plus-option-title">تجهيز أو تعديل صورة</span><span class="plus-option-desc">إرسال صورة مع تعليمات مخصصة</span></span>
                 </button>
               </div>
             </div>
 
-
-            <!-- حقل النص -->
-            <textarea
-              class="input-area"
-              id="input"
-              rows="1"
-              placeholder="اكتب رسالتك إلى SPARTA AI..."
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
-
-
-            <!-- زر الإرسال / الإيقاف -->
+            <textarea class="input-area" id="input" rows="1" placeholder="اكتب رسالتك هنا..." aria-label="رسالتك إلى SPARTA AI" autocomplete="off" spellcheck="true"></textarea>
             <button class="circle-button send-button" id="send" type="button" aria-label="إرسال" title="إرسال (Enter)">
-              <svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              <svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>
-
           </div>
-
 
           <div class="composer-note">
-            <span>SPARTA AI · تصميم وتطوير <strong>ياسين عمرو عبد الرحيم</strong></span>
+            <span>قد يخطئ الذكاء الاصطناعي؛ تحقق من المعلومات المهمة.</span>
             <span class="note-sep">•</span>
-            <span class="bg-quick-hint" id="bgQuickHint" role="button">🎨 تخصيص مظهرك الخاص</span>
+            <span class="bg-quick-hint" id="bgQuickHint" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg>تخصيص المظهر</span>
             <span class="note-sep">•</span>
-            <span class="bg-quick-hint pin-quick-hint" id="pinQuickHint" role="button">📌 ثبّت المساعد فوق التطبيقات</span>
+            <span class="bg-quick-hint pin-quick-hint" id="pinQuickHint" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg>تثبيت المساعد</span>
           </div>
-
         </div>
-
       </div>
-
     </main>
-
   </div>
 
-
-  <!-- ==================================================
-       BACKGROUND CUSTOMIZATION MODAL (واجهة تخصيص الخلفية)
-       خاصة بكل مستخدم وتُحفظ في متصفحه فقط
-  ================================================== -->
   <div class="modal-backdrop hidden" id="bgCustomizerModalBackdrop">
     <div class="modal modal--customizer" role="dialog" aria-modal="true" aria-labelledby="bgCustomizerTitle">
-
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-title-icon">🎨</span>
-          <div>
-            <h2 class="modal-title" id="bgCustomizerTitle">تخصيص الخلفية والمظهر</h2>
-            <p class="modal-subtitle">خصص خلفية الأداة بصورتك المفضلة أو اختر خلفيات الفضاء البراقة (تُحفظ في جهازك فقط)</p>
-          </div>
+          <span class="modal-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg></span>
+          <div><h2 class="modal-title" id="bgCustomizerTitle">تخصيص المظهر والخلفية</h2><p class="modal-subtitle">اختر خلفية هادئة أو استخدم صورتك الخاصة. تحفظ الخيارات على جهازك فقط.</p></div>
         </div>
-        <button class="icon-button modal-close-btn" id="bgCustomizerClose" type="button" aria-label="إغلاق">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
+        <button class="icon-button modal-close-btn" id="bgCustomizerClose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body customizer-body">
-
-        <!-- تنبيه الخصوصية المحلية -->
         <div class="customizer-notice">
-          <span class="notice-icon">🔒</span>
-          <span><strong>تخصيص شخصي مستقل:</strong> أي خلفية تختارها أو ترفعها تظهر في متصفحك وجهازك أنت فقط دون أن تتغير عند أي مستخدم آخر.</span>
+          <span class="notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <span><strong>تخصيص محلي وآمن:</strong> الخلفية التي تختارها تظهر في متصفحك أنت فقط ولا تغيّر تجربة أي مستخدم آخر.</span>
         </div>
 
-        <!-- تبويبات اختيار نوع الخلفية -->
-        <div class="customizer-tabs">
-          <button class="customizer-tab active" data-tab="presets" type="button">
-            ✨ خلفيات النجوم والكون
-          </button>
-          <button class="customizer-tab" data-tab="upload" type="button">
-            📁 صورة من جهازك
-          </button>
-          <button class="customizer-tab" data-tab="url" type="button">
-            🔗 رابط صورة خارجي
-          </button>
+        <div class="customizer-tabs" role="tablist" aria-label="مصدر الخلفية">
+          <button class="customizer-tab active" data-tab="presets" type="button" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/></svg>خلفيات جاهزة</button>
+          <button class="customizer-tab" data-tab="upload" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 20h16"/></svg>صورة من جهازك</button>
+          <button class="customizer-tab" data-tab="url" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg>رابط صورة</button>
         </div>
 
-
-        <!-- محتوى التبويب 1: الخلفيات الجاهزة والنجوم -->
         <div class="tab-pane active" id="panePresets">
           <div class="presets-grid">
-
-            <div class="preset-card active" data-preset="animated-stars">
-              <div class="preset-preview preview--stars">
-                <div class="mini-sparkles"></div>
-                <span class="preset-tag">متحركة تفاعلية</span>
-              </div>
-              <div class="preset-info">
-                <strong>✨ فضاء النجوم البراقة (الافتراضية)</strong>
-                <span>نجوم متلألئة، شهب متحركة، ولمعان براق فائق النقاء</span>
-              </div>
-            </div>
-
-            <div class="preset-card" data-preset="nebula">
-              <div class="preset-preview preview--nebula"></div>
-              <div class="preset-info">
-                <strong>🪐 سديم فضائي فائق</strong>
-                <span>ألوان سديمية بنفسجية وزرقاء عميقة مع غبار كوني</span>
-              </div>
-            </div>
-
-            <div class="preset-card" data-preset="cyberpunk">
-              <div class="preset-preview preview--cyberpunk"></div>
-              <div class="preset-info">
-                <strong>🔮 سايبر بانك نيون</strong>
-                <span>أضواء نيون سايبرية وتوهجات فوسفورية عصرية</span>
-              </div>
-            </div>
-
-            <div class="preset-card" data-preset="aurora">
-              <div class="preset-preview preview--aurora"></div>
-              <div class="preset-info">
-                <strong>❄️ الشفق القطبي الشمالي</strong>
-                <span>تموجات الشفق الزمردي الساحر في سماء الليل</span>
-              </div>
-            </div>
-
-            <div class="preset-card" data-preset="obsidian">
-              <div class="preset-preview preview--obsidian"></div>
-              <div class="preset-info">
-                <strong>🖤 فحم أوبسيديان فاخر</strong>
-                <span>سواد مخملي نقي مريح جداً للعين وموفر للطاقة</span>
-              </div>
-            </div>
-
-            <div class="preset-card" data-preset="galaxy-gold">
-              <div class="preset-preview preview--galaxy-gold"></div>
-              <div class="preset-info">
-                <strong>🌅 أفق المجرة الذهبي</strong>
-                <span>تدرجات ذهبية كونية براقة مع هالات شمسية</span>
-              </div>
-            </div>
-
+            <div class="preset-card" data-preset="animated-stars" role="button" tabindex="0"><div class="preset-preview preview--stars"><span class="preset-tag">افتراضية</span></div><div class="preset-info"><strong>نجوم هادئة</strong><span>نقاط ضوء خافتة مع خلفية كحلية مريحة.</span></div></div>
+            <div class="preset-card" data-preset="nebula" role="button" tabindex="0"><div class="preset-preview preview--nebula"></div><div class="preset-info"><strong>ضوء أزرق ناعم</strong><span>وهج بسيط ومتوازن حول مساحة العمل.</span></div></div>
+            <div class="preset-card" data-preset="cyberpunk" role="button" tabindex="0"><div class="preset-preview preview--cyberpunk"></div><div class="preset-info"><strong>تدرج بنفسجي</strong><span>درجات داكنة هادئة من الأزرق والبنفسجي.</span></div></div>
+            <div class="preset-card" data-preset="aurora" role="button" tabindex="0"><div class="preset-preview preview--aurora"></div><div class="preset-info"><strong>وهج سماوي</strong><span>لمسة سماوية منخفضة التباين.</span></div></div>
+            <div class="preset-card active" data-preset="obsidian" role="button" tabindex="0"><div class="preset-preview preview--obsidian"></div><div class="preset-info"><strong>داكن عميق</strong><span>خلفية محايدة تمنح المحتوى كامل التركيز.</span></div></div>
+            <div class="preset-card" data-preset="galaxy-gold" role="button" tabindex="0"><div class="preset-preview preview--galaxy-gold"></div><div class="preset-info"><strong>وهج دافئ</strong><span>إضاءة دافئة خفيفة ضمن لوحة داكنة.</span></div></div>
           </div>
         </div>
 
-
-        <!-- محتوى التبويب 2: رفع صورة خاصة من الجهاز -->
         <div class="tab-pane hidden" id="paneUpload">
           <div class="upload-dropzone" id="bgUploadDropzone">
             <input type="file" id="userCustomBgInput" accept="image/*" hidden>
-            <div class="dropzone-icon">🖼️</div>
-            <h3>اختر صورة من هاتفك أو كمبيوترك</h3>
-            <p>يدعم JPG و PNG و WEBP و GIF (يتم حفظها في جهازك فقط)</p>
-            <button class="upload-select-btn" id="triggerBgUploadBtn" type="button">
-              📂 تصفح الصور من الجهاز
-            </button>
+            <div class="dropzone-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></div>
+            <h3>اختر صورة من جهازك</h3>
+            <p>يدعم JPG وPNG وWEBP وGIF، وتحفظ الصورة محليًا.</p>
+            <button class="upload-select-btn" id="triggerBgUploadBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 20h16"/></svg>تصفح الصور</button>
           </div>
-
           <div class="custom-bg-preview-wrap hidden" id="uploadedPreviewWrap">
-            <div class="custom-bg-preview-title">معاينة الصورة المرفوعة:</div>
-            <div class="custom-bg-preview-box">
-              <img id="uploadedPreviewImg" alt="معاينة الخلفية المرفوعة" loading="lazy" decoding="async">
-              <button class="remove-custom-bg-btn" id="removeUploadedBgBtn" type="button" title="حذف هذه الصورة">
-                × إزالة الصورة
-              </button>
-            </div>
+            <div class="custom-bg-preview-title">معاينة الصورة</div>
+            <div class="custom-bg-preview-box"><img id="uploadedPreviewImg" alt="معاينة الخلفية المرفوعة" loading="lazy" decoding="async"><button class="remove-custom-bg-btn" id="removeUploadedBgBtn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>إزالة الصورة</button></div>
           </div>
         </div>
 
-
-        <!-- محتوى التبويب 3: رابط صورة مباشر -->
         <div class="tab-pane hidden" id="paneUrl">
-          <div class="url-input-group">
-            <label for="bgUrlInput">أدخل رابط صورة الخلفية (Direct Image URL):</label>
-            <div class="url-input-row">
-              <input type="url" id="bgUrlInput" placeholder="https://images.unsplash.com/photo-..." dir="ltr">
-              <button class="apply-url-btn" id="applyBgUrlBtn" type="button">تطبيق الرابط</button>
-            </div>
-            <span class="input-hint">يمكنك استخدام أي رابط صورة من Unsplash أو الإنترنت.</span>
-          </div>
+          <div class="url-input-group"><label for="bgUrlInput">رابط مباشر لصورة الخلفية</label><div class="url-input-row"><input type="url" id="bgUrlInput" placeholder="https://example.com/image.jpg" dir="ltr"><button class="apply-url-btn" id="applyBgUrlBtn" type="button">تطبيق الرابط</button></div><span class="input-hint">استخدم رابطًا مباشرًا وآمنًا يبدأ بـ https.</span></div>
         </div>
 
-
-        <!-- أدوات التحكم والضبط المتقدمة (الضبابية والتعتيم واللمعان) -->
         <div class="customizer-controls">
-          <div class="controls-title">⚙️ أدوات ضبط الرؤية والمظهر</div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>تعتيم الخلفية (لزيادة وضوح النصوص)</span>
-              <strong id="dimValueLabel">40%</strong>
-            </div>
-            <input type="range" id="bgDimRange" min="0" max="90" value="40" class="custom-slider">
-          </div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>درجة الضبابية (Blur Effect)</span>
-              <strong id="blurValueLabel">0px</strong>
-            </div>
-            <input type="range" id="bgBlurRange" min="0" max="25" value="0" class="custom-slider">
-          </div>
-
-          <div class="control-row switch-row">
-            <div class="control-label">
-              <span>إبقاء لمعان النجوم المتحركة فوق صورتك الخاصة</span>
-              <span class="control-sub">يجعل النجوم والشهب تتلألأ فوق أي صورة تضعها</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="starsOverlayToggle" checked>
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>كثافة وبريق النجوم المتحركة</span>
-              <strong id="starsDensityLabel">عالية</strong>
-            </div>
-            <input type="range" id="starsDensityRange" min="1" max="3" value="2" class="custom-slider">
-          </div>
+          <div class="controls-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>ضبط الرؤية والمظهر</div>
+          <div class="control-row"><div class="control-label"><span>تعتيم الخلفية</span><strong id="dimValueLabel">24%</strong></div><input type="range" id="bgDimRange" min="0" max="90" value="24" class="custom-slider" aria-label="تعتيم الخلفية"></div>
+          <div class="control-row"><div class="control-label"><span>درجة الضبابية</span><strong id="blurValueLabel">0px</strong></div><input type="range" id="bgBlurRange" min="0" max="25" value="0" class="custom-slider" aria-label="درجة الضبابية"></div>
+          <div class="control-row switch-row"><div class="control-label"><span>إظهار نقاط الضوء فوق الصورة</span><span class="control-sub">تأثير ضوء خافت على الخلفية المخصصة</span></div><label class="toggle-switch"><input type="checkbox" id="starsOverlayToggle" aria-label="إظهار نقاط الضوء"><span class="slider"></span></label></div>
+          <div class="control-row"><div class="control-label"><span>كثافة نقاط الضوء</span><strong id="starsDensityLabel">خفيفة</strong></div><input type="range" id="starsDensityRange" min="1" max="3" value="1" class="custom-slider" aria-label="كثافة نقاط الضوء"></div>
         </div>
-
       </div>
-
 
       <div class="modal-footer">
-        <button class="btn btn-secondary reset-bg-btn" id="resetBgBtn" type="button">
-          🔄 استعادة الخلفية الافتراضية
-        </button>
-        <button class="btn btn-primary" id="saveBgSettingsBtn" type="button">
-          ✓ حفظ وتطبيق التغييرات
-        </button>
+        <button class="btn btn-secondary reset-bg-btn" id="resetBgBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>استعادة الافتراضي</button>
+        <button class="btn btn-primary" id="saveBgSettingsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg>حفظ التغييرات</button>
       </div>
-
     </div>
   </div>
 
-
-  <!-- ==================================================
-       SETTINGS MODAL (إعدادات عامة)
-  ================================================== -->
   <div class="modal-backdrop hidden" id="modalBackdrop">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-
       <div class="modal-header">
-        <div class="modal-title" id="settingsTitle">إعدادات SPARTA AI</div>
-        <button class="icon-button" id="modalClose" type="button" aria-label="إغلاق">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
+        <div class="modal-title-group"><span class="modal-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg></span><div><div class="modal-title" id="settingsTitle">إعدادات SPARTA AI</div><p class="modal-subtitle">إدارة النموذج والمظهر وتجربة التطبيق.</p></div></div>
+        <button class="icon-button" id="modalClose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
-
       <div class="modal-body">
-
-        <div class="setting">
-          <label class="setting-label" for="modelSelectSettings">نموذج الذكاء الاصطناعي</label>
-          <select id="modelSelectSettings" class="setting-select">
-            <option value="openai/gpt-oss-120b">SPARTA AI — GPT OSS 120B (الذكي)</option>
-            <option value="MiniMax-M3">SPARTA Max Pro 🔒 — MiniMax M3 (البرمجة والسياق الطويل)</option>
-            <option value="openai/gpt-oss-20b">SPARTA AI Fast — GPT OSS 20B (السريع)</option>
-            <option value="qwen/qwen3.8-27b">SPARTA AI Vision — Qwen 3.8 27B (تحليل الصور)</option>
-          </select>
-        </div>
-
-        <div class="setting">
-          <label class="setting-label" for="themeSelect">المظهر اللوني</label>
-          <select id="themeSelect" class="setting-select">
-            <option value="dark">🌙 المظهر الداكن (الفاخر)</option>
-            <option value="light">☀️ المظهر الفاتح (النهاري)</option>
-          </select>
-        </div>
-
-        <div class="setting setting--action" id="installSettingRow" hidden>
-          <div class="setting-info">
-            <label class="setting-label">تثبيت SPARTA AI كتطبيق</label>
-            <span class="setting-desc" id="installSettingDesc">احصل على تجربة مستقلة بدون واجهة المتصفح قدر الإمكان.</span>
-          </div>
-          <button class="btn btn-secondary btn-sm" id="installFromSettingsBtn" type="button">
-            📲 تثبيت التطبيق
-          </button>
-        </div>
-
-        <div class="setting setting--action">
-          <div class="setting-info">
-            <label class="setting-label" for="floatBubbleToggle">إظهار فقاعة SPARTA AI</label>
-            <span class="setting-desc">إظهار أو إخفاء الفقاعة العائمة المتصلة فعليًا بالمساعد الذكي.</span>
-          </div>
-          <label class="toggle-switch" title="إظهار فقاعة SPARTA AI">
-            <input type="checkbox" id="floatBubbleToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-
-        <div class="setting setting--action">
-          <div class="setting-info">
-            <label class="setting-label">تخصيص الخلفية الشخصية</label>
-            <span class="setting-desc">تغيير الخلفية لصورتك أو تفعيل فضاء النجوم</span>
-          </div>
-          <button class="btn btn-secondary btn-sm" id="openBgFromSettingsBtn" type="button">
-            🎨 فتح مخصص الخلفية
-          </button>
-        </div>
-
-        <div class="setting setting--action">
-          <div class="setting-info">
-            <label class="setting-label">المساعد العائم فوق التطبيقات</label>
-            <span class="setting-desc">نافذة SPARTA AI تبقى فوق كل البرامج أثناء عملك — متصلة بالموقع دون فتحه</span>
-          </div>
-          <button class="btn btn-secondary btn-sm" id="pinFromSettingsBtn" type="button">
-            📌 تثبيت الآن
-          </button>
-        </div>
-
-        <div class="setting developer-info-box">
-          <div class="dev-box-header">
-            <span class="dev-box-icon">👑</span>
-            <strong>المطور والمصمم</strong>
-          </div>
-          <p class="dev-box-name">ياسين عمرو عبد الرحيم</p>
-          <p class="dev-box-desc">تم بناء وتطوير منصة SPARTA AI باحترافية كاملة وتصميم عصري فائق الأداء.</p>
-        </div>
-
+        <div class="setting"><label class="setting-label" for="modelSelectSettings">نموذج الذكاء الاصطناعي</label><select id="modelSelectSettings" class="setting-select"><option value="openai/gpt-oss-120b">SPARTA Core — GPT OSS 120B</option><option value="MiniMax-M3">SPARTA Max Pro — MiniMax M3</option><option value="openai/gpt-oss-20b">SPARTA Fast — GPT OSS 20B</option><option value="qwen/qwen3.8-27b">SPARTA Vision — Qwen 3.8 27B</option></select></div>
+        <div class="setting"><label class="setting-label" for="themeSelect">المظهر</label><select id="themeSelect" class="setting-select"><option value="dark">المظهر الداكن</option><option value="light">المظهر الفاتح</option></select></div>
+        <div class="setting setting--action" id="installSettingRow" hidden><div class="setting-info"><span class="setting-label">تثبيت SPARTA AI</span><span class="setting-desc" id="installSettingDesc">احصل على تجربة مستقلة وسريعة.</span></div><button class="btn btn-secondary btn-sm" id="installFromSettingsBtn" type="button">تثبيت التطبيق</button></div>
+        <div class="setting setting--action"><div class="setting-info"><label class="setting-label" for="floatBubbleToggle">الفقاعة العائمة</label><span class="setting-desc">إظهار أو إخفاء مساعد SPARTA AI المصغر.</span></div><label class="toggle-switch" title="إظهار الفقاعة العائمة"><input type="checkbox" id="floatBubbleToggle" checked><span class="slider"></span></label></div>
+        <div class="setting setting--action"><div class="setting-info"><span class="setting-label">تخصيص الخلفية</span><span class="setting-desc">اختيار خلفية هادئة أو استخدام صورتك.</span></div><button class="btn btn-secondary btn-sm" id="openBgFromSettingsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg>فتح المخصص</button></div>
+        <div class="setting setting--action"><div class="setting-info"><span class="setting-label">المساعد فوق التطبيقات</span><span class="setting-desc">نافذة مساعدة صغيرة تبقى أمامك أثناء العمل.</span></div><button class="btn btn-secondary btn-sm" id="pinFromSettingsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg>تثبيت الآن</button></div>
+        <div class="setting developer-info-box"><div class="dev-box-header"><span class="dev-box-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/></svg></span><strong>المطور والمصمم</strong></div><p class="dev-box-name">ياسين عمرو عبد الرحيم</p><p class="dev-box-desc">تم تصميم وبناء SPARTA AI لتقديم تجربة عربية سريعة وواضحة.</p></div>
       </div>
-
     </div>
   </div>
 
-
-  <!-- ==================================================
-       DEVELOPER INFO MODAL (معلومات المطور)
-  ================================================== -->
   <div class="modal-backdrop hidden" id="developerModalBackdrop">
-    <div class="modal modal--dev" role="dialog" aria-modal="true">
-      <div class="modal-header">
-        <div class="modal-title">عن المطور والمصمم</div>
-        <button class="icon-button" id="devModalClose" type="button" aria-label="إغلاق">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
+    <div class="modal modal--dev" role="dialog" aria-modal="true" aria-labelledby="developerModalTitle">
+      <div class="modal-header"><div class="modal-title" id="developerModalTitle">عن المطور والمصمم</div><button class="icon-button" id="devModalClose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
       <div class="modal-body dev-profile-body">
-        <div class="dev-profile-avatar">
-          <div class="dev-avatar-glow"></div>
-          <span class="dev-symbol">ϟ SPARTA ϟ</span>
-        </div>
+        <div class="dev-profile-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6M14.5 4l-5 16"/></svg></div>
         <h3 class="dev-full-name">ياسين عمرو عبد الرحيم</h3>
         <p class="dev-role-badge">المطور والمهندس والمصمم الحصري لـ SPARTA AI</p>
-        <p class="dev-bio">
-          قام المهندس والمطور <strong>ياسين عمرو عبد الرحيم</strong> بتصميم وهندسة هذه الأداة المتطورة لتقديم تجربة ذكاء اصطناعي رائدة تجمع بين السرعة الفائقة والواجهة النجمية التفاعلية وقابلية التخصيص الكاملة لكل مستخدم.
-        </p>
+        <p class="dev-bio">قام المهندس والمطور <strong>ياسين عمرو عبد الرحيم</strong> بتصميم وهندسة هذه الأداة لتقديم تجربة ذكاء اصطناعي عربية تجمع بين السرعة والوضوح وقابلية التخصيص.</p>
         <div class="dev-badges-list">
-          <span class="badge-item">🚀 Groq + MiniMax AI Engines</span>
-          <span class="badge-item">✨ Sparkling Starry Canvas</span>
-          <span class="badge-item">🎨 Personal User Customization</span>
-          <span class="badge-item">📱 100% Adaptive & Responsive</span>
+          <span class="badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>Groq + MiniMax</span>
+          <span class="badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>واجهة عربية</span>
+          <span class="badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg>تخصيص شخصي</span>
+          <span class="badge-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>متجاوب بالكامل</span>
         </div>
       </div>
     </div>
   </div>
 
-
-  <!-- ==================================================
-       TOAST NOTIFICATIONS
-  ================================================== -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-
-  <!-- ==================================================
-       HIDDEN FILE INPUTS
-  ================================================== -->
   <input type="file" id="imageInput" accept="image/*" hidden>
   <input type="file" id="documentInput" accept=".pdf,.docx,.txt,.md,.js,.json,.html,.htm,.css,.py,.csv,.xml,.yaml,.yml,.log" hidden>
 
-
-  <!-- ==================================================
-       PDF.JS WORKER SCRIPT
-  ================================================== -->
   <script type="module">
     try {
       const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.mjs");
@@ -908,16 +466,8 @@
       window.pdfjsReady = Promise.reject(error);
     }
   </script>
-
-  <!-- ==================================================
-       APPLICATION JAVASCRIPT
-  ================================================== -->
   <script defer src="/pwa.js"></script>
   <script src="/app.js"></script>
-
-
-  <!-- ============ الأداة العائمة: شاشة SPARTA AI المصغّرة ============ -->
   <script defer src="/floating-assistant.js"></script>
-
 </body>
 </html>

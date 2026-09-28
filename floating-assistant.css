@@ -1,38 +1,52 @@
 /* ==========================================================
-   SPARTA AI — المساعد العائم فوق كل التطبيقات
-   ----------------------------------------------------------
-   هوية «تنفيذية»: كحلي ملكي + ذهبي + أزرق سافير.
-   فقاعة عائمة + نافذة دردشة + تثبيت فوق التطبيقات (PiP).
-   ========================================================== */
+   SPARTA AI — Floating assistant, aligned with the premium UI.
+========================================================== */
 
 .tmd-fab,
-.tmd-mini {
-  --fab-size: 62px;
-  --tmd-bg: #080d1c;
-  --tmd-bg-2: #0b1226;
-  --tmd-panel: rgba(148, 166, 205, 0.06);
-  --tmd-line: rgba(148, 166, 205, 0.16);
-  --tmd-text: #eef2fb;
-  --tmd-muted: #97a3bd;
-  --tmd-blue: #4d7cfe;
-  --tmd-blue-deep: #2c3fa8;
-  --tmd-gold: #dfb554;
-  --tmd-gold-soft: #e6c35c;
-  --tmd-red: #ff5c74;
-  --tmd-grad: linear-gradient(135deg, #4d7cfe 0%, #2c3fa8 55%, #b8892c 100%);
-  --tmd-grad-soft: linear-gradient(135deg, rgba(77, 124, 254, 0.18), rgba(184, 137, 44, 0.16));
-  font-family: "Cairo", "Segoe UI", system-ui, sans-serif;
+.tmd-mini,
+.tmd-assistant-page {
+  --tmd-bg: #0b1020;
+  --tmd-surface: #111827;
+  --tmd-card: #151d2e;
+  --tmd-card-hover: #1b263a;
+  --tmd-primary: #6c8cff;
+  --tmd-primary-hover: #809cff;
+  --tmd-secondary: #8b7cff;
+  --tmd-cyan: #67d9e8;
+  --tmd-text: #f5f7ff;
+  --tmd-muted: #a9b2c3;
+  --tmd-subtle: #758096;
+  --tmd-line: rgba(255, 255, 255, 0.08);
+  --tmd-line-strong: rgba(255, 255, 255, 0.14);
+  --tmd-success: #55c98a;
+  --tmd-error: #f27676;
+  --tmd-shadow: 0 14px 36px rgba(0, 0, 0, 0.26);
+  --tmd-fast: 160ms ease;
+  --tmd-normal: 220ms cubic-bezier(0.2, 0.75, 0.25, 1);
   box-sizing: border-box;
+  font-family: "Cairo", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 :root[data-theme="light"] .tmd-fab,
-:root[data-theme="light"] .tmd-mini {
-  --tmd-bg: #ffffff;
-  --tmd-bg-2: #f2f4fb;
-  --tmd-panel: rgba(16, 24, 40, 0.05);
-  --tmd-line: rgba(16, 24, 40, 0.14);
-  --tmd-text: #101828;
-  --tmd-muted: #556079;
+:root[data-theme="light"] .tmd-mini,
+:root[data-theme="light"].tmd-assistant-page,
+:root[data-theme="light"] .tmd-assistant-page {
+  --tmd-bg: #f7f9fc;
+  --tmd-surface: #ffffff;
+  --tmd-card: #ffffff;
+  --tmd-card-hover: #f2f5fa;
+  --tmd-primary: #526ff5;
+  --tmd-primary-hover: #405de0;
+  --tmd-secondary: #7365e8;
+  --tmd-cyan: #2da8ba;
+  --tmd-text: #172033;
+  --tmd-muted: #667085;
+  --tmd-subtle: #8a94a6;
+  --tmd-line: #e6eaf0;
+  --tmd-line-strong: #d7dce5;
+  --tmd-success: #2f9e68;
+  --tmd-error: #d84f4f;
+  --tmd-shadow: 0 14px 36px rgba(23, 32, 51, 0.11);
 }
 
 .tmd-fab *,
@@ -40,106 +54,66 @@
   box-sizing: border-box;
 }
 
-/* ================= الفقاعة العائمة ================= */
+.tmd-fab button:focus-visible,
+.tmd-mini button:focus-visible,
+.tmd-mini textarea:focus-visible,
+.tmd-mini a:focus-visible {
+  outline: 2px solid var(--tmd-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Floating action ---------- */
 .tmd-fab {
+  --fab-size: 58px;
   position: fixed;
   z-index: 99998;
-  inset-block-end: 24px;
-  inset-inline-end: 24px;
+  inset-inline-end: 22px;
+  inset-block-end: 22px;
   width: var(--fab-size);
   height: var(--fab-size);
+  display: grid;
+  place-items: center;
   padding: 0;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  cursor: grab;
-  color: var(--tmd-text);
-  background:
-    linear-gradient(160deg, #131d44 0%, #0a1128 100%) padding-box,
-    linear-gradient(135deg, #4d7cfe 0%, #9b72cb 50%, #dfb554 100%) border-box;
-  box-shadow:
-    0 12px 34px rgba(4, 8, 20, 0.55),
-    0 0 0 1px rgba(223, 181, 84, 0.18),
-    0 4px 18px rgba(61, 100, 235, 0.25),
-    0 0 24px rgba(66, 133, 244, 0.28),
-    0 0 42px rgba(217, 101, 112, 0.14);
   isolation: isolate;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(108, 140, 255, 0.32);
+  border-radius: 18px;
+  color: #fff;
+  background: var(--tmd-primary);
+  box-shadow: 0 6px 18px rgba(5, 9, 20, 0.24);
+  cursor: grab;
   touch-action: none;
-  transition: transform 0.18s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-}
-
-.tmd-fab::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: -7px;
-  border-radius: 50%;
-  background: conic-gradient(from 210deg, #4285f4, #9b72cb 38%, #d96570 66%, #fbbc04 82%, #4285f4);
-  filter: blur(11px);
-  opacity: 0.62;
-  animation: tmdGeminiGlow 5s linear infinite;
-  pointer-events: none;
-}
-
-.tmd-fab::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 2px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 22%, rgba(255,255,255,.18), transparent 34%);
-  pointer-events: none;
-}
-
-.tmd-fab__icon,
-.tmd-fab__ring,
-.tmd-fab__badge,
-.tmd-fab__tag {
-  position: relative;
-  z-index: 2;
-}
-
-.tmd-fab__ring,
-.tmd-fab__badge,
-.tmd-fab__tag {
-  position: absolute;
+  transition: transform var(--tmd-fast), background var(--tmd-fast), box-shadow var(--tmd-normal), opacity var(--tmd-normal);
 }
 
 .tmd-fab:hover {
-  transform: scale(1.07);
-  box-shadow:
-    0 14px 40px rgba(4, 8, 20, 0.6),
-    0 0 0 1px rgba(223, 181, 84, 0.35),
-    0 6px 26px rgba(61, 100, 235, 0.4);
+  background: var(--tmd-primary-hover);
+  box-shadow: 0 8px 20px rgba(5, 9, 20, 0.26);
+  transform: translateY(-2px);
 }
 
 .tmd-fab:active {
   cursor: grabbing;
-  transform: scale(0.95);
+  transform: scale(0.96);
+}
+
+.tmd-fab[hidden] {
+  display: none !important;
+}
+
+.tmd-fab.is-pinned {
+  opacity: 0.62;
 }
 
 .tmd-fab.is-dragging,
 .tmd-fab.is-snapping {
   transition: none;
-  cursor: grabbing;
-}
-
-.tmd-fab.is-snapping {
-  transition: left 0.24s cubic-bezier(0.16, 1, 0.3, 1), top 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.tmd-fab.is-pinned {
-  opacity: 0.55;
-  box-shadow:
-    0 10px 28px rgba(4, 8, 20, 0.5),
-    0 0 0 2px rgba(223, 181, 84, 0.55);
 }
 
 .tmd-fab__icon {
-  width: 34px;
-  height: 34px;
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -150,41 +124,49 @@
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 0 7px rgba(109, 130, 245, 0.55));
 }
 
 .tmd-fab__ring {
   position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1.6px solid rgba(77, 124, 254, 0.55);
-  animation: tmdFabRing 2.8s ease-out infinite;
+  inset: -5px;
+  border: 1px solid rgba(108, 140, 255, 0.26);
+  border-radius: 21px;
+  opacity: 0;
   pointer-events: none;
 }
 
+.tmd-fab:hover .tmd-fab__ring {
+  opacity: 1;
+}
+
 .tmd-fab__ring--gold {
-  border-color: rgba(223, 181, 84, 0.4);
-  animation-delay: 1.4s;
-  animation-duration: 3.4s;
+  display: none;
 }
 
 .tmd-fab__badge {
   position: absolute;
-  inset-block-start: -2px;
-  inset-inline-start: -2px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #e6c35c, #b8892c);
-  color: #10141f;
-  font-size: 11px;
-  font-weight: 800;
+  inset-inline-start: -4px;
+  inset-block-start: -4px;
+  min-width: 18px;
+  height: 18px;
   display: none;
   align-items: center;
   justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--tmd-surface);
+  border-radius: 999px;
+  color: #fff;
+  background: var(--tmd-success);
+  font-size: 0;
   pointer-events: none;
-  box-shadow: 0 2px 8px rgba(223, 181, 84, 0.45);
+}
+
+.tmd-fab__badge::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .tmd-fab__badge.is-on {
@@ -193,132 +175,128 @@
 
 .tmd-fab__tag {
   position: absolute;
-  inset-block-end: calc(100% + 12px);
-  inset-inline-start: 50%;
-  transform: translateX(50%) translateY(6px);
-  white-space: nowrap;
-  padding: 7px 13px;
-  border-radius: 12px;
-  background: #0c142b;
-  border: 1px solid rgba(223, 181, 84, 0.45);
-  color: #e6c35c;
-  font-size: 11.5px;
-  font-weight: 700;
+  inset-inline-end: 0;
+  inset-block-end: calc(100% + 10px);
+  width: max-content;
+  max-width: 250px;
+  padding: 7px 10px;
+  border: 1px solid var(--tmd-line-strong);
+  border-radius: 10px;
+  color: var(--tmd-text);
+  background: var(--tmd-surface);
+  box-shadow: var(--tmd-shadow);
+  font-size: 0.68rem;
+  font-weight: 600;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  box-shadow: 0 10px 26px rgba(4, 8, 20, 0.55);
+  transform: translateY(4px);
+  transition: opacity var(--tmd-normal), transform var(--tmd-normal);
 }
 
 .tmd-fab__tag.is-visible {
   opacity: 1;
-  transform: translateX(50%) translateY(0);
+  transform: translateY(0);
 }
 
-@keyframes tmdFabRing {
-  0% { transform: scale(0.85); opacity: 0.8; }
-  100% { transform: scale(1.55); opacity: 0; }
-}
-
-/* هالة Gemini متعددة الألوان: تتحرك بهدوء حول الفقاعة بدلاً من وميض حاد. */
-@keyframes tmdGeminiGlow {
-  0% { transform: rotate(0deg) scale(0.98); filter: blur(11px) hue-rotate(0deg); }
-  50% { transform: rotate(180deg) scale(1.08); filter: blur(14px) hue-rotate(20deg); }
-  100% { transform: rotate(360deg) scale(0.98); filter: blur(11px) hue-rotate(0deg); }
-}
-
-/* ================= نافذة المساعد ================= */
+/* ---------- Assistant window ---------- */
 .tmd-mini {
   position: fixed;
   z-index: 99999;
-  inset-block-end: 100px;
-  inset-inline-end: 24px;
-  width: min(396px, calc(100vw - 28px));
-  max-height: min(660px, calc(100vh - 120px));
+  inset-inline-end: 22px;
+  inset-block-end: 92px;
+  width: min(394px, calc(100vw - 24px));
+  max-height: min(660px, calc(100dvh - 112px));
   display: none;
   flex-direction: column;
   overflow: hidden;
-  color: var(--tmd-text);
-  background: linear-gradient(180deg, var(--tmd-bg-2), var(--tmd-bg));
-  border: 1px solid var(--tmd-line);
+  border: 1px solid var(--tmd-line-strong);
   border-radius: 20px;
-  box-shadow:
-    0 30px 80px rgba(3, 6, 16, 0.65),
-    0 0 0 1px rgba(223, 181, 84, 0.08);
+  color: var(--tmd-text);
+  background: var(--tmd-bg);
+  box-shadow: var(--tmd-shadow);
   direction: rtl;
 }
 
 .tmd-mini.is-open {
   display: flex;
-  animation: tmdMiniIn 0.22s ease;
+  animation: tmd-window-in var(--tmd-normal) both;
 }
 
-@keyframes tmdMiniIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
-  to { opacity: 1; transform: none; }
-}
-
-/* الرأس */
 .tmd-mini__head {
+  min-height: 62px;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 11px 12px;
-  background: linear-gradient(180deg, #101a3c 0%, #0a1228 100%);
-  border-bottom: 1px solid rgba(223, 181, 84, 0.22);
+  gap: 8px;
+  padding: 10px 11px;
+  border-bottom: 1px solid var(--tmd-line);
+  background: var(--tmd-surface);
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
 
-.tmd-mini__head:active { cursor: grabbing; }
+.tmd-mini__head:active {
+  cursor: grabbing;
+}
 
 .tmd-mini__avatar {
   width: 36px;
   height: 36px;
-  flex: none;
-  border-radius: 50%;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 30% 30%, rgba(77, 124, 254, 0.25), rgba(10, 17, 40, 0.9));
-  border: 1px solid rgba(148, 166, 205, 0.25);
+  flex: 0 0 auto;
+  padding: 8px;
+  border: 1px solid rgba(108, 140, 255, 0.24);
+  border-radius: 11px;
+  color: var(--tmd-primary);
+  background: rgba(108, 140, 255, 0.09);
 }
 
-.tmd-mini__avatar .tmd-spark {
-  width: 21px;
-  height: 21px;
+.tmd-mini__titles {
+  min-width: 0;
+  flex: 1;
 }
-
-.tmd-mini__titles { flex: 1; min-width: 0; }
 
 .tmd-mini__title {
-  font-size: 13.5px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: 0.2px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .tmd-mini__status {
-  font-size: 11px;
-  color: var(--tmd-muted);
-  white-space: nowrap;
   overflow: hidden;
+  color: var(--tmd-subtle);
+  font-size: 0.64rem;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .tmd-mini__head-btn {
-  flex: none;
-  width: 29px;
-  height: 29px;
-  border-radius: 9px;
-  border: 1px solid rgba(148, 166, 205, 0.22);
-  background: rgba(148, 166, 205, 0.07);
-  color: #c7d2ec;
-  cursor: pointer;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   padding: 0;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--tmd-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast);
+}
+
+.tmd-mini__head-btn:hover {
+  color: var(--tmd-text);
+  border-color: var(--tmd-line);
+  background: var(--tmd-card);
+}
+
+.tmd-mini__head-btn:active {
+  transform: scale(0.95);
 }
 
 .tmd-mini__head-btn svg {
@@ -326,306 +304,482 @@
   height: 15px;
 }
 
-.tmd-mini__head-btn:hover {
-  background: rgba(148, 166, 205, 0.16);
-  color: #fff;
-}
-
-/* زر التثبيت فوق التطبيقات */
 .tmd-pin-btn {
-  color: #e6c35c !important;
-  border-color: rgba(223, 181, 84, 0.4) !important;
-  background: rgba(223, 181, 84, 0.1) !important;
-}
-
-.tmd-pin-btn:hover {
-  background: rgba(223, 181, 84, 0.22) !important;
-  color: #f6dd8f !important;
+  color: var(--tmd-primary);
 }
 
 .tmd-pin-btn.is-active {
-  background: linear-gradient(135deg, #e6c35c, #b8892c) !important;
-  border-color: transparent !important;
-  color: #10141f !important;
+  color: #fff;
+  border-color: transparent;
+  background: var(--tmd-primary);
 }
 
-/* شاشة المشاركة */
-.tmd-mini__screen {
-  display: none;
-  position: relative;
-  background: #000;
+/* ---------- Plan controls ---------- */
+.tmd-plan-chip {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 9px;
+  color: var(--tmd-muted);
+  background: var(--tmd-card);
+  font-size: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--tmd-fast), border-color var(--tmd-fast), background var(--tmd-fast);
+}
+
+.tmd-plan-chip:hover {
+  color: var(--tmd-text);
+  border-color: var(--tmd-line-strong);
+}
+
+.tmd-plan-chip__credits {
+  padding: 1px 5px;
+  border-radius: 5px;
+  color: var(--tmd-primary);
+  background: rgba(108, 140, 255, 0.1);
+  font: 600 0.56rem/1.4 Inter, sans-serif;
+}
+
+.tmd-plan-chip.is-pro {
+  color: var(--tmd-primary);
+  border-color: rgba(108, 140, 255, 0.24);
+  background: rgba(108, 140, 255, 0.08);
+}
+
+.tmd-plan-chip.is-empty .tmd-plan-chip__credits {
+  color: var(--tmd-error);
+  background: rgba(242, 118, 118, 0.08);
+}
+
+.tmd-plan-sheet {
+  padding: 10px;
   border-bottom: 1px solid var(--tmd-line);
+  background: var(--tmd-surface);
+  animation: tmd-slide-down var(--tmd-normal) both;
 }
 
-.tmd-mini__screen.is-on { display: block; }
+.tmd-plan-sheet[hidden] {
+  display: none;
+}
+
+.tmd-plan-sheet__inner {
+  display: grid;
+  gap: 8px;
+}
+
+.tmd-plan-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--tmd-text);
+  font-size: 0.72rem;
+}
+
+.tmd-plan-card {
+  padding: 10px 11px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 13px;
+  background: var(--tmd-card);
+}
+
+.tmd-plan-card--pro {
+  border-color: rgba(108, 140, 255, 0.22);
+  background: rgba(108, 140, 255, 0.07);
+}
+
+.tmd-plan-card__title {
+  margin-bottom: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tmd-plan-card__tag {
+  margin-inline-start: 4px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  color: var(--tmd-primary);
+  background: rgba(108, 140, 255, 0.1);
+  font: 700 0.52rem/1.5 Inter, sans-serif;
+}
+
+.tmd-plan-card__desc {
+  color: var(--tmd-muted);
+  font-size: 0.64rem;
+  line-height: 1.65;
+}
+
+.tmd-plan-card__meter {
+  height: 4px;
+  margin: 7px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--tmd-line);
+}
+
+.tmd-plan-card__meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tmd-primary);
+}
+
+.tmd-plan-card__btn {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 7px;
+  padding: 6px 9px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 10px;
+  color: var(--tmd-muted);
+  background: transparent;
+  font: 600 0.68rem/1 "Cairo", sans-serif;
+  cursor: pointer;
+  transition: color var(--tmd-fast), background var(--tmd-fast), transform var(--tmd-fast);
+}
+
+.tmd-plan-card__btn:hover:not(:disabled) {
+  color: var(--tmd-text);
+  background: var(--tmd-card-hover);
+}
+
+.tmd-plan-card__btn--pro {
+  color: #fff;
+  border-color: transparent;
+  background: var(--tmd-primary);
+}
+
+.tmd-plan-card__btn--pro:hover:not(:disabled) {
+  color: #fff;
+  background: var(--tmd-primary-hover);
+}
+
+.tmd-plan-card__btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.tmd-plan-card__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Screen sharing ---------- */
+.tmd-mini__screen {
+  position: relative;
+  display: none;
+  border-bottom: 1px solid var(--tmd-line);
+  background: #070b14;
+}
+
+.tmd-mini__screen.is-on {
+  display: block;
+}
 
 .tmd-mini__screen video {
   width: 100%;
   max-height: 170px;
   display: block;
   object-fit: contain;
-  background: #000;
 }
 
 .tmd-mini__screen-tag {
   position: absolute;
-  inset-block-start: 8px;
   inset-inline-start: 8px;
+  inset-block-start: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.65);
+  padding: 4px 8px;
+  border-radius: 7px;
   color: #fff;
-  font-size: 11px;
-  font-weight: 700;
+  background: rgba(5, 9, 18, 0.82);
+  font-size: 0.62rem;
+  font-weight: 600;
 }
 
 .tmd-mini__screen-tag::before {
   content: "";
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #ff3b5c;
-  animation: tmdBlink 1.2s infinite;
+  background: var(--tmd-error);
 }
 
-@keyframes tmdBlink { 50% { opacity: 0.2; } }
-
-/* الرسائل */
+/* ---------- Messages ---------- */
 .tmd-mini__body {
-  flex: 1;
   min-height: 190px;
-  overflow-y: auto;
-  padding: 14px 12px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 13px 11px;
+  overflow-y: auto;
   scrollbar-width: thin;
 }
 
 .tmd-msg {
-  max-width: 90%;
-  padding: 9px 12px;
+  max-width: 88%;
+  padding: 8px 10px;
   border-radius: 14px;
-  font-size: 13.5px;
+  color: var(--tmd-text);
+  font-size: 0.75rem;
   line-height: 1.75;
   white-space: pre-wrap;
-  word-wrap: break-word;
-  animation: tmdMsgIn 0.2s ease;
-}
-
-@keyframes tmdMsgIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
+  word-break: break-word;
+  animation: tmd-message-in 180ms ease both;
 }
 
 .tmd-msg--ai {
   align-self: flex-start;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  background: var(--tmd-panel);
-  border: 1px solid var(--tmd-line);
-  border-start-start-radius: 4px;
+  gap: 7px;
+  max-width: 94%;
+  padding-inline: 1px;
+  background: transparent;
 }
 
-.tmd-msg--ai > div { flex: 1; min-width: 0; }
+.tmd-msg--ai > div {
+  min-width: 0;
+  flex: 1;
+}
 
 .tmd-msg__spark {
-  flex: none;
   width: 20px;
   height: 20px;
-  margin-block-start: 2px;
-  display: block;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  padding: 4px;
+  border: 1px solid rgba(108, 140, 255, 0.18);
+  border-radius: 7px;
+  color: var(--tmd-primary);
+  background: rgba(108, 140, 255, 0.08);
 }
 
 .tmd-msg__spark svg {
   width: 100%;
   height: 100%;
-  display: block;
 }
 
 .tmd-msg--user {
   align-self: flex-end;
-  background: linear-gradient(135deg, rgba(77, 124, 254, 0.22), rgba(44, 63, 168, 0.26));
-  border: 1px solid rgba(77, 124, 254, 0.38);
-  border-start-end-radius: 4px;
+  border: 1px solid rgba(108, 140, 255, 0.16);
+  border-start-end-radius: 5px;
+  background: rgba(108, 140, 255, 0.11);
 }
 
 .tmd-msg--err {
   align-self: center;
-  background: rgba(255, 92, 116, 0.1);
-  border: 1px solid rgba(255, 92, 116, 0.4);
-  color: #ff92a5;
-  font-size: 12.5px;
+  border: 1px solid rgba(242, 118, 118, 0.22);
+  color: var(--tmd-error);
+  background: rgba(242, 118, 118, 0.07);
+  font-size: 0.7rem;
 }
 
 .tmd-msg img {
   max-width: 100%;
-  border-radius: 9px;
-  margin-block-end: 6px;
   display: block;
+  margin-bottom: 6px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 10px;
 }
 
 .tmd-msg code {
-  background: rgba(77, 124, 254, 0.16);
-  padding: 1px 5px;
+  padding: 1px 4px;
+  border: 1px solid var(--tmd-line);
   border-radius: 5px;
-  font-family: "Fira Code", monospace;
-  font-size: 12px;
+  color: var(--tmd-cyan);
+  background: var(--tmd-card);
+  font: 0.68rem/1.5 "Fira Code", monospace;
 }
 
 .tmd-msg pre {
-  background: rgba(2, 5, 14, 0.6);
-  border: 1px solid var(--tmd-line);
-  border-radius: 10px;
-  padding: 9px;
-  overflow-x: auto;
   margin: 6px 0 0;
+  padding: 8px;
+  overflow-x: auto;
+  border: 1px solid var(--tmd-line);
+  border-radius: 9px;
+  background: #090e1b;
+  direction: ltr;
+  text-align: left;
 }
 
-.tmd-msg pre code { background: none; padding: 0; }
+.tmd-msg pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
 
 .tmd-typing {
+  min-height: 21px;
   display: inline-flex;
-  gap: 4px;
   align-items: center;
-  min-height: 20px;
+  gap: 4px;
 }
 
 .tmd-typing span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--tmd-muted);
-  animation: tmdDot 1.1s infinite ease-in-out;
+  background: var(--tmd-primary);
+  animation: tmd-dot 1.1s ease-in-out infinite;
 }
 
-.tmd-typing span:nth-child(2) { animation-delay: 0.16s; }
-.tmd-typing span:nth-child(3) { animation-delay: 0.32s; }
+.tmd-typing span:nth-child(2) { animation-delay: 120ms; }
+.tmd-typing span:nth-child(3) { animation-delay: 240ms; }
 
-@keyframes tmdDot {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.45; }
-  40% { transform: scale(1); opacity: 1; }
-}
-
-/* اقتراحات سريعة */
+/* ---------- Chips and tools ---------- */
 .tmd-mini__chips {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 0 12px 8px;
+  gap: 5px;
+  padding: 0 11px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tmd-mini__chips::-webkit-scrollbar {
+  display: none;
 }
 
 .tmd-chip {
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 5px 9px;
   border: 1px solid var(--tmd-line);
-  background: var(--tmd-panel);
+  border-radius: 9px;
   color: var(--tmd-muted);
-  border-radius: 999px;
-  padding: 5px 11px;
-  font-size: 11.5px;
+  background: var(--tmd-card);
+  font: 500 0.64rem/1 "Cairo", sans-serif;
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s ease;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast);
 }
 
 .tmd-chip:hover {
   color: var(--tmd-text);
-  border-color: rgba(223, 181, 84, 0.55);
-  background: rgba(223, 181, 84, 0.08);
+  border-color: var(--tmd-line-strong);
+  background: var(--tmd-card-hover);
 }
 
-/* شريط الأدوات */
 .tmd-mini__tools {
   display: flex;
-  gap: 6px;
-  padding: 8px 12px 0;
+  gap: 5px;
+  padding: 8px 11px 0;
+  border-top: 1px solid var(--tmd-line);
 }
 
 .tmd-tool {
+  min-width: 0;
+  min-height: 36px;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 7px 4px;
-  border-radius: 11px;
+  gap: 5px;
+  padding: 5px;
   border: 1px solid var(--tmd-line);
-  background: var(--tmd-panel);
+  border-radius: 10px;
   color: var(--tmd-muted);
-  font-size: 11.5px;
-  font-weight: 600;
-  font-family: inherit;
+  background: transparent;
+  font: 500 0.62rem/1.35 "Cairo", sans-serif;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast);
 }
 
 .tmd-tool svg {
-  width: 15px;
-  height: 15px;
-  flex: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
 }
 
-.tmd-tool:hover { color: var(--tmd-text); }
+.tmd-tool:hover {
+  color: var(--tmd-text);
+  background: var(--tmd-card);
+}
+
+.tmd-tool:active {
+  transform: scale(0.97);
+}
 
 .tmd-tool.is-active {
-  color: #8fb0ff;
-  border-color: rgba(77, 124, 254, 0.55);
-  background: rgba(77, 124, 254, 0.12);
+  color: var(--tmd-primary);
+  border-color: rgba(108, 140, 255, 0.26);
+  background: rgba(108, 140, 255, 0.08);
 }
 
 .tmd-tool.is-rec {
-  color: #ff5c74;
-  border-color: rgba(255, 92, 116, 0.55);
-  background: rgba(255, 92, 116, 0.12);
-  animation: tmdPulse 1.3s infinite;
+  color: var(--tmd-error);
+  border-color: rgba(242, 118, 118, 0.24);
+  background: rgba(242, 118, 118, 0.07);
 }
 
-@keyframes tmdPulse { 50% { opacity: 0.55; } }
-
-/* مساحة الكتابة */
+/* ---------- Input ---------- */
 .tmd-mini__foot {
   display: flex;
   align-items: flex-end;
   gap: 7px;
-  padding: 9px 12px 11px;
+  padding: 8px 11px 11px;
+  background: var(--tmd-bg);
 }
 
 .tmd-mini__input {
+  min-height: 44px;
+  max-height: 98px;
   flex: 1;
+  padding: 10px 11px;
   resize: none;
-  max-height: 96px;
-  min-height: 42px;
-  padding: 11px 13px;
-  border-radius: 14px;
   border: 1px solid var(--tmd-line);
-  background: var(--tmd-panel);
+  border-radius: 13px;
+  outline: 0;
   color: var(--tmd-text);
-  font-family: inherit;
-  font-size: 13.5px;
-  line-height: 1.5;
-  outline: none;
-  transition: border-color 0.15s ease;
+  background: var(--tmd-card);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  transition: border-color var(--tmd-fast), box-shadow var(--tmd-fast);
 }
 
-.tmd-mini__input:focus { border-color: rgba(77, 124, 254, 0.6); }
-.tmd-mini__input::placeholder { color: var(--tmd-muted); }
+.tmd-mini__input:focus {
+  border-color: var(--tmd-primary);
+  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.1);
+}
+
+.tmd-mini__input::placeholder {
+  color: var(--tmd-subtle);
+}
 
 .tmd-mini__send {
-  flex: none;
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 13px;
-  background: var(--tmd-grad);
-  color: #fff;
-  cursor: pointer;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   padding: 0;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  border: 0;
+  border-radius: 13px;
+  color: #fff;
+  background: var(--tmd-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  transition: background var(--tmd-fast), transform var(--tmd-fast), opacity var(--tmd-fast);
+}
+
+.tmd-mini__send:hover:not(:disabled) {
+  background: var(--tmd-primary-hover);
+  transform: scale(1.025);
+}
+
+.tmd-mini__send:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.tmd-mini__send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .tmd-mini__send svg {
@@ -633,87 +787,75 @@
   height: 18px;
 }
 
-.tmd-mini__send:hover { transform: scale(1.06); }
-.tmd-mini__send:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.tmd-mini__send.is-stop {
+  background: var(--tmd-error);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
 
-/* رابط الموقع الكامل (يظهر في النسخة المستقلة فقط) */
 .tmd-open-site {
   display: none;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 8px 12px 12px;
+  gap: 6px;
+  padding: 5px 11px 11px;
   color: var(--tmd-muted);
   text-decoration: none;
-  font-size: 12px;
-  font-weight: 700;
-  transition: color 0.15s ease;
+  font-size: 0.66rem;
+  font-weight: 600;
+  transition: color var(--tmd-fast);
 }
 
-.tmd-open-site:hover { color: var(--tmd-gold-soft); }
+.tmd-open-site:hover {
+  color: var(--tmd-primary);
+}
 
 .tmd-open-site svg {
   width: 14px;
   height: 14px;
 }
 
-/* وضع التصغير الكامل */
 .tmd-mini.is-collapsed .tmd-mini__body,
 .tmd-mini.is-collapsed .tmd-mini__foot,
 .tmd-mini.is-collapsed .tmd-mini__tools,
 .tmd-mini.is-collapsed .tmd-mini__chips,
 .tmd-mini.is-collapsed .tmd-mini__screen,
+.tmd-mini.is-collapsed .tmd-plan-sheet,
 .tmd-mini.is-collapsed .tmd-open-site {
   display: none;
 }
 
-/* ================= وضع APK: فقاعة Android حقيقية =================
-   WebView نفسها تصبح 96dp عند الإغلاق، فلا توجد مساحة شفافة تمنع لمس
-   التطبيقات الأخرى. عند فتح الفقاعة يوسّع الجسر الأصلي النافذة فقط. */
-.tmd-assistant-page.tmd-android-overlay {
+/* ---------- Standalone, PiP and Android ---------- */
+.tmd-assistant-page {
   min-height: 100dvh;
   margin: 0;
   overflow: hidden;
-  background: transparent;
+  color: var(--tmd-text);
+  background: var(--tmd-bg);
+  direction: rtl;
 }
 
-.tmd-assistant-page.tmd-android-overlay::before {
+.tmd-assistant-page .tmd-fab {
   display: none;
 }
 
-.tmd-assistant-page.tmd-android-overlay .tmd-fab {
-  display: flex;
-  position: fixed;
-  inset-block-end: 12px;
-  inset-inline-end: 12px;
-}
-
-.tmd-assistant-page.tmd-android-overlay .tmd-mini {
-  inset: 8px;
+.tmd-assistant-page .tmd-mini {
+  inset: 12px;
   width: auto;
   max-height: none;
 }
 
-.tmd-assistant-page.tmd-android-overlay .tmd-mini.is-open {
+.tmd-assistant-page .tmd-mini.is-open {
   display: flex;
-  width: auto;
-  max-height: none;
 }
 
-/* لقطات Android تصل إلى API مباشرة؛ البطاقة تؤكد المشاركة من دون فيديو أسود. */
-.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen.is-on {
-  min-height: 36px;
+.tmd-assistant-page .tmd-open-site {
+  display: flex;
 }
 
-.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen video {
-  display: none;
-}
-
-/* ================= نافذة التثبيت فوق التطبيقات (PiP) ================= */
 .tmd-pip-body {
   margin: 0;
-  background: #050912;
   overflow: hidden;
+  background: #0b1020;
 }
 
 .tmd-pip-shell {
@@ -728,10 +870,9 @@
   height: 100%;
   max-height: none;
   display: flex;
-  border: none;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
-  background: linear-gradient(180deg, var(--tmd-bg-2), var(--tmd-bg));
 }
 
 .tmd-pip-shell .tmd-mini__head {
@@ -742,792 +883,127 @@
   display: none !important;
 }
 
-/* ================= النسخة المستقلة (assistant.html) ================= */
-.tmd-assistant-page {
+.tmd-assistant-page.tmd-android-overlay {
   min-height: 100dvh;
-  margin: 0;
-  overflow: hidden;
-  background: #050912;
-  position: relative;
+  background: transparent;
 }
 
-/* توهج حي متعدد الألوان يحدد أطراف نافذة الهاتف دون إزعاج المحتوى */
-.tmd-assistant-page::before {
-  content: "";
+.tmd-assistant-page.tmd-android-overlay .tmd-fab {
   position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 20;
-  border: 2px solid #4d7cfe;
-  border-radius: 18px;
-  opacity: .72;
-  filter: drop-shadow(0 0 7px rgba(77,124,254,.65));
-  animation: tmdEdgeGlow 8s linear infinite;
+  inset-inline-end: 10px;
+  inset-block-end: 10px;
+  display: grid;
 }
 
-@keyframes tmdEdgeGlow {
-  to { filter: hue-rotate(360deg) drop-shadow(0 0 9px rgba(217,101,112,.7)); }
+.tmd-assistant-page.tmd-android-overlay .tmd-mini {
+  inset: 8px;
 }
 
-.tmd-assistant-page .tmd-fab { display: none; }
-
-.tmd-assistant-page .tmd-mini {
-  inset-block-end: 18px;
-  inset-inline-end: 18px;
+.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen.is-on {
+  min-height: 36px;
 }
 
-.tmd-assistant-page .tmd-mini.is-open {
-  display: flex;
-  width: min(430px, calc(100vw - 24px));
-  max-height: min(720px, calc(100dvh - 24px));
+.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen video {
+  display: none;
 }
 
-.tmd-assistant-page .tmd-open-site {
-  display: flex;
+/* ---------- Animation and responsive ---------- */
+@keyframes tmd-window-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes tmd-message-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tmd-slide-down {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tmd-dot {
+  0%, 70%, 100% { opacity: 0.35; transform: translateY(0); }
+  35% { opacity: 1; transform: translateY(-3px); }
 }
 
 @media (max-width: 480px) {
-  .tmd-mini {
-    inset-inline: 10px;
-    inset-block-end: max(92px, env(safe-area-inset-bottom));
-    width: auto;
-    max-height: calc(100dvh - 110px);
-  }
-
   .tmd-fab {
     --fab-size: 56px;
-    inset-block-end: max(18px, env(safe-area-inset-bottom));
-    inset-inline-end: 16px;
+    inset-inline-end: max(14px, env(safe-area-inset-right));
+    inset-block-end: calc(14px + env(safe-area-inset-bottom));
+    border-radius: 17px;
   }
 
-  .tmd-fab__icon {
-    width: 30px;
-    height: 30px;
+  .tmd-mini {
+    inset-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+    inset-block-end: calc(82px + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: calc(100dvh - 100px - env(safe-area-inset-bottom));
+  }
+
+  .tmd-mini__head {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+
+  .tmd-mini__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tmd-plan-chip {
+    padding-inline: 6px;
+  }
+
+  .tmd-plan-chip__credits {
+    display: none;
+  }
+
+  .tmd-mini__head-btn {
+    width: 31px;
+    height: 31px;
+  }
+
+  .tmd-mini__body {
+    min-height: 150px;
+  }
+
+  .tmd-tool span {
+    display: none;
+  }
+
+  .tmd-tool {
+    min-width: 44px;
+    min-height: 40px;
   }
 
   .tmd-assistant-page .tmd-mini {
-    inset: 10px 10px max(10px, env(safe-area-inset-bottom));
-    width: auto;
+    inset: 8px 8px max(8px, env(safe-area-inset-bottom));
     max-height: none;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tmd-fab::before,
-  .tmd-fab__ring,
-  .tmd-mini.is-open,
-  .tmd-msg {
-    animation: none !important;
-  }
-}
-
-/* ==========================================================
-   PWA/mobile refinements for the floating AI bubble
-========================================================== */
-
-.tmd-fab[hidden] {
-  display: none !important;
-}
-
-.tmd-mini__send.is-stop {
-  background: linear-gradient(135deg, #e11d48, #c2410c);
-  box-shadow: 0 0 16px rgba(255, 92, 116, 0.35);
-}
-
-@media (max-width: 480px) {
-  .tmd-mini {
-    inset-inline: max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right));
-    inset-block-end: calc(82px + env(safe-area-inset-bottom));
-    max-height: min(620px, calc(100dvh - 104px - env(safe-area-inset-bottom)));
-  }
-
-  .tmd-mini__body {
-    min-height: 160px;
-  }
-
-  .tmd-mini__tools {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .tmd-tool {
-    min-width: 96px;
-  }
-
-  .tmd-fab {
-    inset-block-end: calc(18px + env(safe-area-inset-bottom));
-    inset-inline-end: calc(14px + env(safe-area-inset-right));
-  }
-}
-
 @media (max-width: 360px) {
-  .tmd-mini__head {
-    gap: 6px;
-    padding-inline: 9px;
-  }
-
   .tmd-mini__title {
-    font-size: 12.5px;
+    font-size: 0.7rem;
   }
 
-  .tmd-mini__head-btn {
-    width: 27px;
-    height: 27px;
+  .tmd-mini__status {
+    font-size: 0.58rem;
   }
 
-  .tmd-mini__foot {
-    padding-inline: 9px;
+  .tmd-plan-chip {
+    display: none;
   }
-}
-
-/* ==========================================================
-   SPARTA AI — الطبقة الزجاجية (Glass v4)
-   إعادة تصميم مظهر الودجة: زجاج ضبابي، حواف مضيئة،
-   زوايا ناعمة، وحركات هادئة — مع الحفاظ على الهوية.
-   ========================================================== */
-
-.tmd-fab,
-.tmd-mini {
-  --tmd-glass: rgba(14, 20, 40, 0.58);
-  --tmd-glass-2: rgba(10, 15, 32, 0.72);
-  --tmd-glass-line: rgba(255, 255, 255, 0.14);
-  --tmd-radius: 26px;
-}
-
-:root[data-theme="light"] .tmd-fab,
-:root[data-theme="light"] .tmd-mini {
-  --tmd-glass: rgba(255, 255, 255, 0.62);
-  --tmd-glass-2: rgba(244, 247, 255, 0.78);
-  --tmd-glass-line: rgba(16, 24, 40, 0.12);
-}
-
-/* ---------- الفقاعة ---------- */
-.tmd-fab {
-  --fab-size: 64px;
-  border: 1px solid var(--tmd-glass-line);
-  background: var(--tmd-glass);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  backdrop-filter: blur(18px) saturate(160%);
-  box-shadow:
-    0 18px 40px rgba(3, 7, 18, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4), box-shadow 0.25s ease;
-}
-
-.tmd-fab::before {
-  inset: -6px;
-  filter: blur(14px);
-  opacity: 0.5;
-}
-
-.tmd-fab::after {
-  inset: 1px;
-  background:
-    radial-gradient(120% 80% at 28% 12%, rgba(255, 255, 255, 0.35), transparent 55%),
-    radial-gradient(100% 100% at 80% 100%, rgba(77, 124, 254, 0.22), transparent 60%);
-}
-
-.tmd-fab:hover {
-  transform: translateY(-2px) scale(1.08);
-  box-shadow:
-    0 22px 50px rgba(3, 7, 18, 0.55),
-    0 0 0 1px rgba(223, 181, 84, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-
-/* ---------- النافذة ---------- */
-.tmd-mini {
-  width: min(410px, calc(100vw - 24px));
-  border-radius: var(--tmd-radius);
-  border: 1px solid var(--tmd-glass-line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)),
-    var(--tmd-glass-2);
-  -webkit-backdrop-filter: blur(26px) saturate(170%);
-  backdrop-filter: blur(26px) saturate(170%);
-  box-shadow:
-    0 34px 90px rgba(2, 5, 14, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
-}
-
-.tmd-mini.is-open {
-  animation: tmdGlassIn 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.15);
-}
-
-@keyframes tmdGlassIn {
-  from { opacity: 0; transform: translateY(18px) scale(0.94); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: none; }
-}
-
-.tmd-mini__head {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  border-bottom: 1px solid var(--tmd-glass-line);
-  padding: 12px 13px;
-  gap: 10px;
-}
-
-.tmd-mini__avatar {
-  border-radius: 16px;
-  border: 1px solid var(--tmd-glass-line);
-  background:
-    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.22), transparent 60%),
-    linear-gradient(135deg, rgba(77, 124, 254, 0.35), rgba(223, 181, 84, 0.22));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.tmd-mini__head-btn {
-  border-radius: 12px;
-  border-color: var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.07);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-}
-
-.tmd-mini__head-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  transform: translateY(-1px);
-}
-
-/* ---------- شارة الباقة ---------- */
-.tmd-plan-chip {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 27px;
-  padding: 0 9px;
-  cursor: pointer;
-  font: 700 10.5px/1 "Cairo", system-ui, sans-serif;
-  color: var(--tmd-text);
-  border-radius: 999px;
-  border: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.tmd-plan-chip:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.16); }
-
-.tmd-plan-chip__credits {
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: rgba(77, 124, 254, 0.22);
-  color: #dfe7ff;
-  font-size: 10px;
-}
-
-.tmd-plan-chip.is-pro {
-  border-color: rgba(223, 181, 84, 0.55);
-  background: linear-gradient(135deg, rgba(223, 181, 84, 0.26), rgba(77, 124, 254, 0.2));
-  box-shadow: 0 0 18px rgba(223, 181, 84, 0.22);
-}
-
-.tmd-plan-chip.is-pro .tmd-plan-chip__credits {
-  background: rgba(223, 181, 84, 0.3);
-  color: #ffeec4;
-}
-
-.tmd-plan-chip.is-empty .tmd-plan-chip__credits {
-  background: rgba(255, 92, 116, 0.28);
-  color: #ffdde3;
-}
-
-/* ---------- لوحة الباقات ---------- */
-.tmd-plan-sheet {
-  padding: 12px;
-  border-bottom: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.04);
-  animation: tmdGlassIn 0.26s ease;
-}
-
-.tmd-plan-sheet[hidden] { display: none; }
-
-.tmd-plan-sheet__inner { display: grid; gap: 10px; }
-
-.tmd-plan-sheet__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12.5px;
-  color: var(--tmd-text);
-}
-
-.tmd-plan-card {
-  padding: 11px 12px;
-  border-radius: 18px;
-  border: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.tmd-plan-card--pro {
-  border-color: rgba(223, 181, 84, 0.42);
-  background: linear-gradient(135deg, rgba(223, 181, 84, 0.14), rgba(77, 124, 254, 0.12));
-}
-
-.tmd-plan-card__title { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
-
-.tmd-plan-card__tag {
-  font-size: 9.5px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(223, 181, 84, 0.3);
-  color: #ffeec4;
-  margin-inline-start: 4px;
-}
-
-.tmd-plan-card__desc { font-size: 11.5px; color: var(--tmd-muted); line-height: 1.6; }
-
-.tmd-plan-card__meter {
-  height: 6px;
-  margin: 9px 0;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.tmd-plan-card__meter span {
-  display: block;
-  height: 100%;
-  width: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4d7cfe, #dfb554);
-  transition: width 0.3s ease;
-}
-
-.tmd-plan-card__btn {
-  margin-top: 8px;
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 13px;
-  cursor: pointer;
-  font: 700 12px/1 "Cairo", system-ui, sans-serif;
-  color: var(--tmd-text);
-  border: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.08);
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.tmd-plan-card__btn--pro {
-  color: #11162b;
-  border-color: transparent;
-  background: linear-gradient(135deg, #e6c35c, #dfb554 55%, #4d7cfe);
-}
-
-.tmd-plan-card__btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.07); }
-.tmd-plan-card__btn:disabled { opacity: 0.55; cursor: default; }
-
-/* ---------- فقاعات الرسائل ---------- */
-.tmd-msg {
-  border-radius: 18px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-
-.tmd-msg--user {
-  background: linear-gradient(135deg, rgba(77, 124, 254, 0.9), rgba(44, 63, 168, 0.88)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.tmd-msg--ai {
-  background: rgba(255, 255, 255, 0.07) !important;
-  border: 1px solid var(--tmd-glass-line);
-}
-
-/* ---------- الأدوات والحقل ---------- */
-.tmd-tool {
-  border-radius: 999px;
-  border: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.06);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.tmd-tool:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.14); }
-
-.tmd-mini__foot {
-  border-top: 1px solid var(--tmd-glass-line);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.tmd-mini__input {
-  border-radius: 16px !important;
-  border: 1px solid var(--tmd-glass-line) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-
-.tmd-mini__send {
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(77, 124, 254, 0.3);
-}
-
-.tmd-mini.is-pro .tmd-mini__send {
-  background: linear-gradient(135deg, #e6c35c, #4d7cfe) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tmd-mini.is-open,
-  .tmd-plan-sheet { animation: none; }
-  .tmd-fab::before { animation: none; }
-}
-
-/* ==========================================================
-   SPARTA AI — طبقة الحركات (Animations v4)
-   حركات ناعمة ومتوازنة الأداء (transform/opacity فقط).
-   ========================================================== */
-
-/* ---------- الفقاعة: طفو + نبض + دوران الهالة ---------- */
-@keyframes tmdFloatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes tmdHalo {
-  0% { transform: rotate(0deg) scale(1); opacity: 0.45; }
-  50% { transform: rotate(180deg) scale(1.08); opacity: 0.7; }
-  100% { transform: rotate(360deg) scale(1); opacity: 0.45; }
-}
-
-@keyframes tmdSparkTwinkle {
-  0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
-  50% { transform: rotate(14deg) scale(1.12); filter: drop-shadow(0 0 6px rgba(155, 114, 203, 0.65)); }
-}
-
-@keyframes tmdWave {
-  0% { transform: scale(0.85); opacity: 0.55; }
-  100% { transform: scale(1.9); opacity: 0; }
-}
-
-.tmd-fab:not(:hover):not(:active) {
-  animation: tmdFloatY 4.6s ease-in-out infinite;
-}
-
-.tmd-fab::before {
-  animation: tmdHalo 9s linear infinite;
-}
-
-.tmd-fab .tmd-spark {
-  animation: tmdSparkTwinkle 3.8s ease-in-out infinite;
-}
-
-/* موجات صادرة من الفقاعة لجذب الانتباه */
-.tmd-fab__ring {
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid rgba(77, 124, 254, 0.5);
-  animation: tmdWave 2.8s ease-out infinite;
-  pointer-events: none;
-}
-
-.tmd-fab__ring--gold {
-  border-color: rgba(223, 181, 84, 0.45);
-  animation-delay: 1.4s;
-}
-
-.tmd-fab.is-pinned .tmd-fab__ring { animation-duration: 1.8s; }
-
-/* بطاقة التلميح تنزلق بدل الظهور المفاجئ */
-.tmd-fab__tag {
-  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3);
-  transform: translateY(6px) scale(0.96);
-}
-
-.tmd-fab__tag.is-visible {
-  transform: translateY(0) scale(1);
-}
-
-/* ---------- الرسائل: دخول متدرّج ---------- */
-@keyframes tmdMsgPop {
-  from { opacity: 0; transform: translateY(12px) scale(0.96); }
-  to { opacity: 1; transform: none; }
-}
-
-.tmd-mini__body .tmd-msg {
-  animation: tmdMsgPop 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
-}
-
-.tmd-mini__body .tmd-msg--user { transform-origin: 100% 100%; }
-.tmd-mini__body .tmd-msg--ai { transform-origin: 0 100%; }
-
-.tmd-msg__spark { animation: tmdSparkTwinkle 4.2s ease-in-out infinite; }
-
-/* مؤشر الكتابة */
-@keyframes tmdDotBounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
-  40% { transform: translateY(-5px); opacity: 1; }
-}
-
-.tmd-typing span {
-  animation: tmdDotBounce 1.15s ease-in-out infinite !important;
-}
-.tmd-typing span:nth-child(2) { animation-delay: 0.16s !important; }
-.tmd-typing span:nth-child(3) { animation-delay: 0.32s !important; }
-
-/* ---------- الرأس والحالة ---------- */
-@keyframes tmdStatusIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: none; }
-}
-
-.tmd-mini__status { animation: tmdStatusIn 0.3s ease; }
-
-@keyframes tmdShine {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* لمعان متحرك على شارة الباقة المدفوعة */
-.tmd-plan-chip.is-pro {
-  position: relative;
-  overflow: hidden;
-}
-
-.tmd-plan-chip.is-pro::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
-  background-size: 250% 100%;
-  animation: tmdShine 3.4s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes tmdCreditPop {
-  0% { transform: scale(1); }
-  45% { transform: scale(1.28); }
-  100% { transform: scale(1); }
-}
-
-.tmd-plan-chip.is-bump .tmd-plan-chip__credits {
-  animation: tmdCreditPop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.5);
-}
-
-@keyframes tmdShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(3px); }
-}
-
-.tmd-plan-chip.is-empty { animation: tmdShake 0.5s ease; }
-
-/* ---------- لوحة الباقات ---------- */
-@keyframes tmdSheetIn {
-  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-  to { opacity: 1; transform: none; }
-}
-
-.tmd-plan-sheet { animation: tmdSheetIn 0.28s cubic-bezier(0.2, 0.9, 0.25, 1.15); }
-
-.tmd-plan-sheet .tmd-plan-card {
-  animation: tmdMsgPop 0.36s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tmd-plan-sheet .tmd-plan-card:nth-child(2) { animation-delay: 0.06s; }
-.tmd-plan-sheet .tmd-plan-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(2, 6, 18, 0.35); }
-
-.tmd-plan-card--pro { position: relative; overflow: hidden; }
-
-.tmd-plan-card--pro::before {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: conic-gradient(from 0deg, transparent 0 70%, rgba(223, 181, 84, 0.22) 85%, transparent 100%);
-  animation: tmdHalo 7s linear infinite;
-  pointer-events: none;
-}
-
-.tmd-plan-card__meter span { position: relative; overflow: hidden; }
-
-.tmd-plan-card__meter span::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
-  background-size: 250% 100%;
-  animation: tmdShine 2.2s linear infinite;
-}
-
-/* ---------- الأدوات وزر الإرسال ---------- */
-.tmd-tool span,
-.tmd-tool svg { transition: transform 0.2s ease; }
-.tmd-tool:hover svg { transform: scale(1.14) rotate(-4deg); }
-.tmd-tool:active { transform: scale(0.95); }
-
-@keyframes tmdRecPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 116, 0.55); }
-  50% { box-shadow: 0 0 0 9px rgba(255, 92, 116, 0); }
-}
-
-.tmd-tool.is-rec { animation: tmdRecPulse 1.5s ease-out infinite; }
-
-@keyframes tmdSendGlow {
-  0%, 100% { box-shadow: 0 8px 20px rgba(77, 124, 254, 0.3); }
-  50% { box-shadow: 0 10px 28px rgba(223, 181, 84, 0.45); }
-}
-
-.tmd-mini__send { transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.4), filter 0.18s ease; }
-.tmd-mini__send:hover:not(:disabled) { transform: translateY(-2px) scale(1.06); }
-.tmd-mini__send:active:not(:disabled) { transform: scale(0.92); }
-.tmd-mini__send.is-stop { animation: tmdSendGlow 1.3s ease-in-out infinite; }
-
-/* شريط تقدّم علوي أثناء انتظار الرد */
-.tmd-mini.is-busy .tmd-mini__head { position: relative; overflow: hidden; }
-
-.tmd-mini.is-busy .tmd-mini__head::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #4d7cfe, #dfb554, transparent);
-  background-size: 50% 100%;
-  animation: tmdShine 1.2s linear infinite;
-}
-
-/* الاقتراحات السريعة */
-.tmd-mini__chips .tmd-chip {
-  animation: tmdMsgPop 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
-  transition: transform 0.18s ease, background 0.18s ease;
-}
-.tmd-mini__chips .tmd-chip:nth-child(2) { animation-delay: 0.05s; }
-.tmd-mini__chips .tmd-chip:nth-child(3) { animation-delay: 0.1s; }
-.tmd-mini__chips .tmd-chip:nth-child(4) { animation-delay: 0.15s; }
-.tmd-mini__chips .tmd-chip:hover { transform: translateY(-2px) scale(1.03); }
-
-/* مشاركة الشاشة */
-@keyframes tmdScreenIn {
-  from { opacity: 0; transform: scaleY(0.8); }
-  to { opacity: 1; transform: none; }
-}
-
-.tmd-mini__screen.is-on { animation: tmdScreenIn 0.3s ease; transform-origin: top; }
-.tmd-mini__screen-tag { animation: tmdPulse 2s ease-in-out infinite; }
-
-/* احترام تفضيل تقليل الحركة */
-@media (prefers-reduced-motion: reduce) {
-  .tmd-fab,
-  .tmd-fab::before,
-  .tmd-fab .tmd-spark,
-  .tmd-fab__ring,
   .tmd-msg,
-  .tmd-msg__spark,
   .tmd-plan-sheet,
-  .tmd-plan-card,
-  .tmd-plan-card--pro::before,
-  .tmd-plan-chip.is-pro::after,
-  .tmd-plan-card__meter span::after,
-  .tmd-mini__send.is-stop,
-  .tmd-mini.is-busy .tmd-mini__head::after,
-  .tmd-mini__chips .tmd-chip,
-  .tmd-tool.is-rec {
+  .tmd-typing span {
     animation: none !important;
   }
 }
-
-/* ---------- الودجة: هوية أبيض وأسود ---------- */
-.tmd-fab,
-.tmd-mini {
-  --tmd-bg: #000000;
-  --tmd-bg-2: #0a0a0a;
-  --tmd-line: rgba(255, 255, 255, 0.18);
-  --tmd-text: #f7f7f7;
-  --tmd-muted: #a8a8a8;
-  --tmd-blue: #ffffff;
-  --tmd-blue-deep: #8a8a8a;
-  --tmd-gold: #ffffff;
-  --tmd-gold-soft: #d6d6d6;
-  --tmd-grad: linear-gradient(135deg, #ffffff 0%, #b5b5b5 55%, #6e6e6e 100%);
-  --tmd-glass: rgba(18, 18, 18, 0.6);
-  --tmd-glass-2: rgba(8, 8, 8, 0.75);
-}
-
-:root[data-theme="light"] .tmd-fab,
-:root[data-theme="light"] .tmd-mini {
-  --tmd-bg: #ffffff;
-  --tmd-bg-2: #f2f2f2;
-  --tmd-line: rgba(0, 0, 0, 0.16);
-  --tmd-text: #000000;
-  --tmd-muted: #4a4a4a;
-  --tmd-blue: #000000;
-  --tmd-gold: #1a1a1a;
-  --tmd-glass: rgba(255, 255, 255, 0.65);
-  --tmd-glass-2: rgba(248, 248, 248, 0.82);
-}
-
-.tmd-fab,
-.tmd-mini,
-.tmd-fab::before,
-.tmd-msg--user,
-.tmd-mini__send,
-.tmd-plan-chip,
-.tmd-plan-card--pro { filter: grayscale(1); }
-
-/* ==========================================================
-   SPARTA AI — black-and-white lightning treatment
-   Keeps the standalone assistant as polished as the main app.
-   ========================================================== */
-.tmd-fab,
-.tmd-mini {
-  --tmd-bg: #070707;
-  --tmd-bg-2: #101010;
-  --tmd-panel: rgba(255, 255, 255, 0.055);
-  --tmd-line: rgba(255, 255, 255, 0.17);
-  --tmd-text: #f7f7f5;
-  --tmd-muted: #b1b1ae;
-  --tmd-blue: #f7f7f5;
-  --tmd-blue-deep: #a8a8a5;
-  --tmd-gold: #e8e8e5;
-  --tmd-gold-soft: #c9c9c6;
-  --tmd-red: #bdbdba;
-  --tmd-grad: linear-gradient(135deg, #f7f7f5 0%, #b8b8b5 50%, #6d6d6b 100%);
-  --tmd-grad-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.035));
-  filter: grayscale(1);
-}
-
-.tmd-fab {
-  border-color: rgba(255, 255, 255, 0.34);
-  background: linear-gradient(145deg, #1b1b1b, #070707) padding-box, linear-gradient(135deg, #fff, #777) border-box;
-  box-shadow: 0 14px 34px rgba(0,0,0,.68), 0 0 0 1px rgba(255,255,255,.14), 0 0 30px rgba(255,255,255,.16);
-}
-.tmd-fab::before { background: conic-gradient(from 210deg, #555, #fff 25%, #777 48%, #fff 72%, #555); opacity: .46; }
-.tmd-fab__ring { border-color: rgba(255,255,255,.55); }
-.tmd-fab__ring--gold { border-color: rgba(255,255,255,.28); }
-.tmd-fab__icon svg,
-.tmd-spark { filter: drop-shadow(0 0 8px rgba(255,255,255,.62)); }
-.tmd-fab__badge { background: linear-gradient(135deg,#fff,#a7a7a4); color:#090909; }
-.tmd-fab__tag { background:#0a0a0a; border-color:rgba(255,255,255,.33); color:#f4f4f2; }
-
-.tmd-mini {
-  background: linear-gradient(155deg, rgba(20,20,20,.98), rgba(5,5,5,.98));
-  border-color: rgba(255,255,255,.18);
-  box-shadow: 0 24px 70px rgba(0,0,0,.76), 0 0 0 1px rgba(255,255,255,.06), 0 0 38px rgba(255,255,255,.08);
-}
-.tmd-mini::before { background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
-.tmd-mini__head { background: rgba(255,255,255,.035); border-color:rgba(255,255,255,.12); }
-.tmd-mini__avatar { background: linear-gradient(135deg,#fff,#777); color:#090909; box-shadow:0 0 0 1px rgba(255,255,255,.28), 0 4px 12px rgba(0,0,0,.5); }
-.tmd-mini__head-btn:hover,
-.tmd-tool:hover { color: #fff; border-color:rgba(255,255,255,.42); background:rgba(255,255,255,.09); }
-.tmd-mini__send { color:#090909; background:var(--tmd-grad); box-shadow:0 7px 18px rgba(0,0,0,.42); }
-.tmd-plan-chip.is-pro,
-.tmd-plan-card--pro { border-color:rgba(255,255,255,.38); }
-.tmd-plan-card__tag { background:#f3f3f0; color:#080808; }
-.tmd-plan-card__btn--pro { color:#080808; background:var(--tmd-grad); }
-.tmd-plan-card__meter { background:rgba(255,255,255,.12); }
-.tmd-plan-card__meter span { background:linear-gradient(90deg,#fff,#777); }
-
-:root[data-theme="light"] .tmd-fab,
-:root[data-theme="light"] .tmd-mini {
-  --tmd-bg: #fff;
-  --tmd-bg-2: #f4f4f2;
-  --tmd-panel: rgba(0,0,0,.045);
-  --tmd-line: rgba(0,0,0,.15);
-  --tmd-text: #0a0a0a;
-  --tmd-muted: #555552;
-  background: #fff;
-}
-:root[data-theme="light"] .tmd-fab { background:linear-gradient(145deg,#fff,#dededb) padding-box,linear-gradient(135deg,#111,#777) border-box; box-shadow:0 14px 34px rgba(0,0,0,.22),0 0 22px rgba(0,0,0,.12); }
-:root[data-theme="light"] .tmd-mini { background:linear-gradient(155deg,#fff,#f0f0ed); box-shadow:0 24px 70px rgba(0,0,0,.2); }

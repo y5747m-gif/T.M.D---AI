@@ -12,6 +12,12 @@
   let deferredPrompt = null;
   let installMode = "hidden";
 
+  const ICONS = {
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/></svg>'
+  };
+
   function safeGet(key) {
     try { return localStorage.getItem(key); } catch (error) { return null; }
   }
@@ -53,7 +59,8 @@
       node.setAttribute("aria-live", "polite");
       document.body.appendChild(node);
     }
-    node.textContent = message;
+    const safeMessage = String(message || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+    node.innerHTML = ICONS.check + `<span>${safeMessage}</span>`;
     node.classList.add("show");
     window.clearTimeout(toast.timer);
     toast.timer = window.setTimeout(() => node.classList.remove("show"), 3500);
@@ -81,7 +88,7 @@
       button.title = title;
       const text = button.querySelector(".topbar-btn-text") || button;
       if (text && button.id === "installAppBtn") text.textContent = label;
-      if (button.id === "installFromSettingsBtn") button.textContent = mode === "ios" ? "📲 طريقة الإضافة" : "📲 تثبيت التطبيق";
+      if (button.id === "installFromSettingsBtn") button.innerHTML = ICONS.download + `<span>${mode === "ios" ? "طريقة الإضافة" : "تثبيت التطبيق"}</span>`;
     });
 
     const row = document.getElementById("installSettingRow");
@@ -128,8 +135,8 @@
       sheet.className = "pwa-install-sheet hidden";
       sheet.innerHTML = `
         <div class="pwa-install-card" role="dialog" aria-modal="true" aria-labelledby="pwaInstallTitle">
-          <button class="pwa-install-close" type="button" aria-label="إغلاق">×</button>
-          <div class="pwa-install-icon" aria-hidden="true">📲</div>
+          <button class="pwa-install-close" type="button" aria-label="إغلاق">${ICONS.close}</button>
+          <div class="pwa-install-icon" aria-hidden="true">${ICONS.download}</div>
           <h2 id="pwaInstallTitle">تثبيت SPARTA AI</h2>
           <p class="pwa-install-lead">يمكنك إضافة SPARTA AI إلى الشاشة الرئيسية كتطبيق ويب سريع. لا يتم تخزين أي مفاتيح API داخل التطبيق.</p>
           <ol class="pwa-install-steps"></ol>

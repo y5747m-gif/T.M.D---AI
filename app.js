@@ -251,18 +251,24 @@ function updateSpartaDailyMissionUI() {
   }
 }
 
-/* شعار SPARTA المصغّر داخل رسائل المساعد — برق أحادي اللون. */
-let __tmdSparkSeq = 0;
+/* أيقونات SVG خطية موحّدة مستوحاة من Lucide. */
+const UI_ICONS = {
+  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  volume: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  paperclip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.6-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.7 9.6a2 2 0 0 1-2.8-2.8l8.9-8.9"/></svg>',
+  message: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/></svg>',
+  square: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
+  send: '<svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>'
+};
+
 function botSparkHTML() {
-  const gid = "spartaMsgBolt" + (++__tmdSparkSeq);
-  return (
-    '<svg class="bot-spark-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-    '<defs><linearGradient id="' + gid + '" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">' +
-    '<stop offset="0" stop-color="#ffffff"/><stop offset="0.52" stop-color="#e2e2e2"/><stop offset="1" stop-color="#8f8f8f"/>' +
-    "</linearGradient></defs>" +
-    '<path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="url(#' + gid + ')" stroke="#ffffff" stroke-opacity=".6" stroke-width=".55" stroke-linejoin="round"/>' +
-    "</svg>"
-  );
+  return UI_ICONS.sparkles.replace("<svg ", '<svg class="bot-spark-logo" ');
 }
 
 if (!VALID_MODELS.has(state.model)) {
@@ -346,7 +352,7 @@ class StarfieldEngine {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.mouse = { x: -1000, y: -1000, active: false };
-    this.nextMeteorTime = Date.now() + 2000;
+    this.nextMeteorTime = Date.now() + 18000;
 
     this.init();
   }
@@ -374,29 +380,27 @@ class StarfieldEngine {
 
   createStars() {
     const baseCount = Math.floor((this.width * this.height) / 5000);
-    const count = Math.min(320, Math.max(70, Math.floor(baseCount * (this.densityMultiplier * 0.65))));
+    const count = Math.min(120, Math.max(36, Math.floor(baseCount * (this.densityMultiplier * 0.38))));
 
     this.stars = [];
-    // لوحة رمادية بالكامل — فضاء بالأبيض والأسود
+    // نقاط ضوء هادئة متوافقة مع هوية المنتج.
     const colors = [
-      "rgba(255, 255, 255,",
-      "rgba(226, 226, 226,",
-      "rgba(196, 196, 196,",
-      "rgba(168, 168, 168,",
-      "rgba(240, 240, 240,"
+      "rgba(108, 140, 255,",
+      "rgba(139, 124, 255,",
+      "rgba(103, 217, 232,",
+      "rgba(245, 247, 255,"
     ];
 
     for (let i = 0; i < count; i++) {
-      const isForeground = Math.random() < 0.18; // 18% bright sparkling stars with cross flares
+      const isForeground = Math.random() < 0.18; // A small set of slightly larger foreground points.
       this.stars.push({
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        size: isForeground ? (Math.random() * 2.2 + 1.2) : (Math.random() * 1.4 + 0.4),
+        size: isForeground ? (Math.random() * 1.2 + 0.7) : (Math.random() * 0.8 + 0.25),
         colorPrefix: colors[Math.floor(Math.random() * colors.length)],
-        baseAlpha: Math.random() * 0.5 + 0.3,
+        baseAlpha: Math.random() * 0.3 + 0.18,
         twinkleSpeed: Math.random() * 0.04 + 0.015,
         twinkleOffset: Math.random() * Math.PI * 2,
-        hasFlare: isForeground,
         driftX: (Math.random() - 0.5) * 0.15,
         driftY: (Math.random() - 0.5) * 0.15
       });
@@ -443,7 +447,7 @@ class StarfieldEngine {
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
+      if (document.hidden || this.canvas.style.display === "none") {
         this.stop();
       } else {
         this.start();
@@ -470,27 +474,7 @@ class StarfieldEngine {
     this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw radiant 4-point cross diffraction sparkle flare for foreground stars
-    if (star.hasFlare && alpha > 0.65) {
-      const flareLen = star.size * (3.5 + (alpha - 0.65) * 6);
-      this.ctx.strokeStyle = star.colorPrefix + (alpha * 0.75) + ")";
-      this.ctx.lineWidth = 0.8;
-
-      this.ctx.beginPath();
-      // Horizontal flare
-      this.ctx.moveTo(star.x - flareLen, star.y);
-      this.ctx.lineTo(star.x + flareLen, star.y);
-      // Vertical flare
-      this.ctx.moveTo(star.x, star.y - flareLen);
-      this.ctx.lineTo(star.x, star.y + flareLen);
-      this.ctx.stroke();
-
-      // Soft glow center
-      this.ctx.beginPath();
-      this.ctx.arc(star.x, star.y, star.size * 2, 0, Math.PI * 2);
-      this.ctx.fillStyle = star.colorPrefix + (alpha * 0.25) + ")";
-      this.ctx.fill();
-    }
+    // Foreground points stay crisp to preserve the calm, low-noise visual style.
   }
 
   animate() {
@@ -517,7 +501,7 @@ class StarfieldEngine {
     // Occasional shooting meteor
     if (now > this.nextMeteorTime) {
       this.addMeteor();
-      this.nextMeteorTime = now + Math.random() * 4500 + 3500;
+      this.nextMeteorTime = now + Math.random() * 12000 + 18000;
     }
 
     // Render meteors
@@ -530,16 +514,7 @@ class StarfieldEngine {
       const progress = m.life / m.maxLife;
       const alpha = Math.max(0, 1 - progress);
 
-      const grad = this.ctx.createLinearGradient(
-        m.x, m.y,
-        m.x - m.dx * (m.length / m.speed),
-        m.y - m.dy * (m.length / m.speed)
-      );
-      grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.95})`);
-      grad.addColorStop(0.2, `rgba(205, 205, 205, ${alpha * 0.8})`);
-      grad.addColorStop(1, "rgba(180, 180, 180, 0)");
-
-      this.ctx.strokeStyle = grad;
+      this.ctx.strokeStyle = `rgba(108, 140, 255, ${alpha * 0.5})`;
       this.ctx.lineWidth = 1.8;
       this.ctx.beginPath();
       this.ctx.moveTo(m.x, m.y);
@@ -580,13 +555,13 @@ class UserBackgroundManager {
   loadSettings() {
     const defaults = {
       type: "preset",
-      preset: "animated-stars",
+      preset: "obsidian",
       customDataUrl: "",
       customUrl: "",
-      dim: 40,
+      dim: 24,
       blur: 0,
-      starsOverlay: true,
-      starsDensity: 2
+      starsOverlay: false,
+      starsDensity: 1
     };
 
     try {
@@ -621,13 +596,11 @@ class UserBackgroundManager {
 
     // 2. Stars Canvas Visibility & Density
     if (this.starsCanvas) {
-      if (type === "preset" && preset === "animated-stars") {
-        this.starsCanvas.style.display = "block";
-        this.starsCanvas.style.opacity = "1";
-      } else {
-        this.starsCanvas.style.display = starsOverlay ? "block" : "none";
-        this.starsCanvas.style.opacity = starsOverlay ? "0.85" : "0";
-      }
+      const showStars = (type === "preset" && preset === "animated-stars") || Boolean(starsOverlay);
+      this.starsCanvas.style.display = showStars ? "block" : "none";
+      this.starsCanvas.style.opacity = showStars ? "0.55" : "0";
+      if (showStars) this.starfield?.start();
+      else this.starfield?.stop();
     }
 
     if (this.starfield) {
@@ -640,9 +613,11 @@ class UserBackgroundManager {
     if (type === "preset") {
       this.applyPresetBackground(preset);
     } else if (type === "upload" && customDataUrl) {
+      this.layer.style.backgroundColor = "transparent";
       this.layer.style.backgroundImage = `url("${customDataUrl}")`;
       this.layer.style.opacity = "1";
     } else if (type === "url" && customUrl) {
+      this.layer.style.backgroundColor = "transparent";
       this.layer.style.backgroundImage = `url("${customUrl}")`;
       this.layer.style.opacity = "1";
     } else {
@@ -657,18 +632,19 @@ class UserBackgroundManager {
 
     const presets = {
       "animated-stars": "",
-      "nebula": "radial-gradient(circle at 20% 20%, rgba(67,83,201,0.6) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(77,124,254,0.5) 0%, transparent 60%), #070a16",
-      "cyberpunk": "linear-gradient(135deg, rgba(217,164,65,0.45) 0%, rgba(77,124,254,0.35) 100%), #080914",
-      "aurora": "radial-gradient(circle at 50% 10%, rgba(52,211,153,0.4) 0%, rgba(109,155,255,0.35) 40%, transparent 75%), #040912",
-      "obsidian": "linear-gradient(180deg, #0e111a 0%, #05060a 100%)",
-      "galaxy-gold": "radial-gradient(circle at 40% 30%, rgba(230,195,92,0.45) 0%, rgba(194,141,44,0.3) 50%, transparent 80%), #0b0714"
+      "nebula": "#121a2f",
+      "cyberpunk": "#211d35",
+      "aurora": "#10252c",
+      "obsidian": "#0b1020",
+      "galaxy-gold": "#1c1928"
     };
 
+    this.layer.style.backgroundImage = "none";
     if (preset === "animated-stars" || !presets[preset]) {
-      this.layer.style.backgroundImage = "none";
+      this.layer.style.backgroundColor = "transparent";
       this.layer.style.opacity = "0";
     } else {
-      this.layer.style.backgroundImage = presets[preset];
+      this.layer.style.backgroundColor = presets[preset];
       this.layer.style.opacity = "1";
     }
   }
@@ -740,8 +716,7 @@ class UserBackgroundManager {
     // Open Customizer Triggers
     document.getElementById("openBgCustomizerBtn")?.addEventListener("click", () => this.open());
     document.getElementById("sidebarCustomizerBtn")?.addEventListener("click", () => {
-      document.getElementById("sidebar")?.classList.remove("open");
-      document.getElementById("sidebarBackdrop")?.classList.remove("show");
+      document.getElementById("closeSidebar")?.click();
       this.open();
     });
     document.getElementById("bgQuickHint")?.addEventListener("click", () => this.open());
@@ -759,8 +734,12 @@ class UserBackgroundManager {
     // Tabs switching
     this.tabBtns?.forEach(btn => {
       btn.addEventListener("click", () => {
-        this.tabBtns.forEach(b => b.classList.remove("active"));
+        this.tabBtns.forEach((item) => {
+          item.classList.remove("active");
+          item.setAttribute("aria-selected", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
         const tab = btn.dataset.tab;
         Object.keys(this.tabPanes).forEach(key => {
           this.tabPanes[key]?.classList.toggle("hidden", key !== tab);
@@ -770,12 +749,19 @@ class UserBackgroundManager {
 
     // Preset selection
     this.presetCards?.forEach(card => {
-      card.addEventListener("click", () => {
+      const selectPreset = () => {
         this.presetCards.forEach(c => c.classList.remove("active"));
         card.classList.add("active");
         this.settings.type = "preset";
         this.settings.preset = card.dataset.preset;
         this.applySettings();
+      };
+      card.addEventListener("click", selectPreset);
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectPreset();
+        }
       });
     });
 
@@ -787,7 +773,8 @@ class UserBackgroundManager {
     this.removeUploadedBtn?.addEventListener("click", () => {
       this.settings.customDataUrl = "";
       this.settings.type = "preset";
-      this.settings.preset = "animated-stars";
+      this.settings.preset = "obsidian";
+      this.settings.starsOverlay = false;
       this.applySettings();
       showToast("تمت إزالة صورتك الخاصة والعودة للخلفية الافتراضية.");
     });
@@ -844,17 +831,17 @@ class UserBackgroundManager {
     this.resetBtn?.addEventListener("click", () => {
       this.settings = {
         type: "preset",
-        preset: "animated-stars",
+        preset: "obsidian",
         customDataUrl: "",
         customUrl: "",
-        dim: 40,
+        dim: 24,
         blur: 0,
-        starsOverlay: true,
-        starsDensity: 2
+        starsOverlay: false,
+        starsDensity: 1
       };
       this.saveSettings();
       this.applySettings();
-      showToast("تمت استعادة الخلفية الافتراضية (فضاء النجوم البراقة).");
+      showToast("تمت استعادة الخلفية الهادئة الافتراضية.");
     });
   }
 
@@ -918,11 +905,14 @@ class UserBackgroundManager {
 
   open() {
     this.syncUIControls();
+    this.previouslyFocused = document.activeElement;
     this.modal?.classList.remove("hidden");
+    requestAnimationFrame(() => this.closeBtn?.focus());
   }
 
   close() {
     this.modal?.classList.add("hidden");
+    if (this.previouslyFocused instanceof HTMLElement) this.previouslyFocused.focus();
   }
 }
 
@@ -934,7 +924,7 @@ let chat, welcome, input, sendButton;
 let plusButton, plusMenu;
 let documentInput, imageInput;
 let addImageButton, analyzeDocumentButton, imageEditButton;
-let imagePreviewContainer, imagePreview, imageFileName, imageModeLabel, removeImage;
+let imagePreviewContainer, imagePreview, imageFileName, imageModeLabel, attachmentSize, removeImage;
 let historyList, newChat;
 let settingsBtn, modalBackdrop, modalClose;
 let themeSelect, modelSelect, modelName, floatBubbleToggle;
@@ -994,6 +984,7 @@ function cacheElements() {
   imagePreview = document.getElementById("imagePreview");
   imageFileName = document.getElementById("imageFileName");
   imageModeLabel = document.getElementById("imageModeLabel");
+  attachmentSize = document.getElementById("attachmentSize");
   removeImage = document.getElementById("removeImage");
 
   historyList = document.getElementById("history");
@@ -1123,31 +1114,45 @@ function bindEvents() {
     const api = window.__tmdFloatingAssistant;
     if (api && typeof api.pin === "function") {
       api.pin();
-      showToast("📌 جارٍ تثبيت المساعد فوق التطبيقات…");
+      showToast("جارٍ تثبيت المساعد فوق التطبيقات…", "info");
     } else {
       showToast("المساعد العائم لم يجهز بعد، جرّب بعد لحظات.");
     }
   };
   document.getElementById("pinAssistantBtn")?.addEventListener("click", pinFloatingAssistant);
   document.getElementById("pinQuickHint")?.addEventListener("click", pinFloatingAssistant);
+  [document.getElementById("pinQuickHint"), document.getElementById("bgQuickHint")].forEach((node) => {
+    node?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        node.click();
+      }
+    });
+  });
   document.getElementById("pinFromSettingsBtn")?.addEventListener("click", () => {
     modalBackdrop?.classList.add("hidden");
     pinFloatingAssistant();
   });
 
   // Responsive Sidebar Drawer
-  openSidebar?.addEventListener("click", () => {
-    sidebar?.classList.add("open");
-    sidebarBackdrop?.classList.add("show");
-  });
-
-  const closeSidebarFn = () => {
-    sidebar?.classList.remove("open");
-    sidebarBackdrop?.classList.remove("show");
+  const setSidebarOpen = (isOpen) => {
+    const compact = window.matchMedia("(max-width: 1024px)").matches;
+    sidebar?.classList.toggle("open", Boolean(isOpen));
+    sidebarBackdrop?.classList.toggle("show", Boolean(isOpen));
+    openSidebar?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    if (sidebar) {
+      sidebar.setAttribute("aria-hidden", compact && !isOpen ? "true" : "false");
+      sidebar.inert = compact && !isOpen;
+    }
   };
+  openSidebar?.setAttribute("aria-controls", "sidebar");
+  openSidebar?.addEventListener("click", () => setSidebarOpen(true));
 
+  const closeSidebarFn = () => setSidebarOpen(false);
   closeSidebar?.addEventListener("click", closeSidebarFn);
   sidebarBackdrop?.addEventListener("click", closeSidebarFn);
+  window.addEventListener("resize", () => setSidebarOpen(sidebar?.classList.contains("open") || false));
+  setSidebarOpen(false);
 
   // Settings Modal
   settingsBtn?.addEventListener("click", openSettings);
@@ -1157,8 +1162,13 @@ function bindEvents() {
   });
 
   // Developer Profile Modal
-  developerCardBtn?.addEventListener("click", () => {
-    developerModalBackdrop?.classList.remove("hidden");
+  const openDeveloperModal = () => developerModalBackdrop?.classList.remove("hidden");
+  developerCardBtn?.addEventListener("click", openDeveloperModal);
+  developerCardBtn?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openDeveloperModal();
+    }
   });
   devModalClose?.addEventListener("click", () => {
     developerModalBackdrop?.classList.add("hidden");
@@ -1365,7 +1375,13 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#ffffff" : "#050505");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#F7F9FC" : "#0B1020");
+  const themeIcon = state.theme === "light" ? UI_ICONS.moon : UI_ICONS.sun;
+  document.querySelectorAll(".theme-icon, .theme-icon-indicator").forEach((node) => {
+    node.innerHTML = themeIcon;
+  });
+  document.getElementById("themeTopDesktop")?.setAttribute("aria-label", state.theme === "light" ? "تفعيل المظهر الداكن" : "تفعيل المظهر الفاتح");
+  document.getElementById("themeTop")?.setAttribute("aria-label", state.theme === "light" ? "تفعيل المظهر الداكن" : "تفعيل المظهر الفاتح");
 }
 
 function updateModelUI() {
@@ -1378,7 +1394,7 @@ function updateModelUI() {
     modelName.textContent = "SPARTA Vision 27B";
   } else if (state.model === MODELS.minimax) {
     modelName.textContent = state.minimaxBillingBlocked
-      ? "SPARTA Max Pro — MiniMax M3 (⚠️ الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
+      ? "SPARTA Max Pro — MiniMax M3 (الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
       : "SPARTA Max Pro — MiniMax M3";
   } else if (state.model === MODELS.fast) {
     modelName.textContent = "SPARTA Fast 20B";
@@ -1397,15 +1413,18 @@ function togglePlusMenu() {
   if (isHidden) {
     plusMenu.classList.remove("hidden");
     plusButton?.classList.add("active");
+    plusButton?.setAttribute("aria-expanded", "true");
   } else {
     plusMenu.classList.add("hidden");
     plusButton?.classList.remove("active");
+    plusButton?.setAttribute("aria-expanded", "false");
   }
 }
 
 function closePlusMenu() {
   plusMenu?.classList.add("hidden");
   plusButton?.classList.remove("active");
+  plusButton?.setAttribute("aria-expanded", "false");
 }
 
 
@@ -1491,6 +1510,7 @@ function showImagePreview() {
   if (!state.selectedImage) return;
   if (imagePreview) imagePreview.src = state.selectedImage.dataURL;
   if (imageFileName) imageFileName.textContent = state.selectedImage.name;
+  if (attachmentSize) attachmentSize.textContent = formatFileSize(state.selectedImage.file?.size);
   if (imagePreviewContainer) imagePreviewContainer.classList.remove("hidden");
   updateComposerState();
 }
@@ -1508,6 +1528,7 @@ function resetAttachment() {
   if (imageInput) imageInput.value = "";
   if (documentInput) documentInput.value = "";
   if (imagePreview) imagePreview.removeAttribute("src");
+  if (attachmentSize) attachmentSize.textContent = "";
   if (imagePreviewContainer) imagePreviewContainer.classList.add("hidden");
   updateComposerState();
 }
@@ -1539,7 +1560,8 @@ async function handleDocumentSelection(event) {
     if (imagePreviewContainer) imagePreviewContainer.classList.remove("hidden");
     if (imagePreview) imagePreview.removeAttribute("src");
     if (imageFileName) imageFileName.textContent = file.name;
-    if (imageModeLabel) imageModeLabel.textContent = "تحليل المستند";
+    if (imageModeLabel) imageModeLabel.textContent = "مستند جاهز للتحليل";
+    if (attachmentSize) attachmentSize.textContent = formatFileSize(file.size);
 
     showToast(`تم إرفاق المستند: ${file.name}`);
 
@@ -1610,6 +1632,14 @@ async function readDocument(file) {
   }
 
   throw new Error("صيغة الملف غير مدعومة. استخدم PDF أو Word أو TXT أو ملفات الأكواد.");
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value < 0) return "";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function fileToDataURL(file) {
@@ -1714,10 +1744,8 @@ async function sendMessage() {
   state.messages.push(userMessage);
   saveMessages();
 
-  // حركة سهم الإرسال: يطير من الزر إلى منطقة المحادثة ثم ينزل حتى نهايتها
-  const arrowOrigin = sendButton ? sendButton.getBoundingClientRect() : null;
+  // عرض الرسالة بحركة دخول قصيرة وهادئة.
   renderMessages();
-  flySendArrow(arrowOrigin);
 
   if (input) {
     input.value = "";
@@ -1983,7 +2011,7 @@ function renderMessage(message, index) {
   if (message.notice && typeof message.notice.text === "string") {
     const notice = document.createElement("div");
     notice.className = "message-notice";
-    notice.textContent = `ℹ️ ${message.notice.text}`;
+    notice.innerHTML = UI_ICONS.info + `<span>${escapeHTML(message.notice.text)}</span>`;
     content.appendChild(notice);
   }
 
@@ -2000,7 +2028,7 @@ function renderMessage(message, index) {
   if (message.fileName) {
     const fileBox = document.createElement("div");
     fileBox.className = "message-file";
-    fileBox.textContent = `📎 ${message.fileName}`;
+    fileBox.innerHTML = UI_ICONS.paperclip + `<span>${escapeHTML(message.fileName)}</span>`;
     content.appendChild(fileBox);
   }
 
@@ -2039,17 +2067,19 @@ function renderMessage(message, index) {
 
     const copyBtn = document.createElement("button");
     copyBtn.className = "msg-action-btn";
-    copyBtn.innerHTML = `<span>📋</span> <span>نسخ</span>`;
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(message.content);
-      showToast("تم نسخ نص الرسالة إلى الحافظة!");
+    copyBtn.innerHTML = UI_ICONS.copy + `<span>نسخ</span>`;
+    copyBtn.setAttribute("aria-label", "نسخ نص الرسالة");
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(message.content);
+      showToast("تم نسخ النص", "success");
     });
     actions.appendChild(copyBtn);
 
     if ("speechSynthesis" in window) {
       const speakBtn = document.createElement("button");
       speakBtn.className = "msg-action-btn";
-      speakBtn.innerHTML = `<span>🔊</span> <span>استماع</span>`;
+      speakBtn.innerHTML = UI_ICONS.volume + `<span>استماع</span>`;
+      speakBtn.setAttribute("aria-label", "الاستماع إلى الرسالة");
       speakBtn.addEventListener("click", () => speakText(message.content));
       actions.appendChild(speakBtn);
     }
@@ -2084,7 +2114,7 @@ function renderMarkdown(text) {
       <div class="code-block-wrapper">
         <div class="code-header">
           <span>${displayLang}</span>
-          <button class="copy-code-btn" type="button" onclick="copyCodeFromBlock(this)">📋 نسخ الكود</button>
+          <button class="copy-code-btn" type="button" aria-label="نسخ الكود" onclick="copyCodeFromBlock(this)">${UI_ICONS.copy}<span>نسخ الكود</span></button>
         </div>
         <pre><code class="language-${displayLang}">${code.trim()}</code></pre>
       </div>
@@ -2125,9 +2155,9 @@ window.copyCodeFromBlock = function(btn) {
   const pre = btn.closest(".code-block-wrapper")?.querySelector("pre code");
   if (pre) {
     navigator.clipboard.writeText(pre.innerText || pre.textContent);
-    btn.textContent = "✓ تم النسخ!";
-    setTimeout(() => { btn.textContent = "📋 نسخ الكود"; }, 2000);
-    showToast("تم نسخ الكود البرمجي!");
+    btn.innerHTML = UI_ICONS.check + "<span>تم النسخ</span>";
+    setTimeout(() => { btn.innerHTML = UI_ICONS.copy + "<span>نسخ الكود</span>"; }, 1800);
+    showToast("تم نسخ الكود", "success");
   }
 };
 
@@ -2176,11 +2206,11 @@ function addErrorMessage(message, notice) {
   const wrapper = document.createElement("div");
   wrapper.className = "message assistant";
   wrapper.innerHTML = `
-    <div class="message-avatar">!</div>
+    <div class="message-avatar is-bot">${botSparkHTML()}</div>
     <div class="message-content">
-      ${notice ? `<div class="message-notice">ℹ️ ${escapeHTML(notice)}</div>` : ""}
+      ${notice ? `<div class="message-notice">${UI_ICONS.info}<span>${escapeHTML(notice)}</span></div>` : ""}
       <div class="message-text error-text">
-        ⚠️ ${escapeHTML(message)}
+        ${UI_ICONS.alert}<span>${escapeHTML(message)}</span>
       </div>
     </div>
   `;
@@ -2193,12 +2223,12 @@ function setSendingState(sending) {
   if (sending) {
     sendButton.disabled = false;
     sendButton.classList.add("stop");
-    sendButton.innerHTML = `<span style="font-size:1.1rem;">■</span>`;
+    sendButton.innerHTML = UI_ICONS.square;
     sendButton.setAttribute("aria-label", "إيقاف");
     sendButton.setAttribute("title", "إيقاف الطلب الحالي");
   } else {
     sendButton.classList.remove("stop");
-    sendButton.innerHTML = `<svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`;
+    sendButton.innerHTML = UI_ICONS.send;
     sendButton.setAttribute("aria-label", "إرسال");
     sendButton.setAttribute("title", "إرسال (Enter)");
     updateComposerState();
@@ -2210,82 +2240,6 @@ function stopRequest() {
   if (state.controller) state.controller.abort();
 }
 
-
-/* =========================================================
-   SEND ARROW FLIGHT (حركة سهم الإرسال إلى نهاية المحادثة)
-   ========================================================= */
-function flySendArrow(origin) {
-  if (!chat || !origin) return;
-  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const bubbles = chat.querySelectorAll(".message.user");
-  const target = bubbles[bubbles.length - 1];
-
-  if (target) {
-    target.classList.add("is-arriving");
-    const body = target.querySelector(".message-content");
-    if (body) body.classList.add("is-revealing");
-  }
-
-  if (reduce) {
-    if (target) target.classList.add("is-landed");
-    scrollToBottom();
-    return;
-  }
-
-  const arrow = document.createElement("div");
-  arrow.className = "send-arrow-fly";
-  arrow.innerHTML =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
-    '<line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' +
-    '<span class="send-arrow-fly__trail"></span>';
-  document.body.appendChild(arrow);
-
-  const chatRect = chat.getBoundingClientRect();
-  const startX = origin.left + origin.width / 2;
-  const startY = origin.top + origin.height / 2;
-
-  // نقطة الوصول: منتصف منطقة المحادثة ثم نهاية الرسالة الأخيرة
-  const midX = target ? (target.getBoundingClientRect().left + target.getBoundingClientRect().width / 2) : (chatRect.left + chatRect.width / 2);
-  const midY = chatRect.top + chatRect.height * 0.35;
-  const endRect = target ? target.getBoundingClientRect() : chatRect;
-  const endX = endRect.left + endRect.width / 2;
-  const endY = Math.min(chatRect.bottom - 18, endRect.bottom - 6);
-
-  arrow.style.left = startX + "px";
-  arrow.style.top = startY + "px";
-
-  const frames = [
-    { transform: "translate(-50%, -50%) scale(0.85) rotate(0deg)", opacity: 0.2, offset: 0 },
-    { transform: "translate(-50%, -50%) scale(1.15) rotate(-8deg)", opacity: 1, offset: 0.12 },
-    {
-      transform: "translate(calc(-50% + " + (midX - startX) + "px), calc(-50% + " + (midY - startY) + "px)) scale(1.05) rotate(6deg)",
-      opacity: 1,
-      offset: 0.55
-    },
-    {
-      transform: "translate(calc(-50% + " + (endX - startX) + "px), calc(-50% + " + (endY - startY) + "px)) scale(0.6) rotate(180deg)",
-      opacity: 0,
-      offset: 1
-    }
-  ];
-
-  let done = false;
-  const land = () => {
-    if (done) return;
-    done = true;
-    arrow.remove();
-    if (target) target.classList.add("is-landed");
-    scrollToBottom();
-  };
-
-  if (typeof arrow.animate === "function") {
-    const anim = arrow.animate(frames, { duration: 820, easing: "cubic-bezier(0.34, 0.9, 0.3, 1)", fill: "forwards" });
-    anim.onfinish = land;
-    window.setTimeout(land, 1100);
-  } else {
-    window.setTimeout(land, 200);
-  }
-}
 
 function scrollToBottom() {
   requestAnimationFrame(() => {
@@ -2350,7 +2304,8 @@ function renderHistory() {
   historyList.innerHTML = "";
 
   if (!state.conversations.length) {
-    historyList.innerHTML = `<div class="empty-history">لا توجد محادثات سابقة</div>`;
+    historyList.innerHTML = `<div class="empty-history">${UI_ICONS.message}<span>لا توجد محادثات بعد</span><button class="empty-history-action" type="button">ابدأ محادثة جديدة</button></div>`;
+    historyList.querySelector(".empty-history-action")?.addEventListener("click", createNewChat);
     return;
   }
 
@@ -2359,7 +2314,7 @@ function renderHistory() {
     const item = document.createElement("button");
     item.type = "button";
     item.className = `history-item ${conv.active ? "active" : ""}`;
-    item.innerHTML = `<span>💬</span> <span style="overflow:hidden; text-overflow:ellipsis;">${escapeHTML(conv.title || "محادثة جديدة")}</span>`;
+    item.innerHTML = UI_ICONS.message + `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(conv.title || "محادثة جديدة")}</span>`;
     item.addEventListener("click", () => loadConversation(conv));
     historyList.appendChild(item);
   });
@@ -2370,8 +2325,7 @@ function loadConversation(conv) {
   state.messages = Array.isArray(conv.messages) ? [...conv.messages] : [];
   resetAttachment();
   renderMessages();
-  sidebar?.classList.remove("open");
-  sidebarBackdrop?.classList.remove("show");
+  closeSidebar?.click();
   saveMessages();
 }
 
@@ -2396,8 +2350,7 @@ function createNewChat() {
   saveMessages();
   safeSetItem(STORAGE_KEYS.conversations, JSON.stringify(sanitizeConversationsForStorage(state.conversations)));
   renderHistory();
-  sidebar?.classList.remove("open");
-  sidebarBackdrop?.classList.remove("show");
+  closeSidebar?.click();
   input?.focus();
   showToast("تم بدء محادثة جديدة");
 }
@@ -2441,7 +2394,7 @@ function exportCurrentChat() {
   text += `---------------------------------------------------\n\n`;
 
   state.messages.forEach(m => {
-    const role = m.role === "user" ? "👤 المستخدم" : "✦ SPARTA AI";
+    const role = m.role === "user" ? "المستخدم" : "SPARTA AI";
     text += `${role}:\n${m.content || ""}\n\n`;
   });
 
@@ -2461,21 +2414,31 @@ function exportCurrentChat() {
    ========================================================= */
 function openSettings() {
   syncFloatingBubbleToggle();
+  openSettings.previouslyFocused = document.activeElement;
   modalBackdrop?.classList.remove("hidden");
+  requestAnimationFrame(() => modalClose?.focus());
 }
 
 function closeSettings() {
   modalBackdrop?.classList.add("hidden");
+  if (openSettings.previouslyFocused instanceof HTMLElement) openSettings.previouslyFocused.focus();
 }
 
-function showToast(message) {
+function showToast(message, requestedType) {
   if (!toast) return;
-  toast.textContent = message;
+  const text = String(message || "");
+  const type = requestedType || (/خطأ|تعذر|فشل|غير صحيحة|مرفوض/i.test(text)
+    ? "error"
+    : (/جار|انتظر|تنبيه|رصيد/i.test(text) ? "info" : "success"));
+  const icon = type === "error" ? UI_ICONS.alert : (type === "info" ? UI_ICONS.info : UI_ICONS.check);
+  toast.classList.remove("is-error", "is-info", "is-warning");
+  if (type !== "success") toast.classList.add(`is-${type}`);
+  toast.innerHTML = icon + `<span>${escapeHTML(text)}</span>`;
   toast.classList.add("show");
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => {
     toast.classList.remove("show");
-  }, 3500);
+  }, 3200);
 }
 
 function truncateText(text, limit) {

@@ -2,7 +2,7 @@
    SPARTA AI — المساعد العائم فوق كل التطبيقات
    ----------------------------------------------------------
    • فقاعة عائمة قابلة للسحب مع شعار الشرارة (ب نمط Gemini).
-   • زر «تثبيت» 📌: يرفع المساعد إلى نافذة عائمة دائمة تبقى
+   • زر «تثبيت»: يرفع المساعد إلى نافذة عائمة دائمة تبقى
      فوق كل البرامج والتطبيقات (Document Picture-in-Picture)
      وهي متصلة بالموقع — دون بقاء المستخدم داخل SPARTA AI.
    • على المتصفحات التي لا تدعم ذلك: نافذة مستقلة مدمجة.
@@ -45,20 +45,12 @@
     "ساعدني في الخطوة التالية"
   ];
 
-  /* ============ برق SPARTA أحادي اللون ============ */
-  let sparkSeq = 0;
+  /* ============ علامة AI هندسية بسيطة ============ */
   function sparkSVG(className) {
-    const gid = "spartaBoltGrad" + (++sparkSeq);
     return (
-      '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-      '<defs>' +
-      '<linearGradient id="' + gid + '" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">' +
-      '<stop offset="0" stop-color="#ffffff"/>' +
-      '<stop offset="0.52" stop-color="#dedede"/>' +
-      '<stop offset="1" stop-color="#8f8f8f"/>' +
-      "</linearGradient>" +
-      "</defs>" +
-      '<path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="url(#' + gid + ')" stroke="#fff" stroke-opacity=".6" stroke-width=".55" stroke-linejoin="round"/>' +
+      '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+      '<path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/>' +
+      '<path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/>' +
       "</svg>"
     );
   }
@@ -75,6 +67,7 @@
     screen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>',
     mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>',
     speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>',
+    stop: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
     site: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>'
   };
 
@@ -181,8 +174,8 @@
     '<span class="tmd-fab__ring"></span>' +
     '<span class="tmd-fab__ring tmd-fab__ring--gold"></span>' +
     '<span class="tmd-fab__icon">' + sparkSVG() + "</span>" +
-    '<span class="tmd-fab__badge" data-el="badge">●</span>' +
-    '<span class="tmd-fab__tag" data-el="fabTag">المساعد مثبّت فوق التطبيقات ✓</span>';
+    '<span class="tmd-fab__badge" data-el="badge"></span>' +
+    '<span class="tmd-fab__tag" data-el="fabTag">المساعد مثبّت فوق التطبيقات</span>';
 
   const win = document.createElement("section");
   win.className = "tmd-mini";
@@ -253,6 +246,15 @@
   el.badge = fab.querySelector("[data-el=badge]");
   el.fabTag = fab.querySelector("[data-el=fabTag]");
   el.openSite.href = SITE_URL;
+  const labels = {
+    pinBtn: "تثبيت المساعد فوق التطبيقات",
+    clear: "بدء محادثة جديدة",
+    collapse: "تصغير نافذة المساعد",
+    close: "إغلاق نافذة المساعد",
+    planClose: "إغلاق لوحة الباقات",
+    send: "إرسال الرسالة"
+  };
+  Object.keys(labels).forEach((key) => el[key]?.setAttribute("aria-label", labels[key]));
 
   document.body.appendChild(fab);
   document.body.appendChild(win);
@@ -271,7 +273,7 @@
         ? "SPARTA Max Pro — MiniMax ومهمة يومية، من دون رصيد يومي تلقائي"
         : "الباقة المجانية — لا تشمل MiniMax أو مهمة SPARTA Pro";
     }
-    if (el.planPro) el.planPro.textContent = pro ? "SPARTA Max Pro مفعّلة ✓" : "يتطلب اشتراكًا مدفوعًا";
+    if (el.planPro) el.planPro.textContent = pro ? "SPARTA Max Pro مفعّلة" : "يتطلب اشتراكًا مدفوعًا";
     if (el.planPro) el.planPro.disabled = pro;
     if (el.planFree) el.planFree.textContent = pro ? "التحويل إلى المجانية" : "الخطة الحالية";
     if (el.planFree) el.planFree.disabled = !pro;
@@ -389,9 +391,9 @@
       bubble({
         role: "assistant",
         content:
-          "مرحبًا 👋 أنا SPARTA AI في نافذة عائمة.\n" +
-          "اكتب لي، أو اضغط 🎙️ وتحدّث معي، أو شارك شاشتك لأرى ما تعمل عليه.\n" +
-          "واضغط زر التثبيت 📌 بالأعلى لأبقى فوق كل التطبيقات أثناء عملك."
+          "مرحبًا، أنا SPARTA AI في نافذة عائمة.\n" +
+          "اكتب رسالتك، استخدم التحدث، أو شارك شاشتك لأساعدك فيما تعمل عليه.\n" +
+          "يمكنك استخدام زر التثبيت بالأعلى لإبقائي أمام التطبيقات."
       });
     }
     state.messages.forEach(bubble);
@@ -433,14 +435,14 @@
     const voices = window.speechSynthesis.getVoices() || [];
     const arabic = voices.find((v) => /ar/i.test(v.lang));
     if (arabic) utter.voice = arabic;
-    utter.onstart = () => setStatus("🔊 يتحدث الآن…");
+    utter.onstart = () => setStatus("يقرأ الرد صوتيًا…");
     utter.onend = () => setStatus(pinnedLabel());
     window.speechSynthesis.speak(utter);
   }
 
   function pinnedLabel() {
-    if (state.sharing) return "🖥️ يشاهد شاشتك";
-    return state.pinned ? "📌 مثبّت فوق التطبيقات" : "جاهز للدردشة";
+    if (state.sharing) return "مشاركة الشاشة نشطة";
+    return state.pinned ? "مثبّت فوق التطبيقات" : "جاهز للدردشة";
   }
 
   /* ============ التعرف على الكلام (STT) ============ */
@@ -457,7 +459,7 @@
     recognition.onstart = () => {
       state.listening = true;
       el.micBtn.classList.add("is-rec");
-      setStatus("🎙️ أستمع إليك…");
+      setStatus("أستمع إليك…");
     };
     recognition.onresult = (event) => {
       let finalText = "";
@@ -529,10 +531,10 @@
     el.shareBtn.classList.add("is-active");
     el.shareBtn.querySelector("span").textContent = "إيقاف المشاركة";
     el.badge.classList.add("is-on");
-    setStatus("🖥️ يشاهد شاشتك");
+    setStatus("مشاركة الشاشة نشطة");
     bubble({
       role: "assistant",
-      content: "تم تفعيل مشاركة الشاشة ✅ سأرفق لقطة من شاشتك مع كل رسالة لأفهم ما تعمل عليه. اسألني: ماذا ترى على شاشتي؟"
+      content: "تم تفعيل مشاركة الشاشة. سأرفق لقطة مع كل رسالة لأفهم ما تعمل عليه. يمكنك أن تسألني: ماذا ترى على شاشتي؟"
     });
     scrollDown();
   }
@@ -654,7 +656,7 @@
       el.send.disabled = false;
       el.send.classList.add("is-stop");
       el.send.title = "إيقاف الطلب";
-      el.send.innerHTML = '<span style="font-size:1.05rem;line-height:1">■</span>';
+      el.send.innerHTML = ICONS.stop;
     } else {
       el.send.classList.remove("is-stop");
       el.send.title = "إرسال";
@@ -700,7 +702,7 @@
     state.busy = true;
     state.abortReason = "";
     setSendBusy(true);
-    setStatus("… يفكّر");
+    setStatus("جاري المعالجة…");
     const typing = addTyping();
     state.controller = new AbortController();
     const timeoutId = window.setTimeout(() => {
@@ -832,12 +834,12 @@
     el.pinBtn.classList.add("is-active");
     el.pinBtn.title = "إلغاء التثبيت وإعادة المساعد إلى الموقع";
     el.pinBtn.innerHTML = ICONS.unpin;
-    setStatus("📌 مثبّت فوق التطبيقات");
+    setStatus("مثبّت فوق التطبيقات");
     flashFabTag();
 
     bubble({
       role: "assistant",
-      content: "تم التثبيت 📌 أنا الآن نافذة عائمة فوق كل التطبيقات، وسأبقى متصلًا وأعمل أثناء استخدامك أي برنامج آخر. (تبقى متصلًا بالموقع الأصلي ما دام تبويبه مفتوحًا)"
+      content: "تم التثبيت. أنا الآن نافذة عائمة فوق التطبيقات، وسأبقى متصلًا أثناء استخدامك أي برنامج آخر ما دام تبويب الموقع الأصلي مفتوحًا."
     });
     scrollDown();
     setTimeout(() => el.input.focus(), 150);
@@ -886,7 +888,7 @@
       closeWin();
       bubble({
         role: "assistant",
-        content: "فتحنا المساعد في نافذة مستقلة 🗗 استمر في عملك وسيبقى يعمل بجانبك.\nللحصول على النافذة العائمة فوق كل التطبيقات استخدم Chrome أو Edge على الكمبيوتر."
+        content: "فُتح المساعد في نافذة مستقلة وسيبقى يعمل بجانبك.\nللحصول على نافذة عائمة فوق التطبيقات استخدم Chrome أو Edge على الكمبيوتر."
       });
       scrollDown();
     } else {
@@ -980,6 +982,7 @@
     win.classList.remove("is-collapsed");
     state.collapsed = false;
     fab.setAttribute("aria-label", "إغلاق مساعد SPARTA AI العائم");
+    win.setAttribute("aria-hidden", "false");
     setTimeout(() => el.input.focus(), 120);
     scrollDown();
   }
@@ -987,6 +990,8 @@
   function closeWin() {
     state.open = false;
     win.classList.remove("is-open");
+    win.setAttribute("aria-hidden", "true");
+    fab.setAttribute("aria-label", "فتح مساعد SPARTA AI العائم");
     if (!state.pinned) setNativeOverlayExpanded(false);
     stopSpeaking();
     if (state.listening && recognition) {
@@ -998,7 +1003,7 @@
     if (!state.enabled) return;
     if (state.pinned) {
       flashFabTag();
-      setStatus("📌 مثبّت فوق التطبيقات — أوقف التثبيت من زر الدبوس بالنافذة العائمة");
+      setStatus("مثبّت فوق التطبيقات — أوقف التثبيت من زر الدبوس");
       return;
     }
     if (state.open) closeWin();
