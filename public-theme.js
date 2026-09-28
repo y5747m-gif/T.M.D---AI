@@ -19,7 +19,7 @@
     const resolved = theme === "light" ? "light" : "dark";
     document.documentElement.dataset.theme = resolved;
     if (document.body) document.body.dataset.theme = resolved;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "light" ? "#F7F9FC" : "#0B1020");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "light" ? "#FAF6F1" : "#100B0C");
     if (button) {
       button.innerHTML = resolved === "light" ? ICONS.moon : ICONS.sun;
       button.setAttribute("aria-label", resolved === "light" ? "تفعيل المظهر الداكن" : "تفعيل المظهر الفاتح");

@@ -45,12 +45,12 @@
     "ساعدني في الخطوة التالية"
   ];
 
-  /* ============ علامة AI هندسية بسيطة ============ */
+  /* ============ علامة AI هندسية بسيطة (مدار + نواة) ============ */
   function sparkSVG(className) {
     return (
-      '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
-      '<path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/>' +
-      '<path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/>' +
+      '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+      '<g transform="rotate(-24 12 12)"><ellipse cx="12" cy="12" rx="9" ry="3.8"/><circle cx="4.9" cy="14.4" r="1.3" fill="currentColor" stroke="none"/></g>' +
+      '<circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none"/>' +
       "</svg>"
     );
   }

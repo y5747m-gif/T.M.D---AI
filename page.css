@@ -52,10 +52,10 @@ body {
 
 .brand-row-text .pro-badge {
   padding: 2px 6px;
-  border: 1px solid rgba(108, 140, 255, 0.25);
+  border: 1px solid rgba(224, 85, 78, 0.25);
   border-radius: 6px;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
   font-size: 0.62rem;
 }
 
@@ -92,8 +92,8 @@ body {
 
 .page-nav a.active {
   color: var(--color-primary);
-  border-color: rgba(108, 140, 255, 0.16);
-  background: rgba(108, 140, 255, 0.09);
+  border-color: rgba(224, 85, 78, 0.16);
+  background: rgba(224, 85, 78, 0.09);
 }
 
 .page-theme-toggle {
@@ -229,7 +229,7 @@ body {
 }
 
 .feature-card:hover {
-  border-color: rgba(108, 140, 255, 0.24);
+  border-color: rgba(224, 85, 78, 0.24);
   background: var(--color-surface-hover);
   transform: translateY(-1px);
 }
@@ -281,10 +281,10 @@ body {
   height: 19px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(108, 140, 255, 0.22);
+  border: 1px solid rgba(224, 85, 78, 0.22);
   border-radius: 50%;
   color: var(--color-primary);
-  background: rgba(108, 140, 255, 0.08);
+  background: rgba(224, 85, 78, 0.08);
   font: 600 0.68rem/1 Inter, sans-serif;
 }
 
@@ -296,7 +296,7 @@ body {
 .cta-box {
   margin-top: 48px;
   padding: 24px;
-  border: 1px solid rgba(108, 140, 255, 0.2);
+  border: 1px solid rgba(224, 85, 78, 0.2);
   border-radius: var(--radius-xl);
   background: var(--color-surface-soft);
   text-align: center;
