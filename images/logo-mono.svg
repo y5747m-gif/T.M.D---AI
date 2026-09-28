@@ -1,41 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="T.M.D_AI">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI lightning mark">
   <defs>
-    <linearGradient id="tmdMonoStroke" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="55%" stop-color="#bdbdbd"/>
-      <stop offset="100%" stop-color="#6e6e6e"/>
-    </linearGradient>
-    <radialGradient id="tmdMonoCore" cx="38%" cy="30%" r="75%">
-      <stop offset="0%" stop-color="#2a2a2a"/>
-      <stop offset="60%" stop-color="#101010"/>
-      <stop offset="100%" stop-color="#000000"/>
-    </radialGradient>
-    <filter id="tmdMonoGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.2" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <linearGradient id="edge" x1="28" y1="18" x2="131" y2="142" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".48" stop-color="#bbb"/><stop offset="1" stop-color="#555"/></linearGradient>
+    <linearGradient id="bolt" x1="79" y1="39" x2="84" y2="121" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".53" stop-color="#f4f4f4"/><stop offset="1" stop-color="#bdbdbd"/></linearGradient>
+    <radialGradient id="core" cx=".35" cy=".2" r=".9"><stop stop-color="#303030"/><stop offset=".6" stop-color="#0b0b0b"/><stop offset="1"/></radialGradient>
   </defs>
-
-  <!-- درع سداسي أسود -->
-  <polygon points="60,8 105,33 105,87 60,112 15,87 15,33"
-           fill="url(#tmdMonoCore)" stroke="url(#tmdMonoStroke)" stroke-width="3"
-           stroke-linejoin="round" filter="url(#tmdMonoGlow)"/>
-
-  <!-- مدار متقطّع -->
-  <circle cx="60" cy="60" r="34" fill="none" stroke="#ffffff" stroke-opacity="0.55"
-          stroke-width="1.2" stroke-dasharray="7 5"/>
-  <ellipse cx="60" cy="60" rx="41" ry="17" fill="none" stroke="#ffffff" stroke-opacity="0.28"
-           stroke-width="1.1" transform="rotate(-24 60 60)"/>
-
-  <!-- شرارة الذكاء -->
-  <path d="M60 28 C61.6 42 70 50.4 84 52 C70 53.6 61.6 62 60 76 C58.4 62 50 53.6 36 52 C50 50.4 58.4 42 60 28 Z"
-        fill="#ffffff"/>
-
-  <!-- المونوغرام -->
-  <text x="60" y="94" font-family="'Space Grotesk','Cairo',sans-serif" font-size="17" font-weight="800"
-        fill="#ffffff" text-anchor="middle" letter-spacing="3.5">TMD</text>
-
-  <!-- نقاط مدارية -->
-  <circle cx="94" cy="44" r="2.6" fill="#ffffff"/>
-  <circle cx="26" cy="74" r="2" fill="#ffffff" fill-opacity="0.75"/>
+  <path d="M80 8 137 40v62l-57 50-57-50V40L80 8Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m91 35-39 48h25l-8 42 39-52H83l8-38Z" fill="url(#bolt)" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+  <circle cx="80" cy="80" r="55" stroke="#fff" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 8"/>
 </svg>

@@ -1,12 +1,12 @@
 "use strict";
 
 /* ==========================================================
-   T.M.D AI — Production PWA Service Worker
+   SPARTA AI — Production PWA Service Worker
    - يخزّن ملفات الواجهة الأساسية فقط.
    - لا يخزّن /api ولا مفاتيح ولا ردود الذكاء الاصطناعي.
    ========================================================== */
 
-const CACHE_VERSION = "tmd-ai-cache-v2026-09-27-1";
+const CACHE_VERSION = "sparta-ai-cache-v2026-09-28-1";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -31,6 +31,8 @@ const APP_SHELL = [
   "/images/icon-512.png",
   "/images/icon-512-maskable.png",
   "/images/bot-spark.svg",
+  "/images/sparta-mark.svg",
+  "/images/sparta-logo.svg",
   "/images/og-image.jpg"
 ];
 
@@ -44,7 +46,7 @@ self.addEventListener("install", (event) => {
       .then((cache) => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
       .catch((error) => {
-        console.warn("T.M.D AI SW install cache failed:", error);
+        console.warn("SPARTA AI SW install cache failed:", error);
       })
   );
 });

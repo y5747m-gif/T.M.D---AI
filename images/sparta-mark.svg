@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SPARTA AI lightning mark</title>
+  <desc id="desc">A monochrome shield with a precise lightning bolt.</desc>
+  <defs>
+    <linearGradient id="edge" x1="28" y1="18" x2="131" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".48" stop-color="#bbb"/>
+      <stop offset="1" stop-color="#555"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="79" y1="39" x2="84" y2="121" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".53" stop-color="#f4f4f4"/>
+      <stop offset="1" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <radialGradient id="core" cx=".35" cy=".2" r=".9">
+      <stop stop-color="#303030"/>
+      <stop offset=".6" stop-color="#0b0b0b"/>
+      <stop offset="1"/>
+    </radialGradient>
+    <filter id="glow" x="-55%" y="-55%" width="210%" height="210%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M80 8 137 40v62l-57 50-57-50V40L80 8Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M36 79h24M100 79h24" stroke="#fff" stroke-opacity=".38" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M80 24v14M51 40l9 9M109 40l-9 9" stroke="#fff" stroke-opacity=".52" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="m91 35-39 48h25l-8 42 39-52H83l8-38Z" fill="url(#bolt)" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="m91 35-39 48h25" stroke="#fff" stroke-opacity=".8" stroke-width="1" stroke-linecap="round"/>
+  <circle cx="80" cy="80" r="55" stroke="#fff" stroke-opacity=".2" stroke-width="1" stroke-dasharray="3 8"/>
+</svg>

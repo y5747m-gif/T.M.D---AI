@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" aria-label="SPARTA AI lightning">
   <defs>
-    <linearGradient id="tmd-bot-spark" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#4285f4"/>
-      <stop offset="48%" stop-color="#9b72cb"/>
-      <stop offset="100%" stop-color="#d96570"/>
+    <linearGradient id="sparta-bot-bolt" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".52" stop-color="#dedede"/>
+      <stop offset="1" stop-color="#8f8f8f"/>
     </linearGradient>
   </defs>
-  <path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#tmd-bot-spark)"/>
+  <path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="url(#sparta-bot-bolt)" stroke="#fff" stroke-opacity=".6" stroke-width=".55" stroke-linejoin="round"/>
 </svg>

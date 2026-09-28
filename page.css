@@ -1,5 +1,5 @@
 /* ============================================================
-   T.M.D_AI_Pro — Static Public Pages Shell (عن / أسئلة / خصوصية / 404)
+   SPARTA AI — Static Public Pages Shell (عن / أسئلة / خصوصية / 404)
    يُحمَّل بعد style.css لاستخدام نفس متغيرات التصميم،
    ويعيد تفعيل التمرير لأن تطبيق الدردشة يستخدم overflow:hidden.
 ============================================================ */
@@ -312,3 +312,16 @@ body {
     text-align: center;
   }
 }
+
+/* SPARTA AI: neutral public-page surface */
+body {
+  background-image:
+    radial-gradient(920px 460px at 92% -10%, rgba(255, 255, 255, 0.10), transparent 62%),
+    radial-gradient(860px 440px at 6% 96%, rgba(255, 255, 255, 0.06), transparent 60%);
+}
+.brand-row img { border-radius: 12px; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42); }
+.page-nav a.active { border-color: var(--line-strong); background: var(--bg-card-hover); }
+.prose a { border-color: currentColor; }
+.cta-box { background: var(--accent-grad-subtle); border-color: var(--line-strong); }
+.btn-primary-link { color: var(--bg-core) !important; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28); }
+.err-code { filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.22)); }

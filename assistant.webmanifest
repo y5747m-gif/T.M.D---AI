@@ -1,7 +1,7 @@
 {
-  "name": "T.M.D AI",
-  "short_name": "T.M.D AI",
-  "description": "مساعد T.M.D AI العائم: دردشة ذكية سريعة متصلة بمنصة T.M.D AI مع مشاركة الشاشة والرد الصوتي ضمن تجربة PWA.",
+  "name": "SPARTA AI",
+  "short_name": "SPARTA AI",
+  "description": "مساعد SPARTA AI العائم: دردشة ذكية سريعة متصلة بمنصة SPARTA AI مع مشاركة الشاشة والرد الصوتي ضمن تجربة PWA.",
   "id": "/assistant.html",
   "start_url": "/assistant.html?source=pwa",
   "scope": "/",
@@ -10,8 +10,8 @@
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#050912",
-  "theme_color": "#050912",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "categories": ["productivity", "utilities", "education"],
   "prefer_related_applications": false,
   "icons": [

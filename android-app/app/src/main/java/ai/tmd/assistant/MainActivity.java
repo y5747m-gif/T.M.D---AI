@@ -80,8 +80,8 @@ public class MainActivity extends Activity {
         root.setPadding(42, 60, 42, 60);
         root.setBackgroundColor(Color.rgb(5, 9, 18));
 
-        root.addView(text("✦", 64, Color.rgb(142, 151, 255)));
-        root.addView(text("T.M.D AI", 30, Color.WHITE));
+        root.addView(text("ϟ", 64, Color.WHITE));
+        root.addView(text("SPARTA AI", 30, Color.WHITE));
         root.addView(text("المساعد العائم على هاتفك\nدردشة ومشاركة شاشة فوق كل التطبيقات", 18, Color.LTGRAY));
 
         Button launch = new Button(this);

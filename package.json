@@ -1,8 +1,8 @@
 {
-  "name": "tmd-ai-pro",
+  "name": "sparta-ai",
   "version": "3.0.0",
   "private": true,
-  "description": "T.M.D_AI_Pro — Professional AI Chat Interface on Groq, MiniMax & Vercel",
+  "description": "SPARTA AI — Professional AI Chat Interface on Groq, MiniMax & Vercel",
   "engines": {
     "node": ">=20"
   },

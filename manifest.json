@@ -1,7 +1,7 @@
 {
-  "name": "T.M.D AI",
-  "short_name": "T.M.D AI",
-  "description": "T.M.D AI مساعد ذكاء اصطناعي عربي احترافي للمحادثة وتحليل الملفات والصور، قابل للتثبيت كتطبيق PWA على الهاتف والحاسوب.",
+  "name": "SPARTA AI",
+  "short_name": "SPARTA AI",
+  "description": "SPARTA AI مساعد ذكاء اصطناعي عربي احترافي للمحادثة وتحليل الملفات والصور، قابل للتثبيت كتطبيق PWA على الهاتف والحاسوب.",
   "id": "/",
   "start_url": "/?source=pwa",
   "scope": "/",
@@ -10,8 +10,8 @@
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#050912",
-  "theme_color": "#050912",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "categories": ["productivity", "utilities", "education"],
   "prefer_related_applications": false,
   "icons": [
@@ -50,7 +50,7 @@
     {
       "name": "فتح المساعد العائم",
       "short_name": "المساعد",
-      "description": "افتح مساعد T.M.D AI مباشرة.",
+      "description": "افتح مساعد SPARTA AI مباشرة.",
       "url": "/assistant.html?source=shortcut",
       "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
