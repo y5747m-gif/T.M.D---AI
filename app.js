@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===========================================================================
-   T.M.D_AI_Pro — Complete Application Script
+   SPARTA AI — Complete Application Script
    Architect, Developer & Designer: ياسين عمرو عبد الرحيم (Yassin Amr Abdelrahim)
    =========================================================================== */
 
@@ -156,17 +156,111 @@ const VALID_MODELS = new Set([
 
 const REQUEST_TIMEOUT_MS = 45000;
 
-/* شعار المساعد (شرارة ب نمط Gemini) — معرّف فريد لكل نسخة حتى لا تتعارض التدرجات */
+/* اشتراك SPARTA Pro هو المصدر الوحيد للوصول إلى MiniMax ومهمة اليوم.
+   المفتاح متوافق مع الفقاعة العائمة حتى تتطابق الحالة في الواجهتين. */
+const SPARTA_PLAN_KEY = "tmd_float_plan";
+const SPARTA_DAILY_MISSION_KEY = "sparta_pro_daily_mission";
+const SPARTA_DAILY_MISSIONS = [
+  {
+    title: "حلّل قرارًا واحدًا بوضوح",
+    description: "حوّل قرارًا مهنيًا أو شخصيًا إلى خيارات، معايير، وخطوة تالية عملية خلال خمس دقائق.",
+    prompt: "هذه مهمة SPARTA اليومية: ساعدني في تحليل قرار واحد. اسألني أولًا عن القرار، ثم رتّب الخيارات والمعايير، واقترح خطوة تالية عملية ومختصرة."
+  },
+  {
+    title: "حوّل فكرة إلى خطة تنفيذ",
+    description: "قسّم فكرة واحدة إلى أول ثلاث خطوات قابلة للإنجاز اليوم، مع ترتيب الأولويات.",
+    prompt: "هذه مهمة SPARTA اليومية: حوّل فكرتي إلى خطة تنفيذ قصيرة. اسألني عن الفكرة، ثم أعطني أول ثلاث خطوات واقعية بترتيب الأولوية."
+  },
+  {
+    title: "ابنِ ملخصًا يحسم الأولويات",
+    description: "اجمع المعلومات المتفرقة في ملخص واضح يبين ما يجب فعله الآن وما يمكن تأجيله.",
+    prompt: "هذه مهمة SPARTA اليومية: ساعدني على ترتيب أولوياتي. اسألني عن مهامي، ثم أنشئ ملخصًا قصيرًا يحدد ما أنجزه الآن وما أؤجله ولماذا."
+  }
+];
+
+function spartaTodayKey() {
+  const now = new Date();
+  return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+}
+
+function hasSpartaPro() {
+  return safeReadJSON(SPARTA_PLAN_KEY, "free") === "minimax";
+}
+
+function getSpartaDailyMission() {
+  const day = spartaTodayKey();
+  const seed = Number(day.replace(/-/g, ""));
+  const index = Number.isFinite(seed) ? seed % SPARTA_DAILY_MISSIONS.length : 0;
+  return { ...SPARTA_DAILY_MISSIONS[index], day, index };
+}
+
+function readSpartaDailyMissionState() {
+  const stored = safeReadJSON(SPARTA_DAILY_MISSION_KEY, null);
+  const mission = getSpartaDailyMission();
+  return stored && stored.day === mission.day ? stored : { day: mission.day, completed: false };
+}
+
+function completeSpartaDailyMission() {
+  const mission = getSpartaDailyMission();
+  safeSetItem(SPARTA_DAILY_MISSION_KEY, JSON.stringify({
+    day: mission.day,
+    mission: mission.index,
+    completed: true,
+    completedAt: Date.now()
+  }));
+  updateSpartaDailyMissionUI();
+}
+
+function updateSpartaDailyMissionUI() {
+  const card = document.getElementById("dailyMission");
+  const title = document.getElementById("dailyMissionTitle");
+  const description = document.getElementById("dailyMissionDescription");
+  const meta = document.getElementById("dailyMissionMeta");
+  const lock = document.getElementById("dailyMissionLock");
+  const button = document.getElementById("dailyMissionButton");
+  if (!card || !title || !description || !meta || !lock || !button) return;
+
+  const mission = getSpartaDailyMission();
+  const progress = readSpartaDailyMissionState();
+  const pro = hasSpartaPro();
+  const completed = pro && progress.completed === true;
+
+  title.textContent = mission.title;
+  description.textContent = mission.description;
+  card.classList.toggle("is-locked", !pro);
+  card.classList.toggle("is-complete", completed);
+
+  if (!pro) {
+    lock.textContent = "PRO";
+    meta.textContent = "متاحة باشتراك SPARTA Pro المدفوع فقط · لا تشمل الخطط أرصدة يومية تلقائية";
+    button.textContent = "تتطلب Pro";
+    button.setAttribute("aria-label", "مهمة اليوم متاحة في اشتراك SPARTA Pro المدفوع فقط");
+    return;
+  }
+
+  if (completed) {
+    lock.textContent = "تم";
+    meta.textContent = "أُنجزت مهمة اليوم · يعود تحدٍّ جديد عند بدء اليوم التالي";
+    button.textContent = "أُنجزت اليوم";
+    button.setAttribute("aria-label", "مهمة اليوم مكتملة");
+  } else {
+    lock.textContent = "PRO";
+    meta.textContent = "تحدٍّ واحد كل يوم لنسخة SPARTA Pro · المهمة لا تمنح رصيدًا أو نقاطًا";
+    button.textContent = "ابدأ المهمة";
+    button.setAttribute("aria-label", "ابدأ مهمة SPARTA Pro اليومية");
+  }
+}
+
+/* شعار SPARTA المصغّر داخل رسائل المساعد — برق أحادي اللون. */
 let __tmdSparkSeq = 0;
 function botSparkHTML() {
-  const gid = "tmdMsgSpark" + (++__tmdSparkSeq);
+  const gid = "spartaMsgBolt" + (++__tmdSparkSeq);
   return (
     '<svg class="bot-spark-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-    '<defs><linearGradient id="' + gid + '" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">' +
-    '<stop offset="0" stop-color="#ffffff"/><stop offset="0.48" stop-color="#c9c9c9"/><stop offset="1" stop-color="#8a8a8a"/>' +
+    '<defs><linearGradient id="' + gid + '" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">' +
+    '<stop offset="0" stop-color="#ffffff"/><stop offset="0.52" stop-color="#e2e2e2"/><stop offset="1" stop-color="#8f8f8f"/>' +
     "</linearGradient></defs>" +
-    '<path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 ' +
-    'C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#' + gid + ')"/>' +
+    '<path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="url(#' + gid + ')" stroke="#ffffff" stroke-opacity=".6" stroke-width=".55" stroke-linejoin="round"/>' +
     "</svg>"
   );
 }
@@ -181,15 +275,15 @@ if (!VALID_MODELS.has(state.model)) {
    2. CREATOR & IDENTITY RESPONSES LIBRARY (ياسين عمرو عبد الرحيم)
    ========================================================= */
 const CREATOR_RESPONSES = [
-  `أنا **T.M.D_AI_Pro**، مساعد ذكاء اصطناعي فائق التطور. تم تصميمي وتطويري وبرمجتي بالكامل بواسطة المطور والمصمم المبدع **ياسين عمرو عبد الرحيم**، الذي هندس واجهتي وخوارزمياتي لتقديم تجربة ذكية وسريعة واحترافية.`,
+  `أنا **SPARTA AI**، مساعد ذكاء اصطناعي فائق التطور. تم تصميمي وتطويري وبرمجتي بالكامل بواسطة المطور والمصمم المبدع **ياسين عمرو عبد الرحيم**، الذي هندس واجهتي وخوارزمياتي لتقديم تجربة ذكية وسريعة واحترافية.`,
 
   `الفضل في وجودي وابتكاري يعود للمطور والمهندس **ياسين عمرو عبد الرحيم**؛ هو العقل المدبر الذي قام بتصميم كل جزء في هذا النظام وبرمجته بأحدث تقنيات الذكاء الاصطناعي لتلبية كافة احتياجاتك.`,
 
   `صممني وطوّرني المطور البارع **ياسين عمرو عبد الرحيم**. قام ببرمجة نظامي وهندسة الواجهة النجمية التفاعلية ونظام المحادثة الذكي ليضمن لك تجربة استثنائية وسلسة.`,
 
-  `أنا ثمرة رؤية وإبداع المطور **ياسين عمرو عبد الرحيم**، الذي جمع بين التصميم العصري الفاخر والذكاء الاصطناعي فائق السرعة لصنع منصة **T.M.D_AI_Pro**.`,
+  `أنا ثمرة رؤية وإبداع المطور **ياسين عمرو عبد الرحيم**، الذي جمع بين التصميم العصري الفاخر والذكاء الاصطناعي فائق السرعة لصنع منصة **SPARTA AI**.`,
 
-  `المطور والمصمم الحصري لمنصة **T.M.D_AI_Pro** هو **ياسين عمرو عبد الرحيم**. هو من وضع هيكلية النظام، وصمم الواجهات، وبرمج خوارزميات الاستجابة وتحليل المستندات والصور.`,
+  `المطور والمصمم الحصري لمنصة **SPARTA AI** هو **ياسين عمرو عبد الرحيم**. هو من وضع هيكلية النظام، وصمم الواجهات، وبرمج خوارزميات الاستجابة وتحليل المستندات والصور.`,
 
   `قام بهندستي وبنائي المطور الذكي **ياسين عمرو عبد الرحيم**، بهدف تقديم رفيق ذكاء اصطناعي فائق الدقة والقوة في معالجة النصوص، الملفات، والصور.`,
 
@@ -201,7 +295,7 @@ const CREATOR_RESPONSES = [
 
   `تمت برمجتي وصياغة بنيتي التحتية بواسطة المهندس والمطور **ياسين عمرو عبد الرحيم**، حيث حرص على جعلي مساعداً فائق الأداء والذكاء بواجهة متجاوبة بالكامل.`,
 
-  `أنا **T.M.D_AI_Pro**، ومطوري ومصممي هو **ياسين عمرو عبد الرحيم**. إذا كان لديك أي استفسار أو مهمة، فأنا مجهز بالكامل لمساعدتك بفضل التطوير المتقن الذي وضعه فيّ.`
+  `أنا **SPARTA AI**، ومطوري ومصممي هو **ياسين عمرو عبد الرحيم**. إذا كان لديك أي استفسار أو مهمة، فأنا مجهز بالكامل لمساعدتك بفضل التطوير المتقن الذي وضعه فيّ.`
 ];
 
 function getDynamicCreatorResponse() {
@@ -863,8 +957,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const bgManager = new UserBackgroundManager(starfield);
   window.TMD_BgManager = bgManager;
 
+  if (state.model === MODELS.minimax && !hasSpartaPro()) {
+    state.model = MODELS.smart;
+    safeSetItem(STORAGE_KEYS.model, state.model);
+  }
   applyTheme();
   updateModelUI();
+  updateSpartaDailyMissionUI();
   bindEvents();
   renderHistory();
   renderMessages();
@@ -1018,7 +1117,7 @@ function bindEvents() {
   // تثبيت المساعد العائم فوق كل التطبيقات (زر الشريط العلوي + الإعدادات + التلميح السريع)
   const pinFloatingAssistant = () => {
     if (state.floatingBubbleEnabled === false) {
-      showToast("فعّل خيار «إظهار فقاعة T.M.D AI» من الإعدادات أولًا.");
+      showToast("فعّل خيار «إظهار فقاعة SPARTA AI» من الإعدادات أولًا.");
       return;
     }
     const api = window.__tmdFloatingAssistant;
@@ -1089,23 +1188,62 @@ function bindEvents() {
   document.getElementById("themeTop")?.addEventListener("click", toggleTheme);
   document.getElementById("themeTopDesktop")?.addEventListener("click", toggleTheme);
 
-  // Model Selector
-  modelSelect?.addEventListener("change", () => {
-    const val = modelSelect.value;
-    state.model = VALID_MODELS.has(val) ? val : MODELS.smart;
+  // Model Selector — MiniMax/M3 هو جزء من اشتراك SPARTA Pro المدفوع فقط.
+  const selectModel = (value) => {
+    const candidate = VALID_MODELS.has(value) ? value : MODELS.smart;
+    if (candidate === MODELS.minimax && !hasSpartaPro()) {
+      state.model = MODELS.smart;
+      safeSetItem(STORAGE_KEYS.model, state.model);
+      updateModelUI();
+      showToast("SPARTA Max مع MiniMax M3 متاحان ضمن اشتراك SPARTA Pro المدفوع فقط.");
+      return false;
+    }
+    state.model = candidate;
     safeSetItem(STORAGE_KEYS.model, state.model);
     updateModelUI();
-    const settingsModel = document.getElementById("modelSelectSettings");
-    if (settingsModel) settingsModel.value = state.model;
-  });
+    return true;
+  };
+
+  modelSelect?.addEventListener("change", () => selectModel(modelSelect.value));
 
   const settingsModel = document.getElementById("modelSelectSettings");
-  settingsModel?.addEventListener("change", () => {
-    const val = settingsModel.value;
-    state.model = VALID_MODELS.has(val) ? val : MODELS.smart;
+  settingsModel?.addEventListener("change", () => selectModel(settingsModel.value));
+
+  // مهمة اليوم ليست رصيدًا مجانيًا: هي تحدٍّ مستقل للنسخة المدفوعة فقط.
+  document.getElementById("dailyMissionButton")?.addEventListener("click", () => {
+    if (!hasSpartaPro()) {
+      showToast("مهمة اليوم وSPARTA Max متاحان في اشتراك SPARTA Pro المدفوع فقط.");
+      updateSpartaDailyMissionUI();
+      return;
+    }
+    const mission = getSpartaDailyMission();
+    const progress = readSpartaDailyMissionState();
+    if (progress.completed) {
+      showToast("أكملت مهمة اليوم بالفعل. يعود تحدٍّ جديد غدًا.");
+      return;
+    }
+    state.model = MODELS.minimax;
     safeSetItem(STORAGE_KEYS.model, state.model);
-    if (modelSelect) modelSelect.value = state.model;
     updateModelUI();
+    if (!input) return;
+    input.value = mission.prompt;
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 180) + "px";
+    input.dataset.spartaDailyMission = mission.day;
+    input.focus();
+    updateComposerState();
+    showToast("تم تجهيز مهمة اليوم في SPARTA Max. أرسلها للبدء.");
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === SPARTA_PLAN_KEY || event.key === SPARTA_DAILY_MISSION_KEY) {
+      updateSpartaDailyMissionUI();
+      if (!hasSpartaPro() && state.model === MODELS.minimax) {
+        state.model = MODELS.smart;
+        safeSetItem(STORAGE_KEYS.model, state.model);
+        updateModelUI();
+      }
+    }
   });
 
   // Welcome Cards Click to Prompt
@@ -1213,8 +1351,8 @@ function setFloatingBubbleEnabled(enabled) {
   }
 
   showToast(state.floatingBubbleEnabled
-    ? "تم إظهار فقاعة T.M.D AI."
-    : "تم إخفاء فقاعة T.M.D AI. يمكنك إعادتها من الإعدادات.");
+    ? "تم إظهار فقاعة SPARTA AI."
+    : "تم إخفاء فقاعة SPARTA AI. يمكنك إعادتها من الإعدادات.");
 }
 
 
@@ -1227,7 +1365,7 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#f0f3fa" : "#050912");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#ffffff" : "#050505");
 }
 
 function updateModelUI() {
@@ -1237,15 +1375,15 @@ function updateModelUI() {
   if (!modelName) return;
 
   if (state.model === MODELS.vision) {
-    modelName.textContent = "T.M.D Vision 27B";
+    modelName.textContent = "SPARTA Vision 27B";
   } else if (state.model === MODELS.minimax) {
     modelName.textContent = state.minimaxBillingBlocked
-      ? "T.M.D Max — MiniMax M3 (⚠️ الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
-      : "T.M.D Max — MiniMax M3";
+      ? "SPARTA Max Pro — MiniMax M3 (⚠️ الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
+      : "SPARTA Max Pro — MiniMax M3";
   } else if (state.model === MODELS.fast) {
-    modelName.textContent = "T.M.D Fast 20B";
+    modelName.textContent = "SPARTA Fast 20B";
   } else {
-    modelName.textContent = "T.M.D Pro 120B";
+    modelName.textContent = "SPARTA Core 120B";
   }
 }
 
@@ -1546,6 +1684,7 @@ async function sendMessage() {
   if (!text && !state.selectedImage && !state.selectedDocument) {
     return;
   }
+  const isDailyMissionRequest = input?.dataset.spartaDailyMission === spartaTodayKey();
 
   state.busy = true;
   state.controller = new AbortController();
@@ -1583,6 +1722,7 @@ async function sendMessage() {
   if (input) {
     input.value = "";
     input.style.height = "auto";
+    delete input.dataset.spartaDailyMission;
   }
 
   const attachedImage = state.selectedImage;
@@ -1696,6 +1836,12 @@ async function sendMessage() {
       setMiniMaxBillingBlocked(true);
     }
 
+    // لا توجد مكافأة رصيد هنا: نعلّم المهمة مكتملة فقط بعد رد ناجح من Pro.
+    if (isDailyMissionRequest && hasSpartaPro()) {
+      completeSpartaDailyMission();
+      showToast("أُنجزت مهمة SPARTA Pro اليومية. يعود تحدٍّ جديد غدًا.");
+    }
+
     saveMessages();
     renderMessages();
     saveConversation();
@@ -1711,7 +1857,7 @@ async function sendMessage() {
         showToast("تم إيقاف المعالجة.");
       }
     } else {
-      console.warn("T.M.D_AI_Pro Message Error:", error?.message || error);
+      console.warn("SPARTA AI Message Error:", error?.message || error);
       const message = error?.message || "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.";
       showToast(message);
       addErrorMessage(
@@ -2289,13 +2435,13 @@ function exportCurrentChat() {
     return;
   }
 
-  let text = `# سجل محادثة T.M.D_AI_Pro\n`;
+  let text = `# سجل محادثة SPARTA AI\n`;
   text += `تاريخ التصدير: ${new Date().toLocaleString("ar-EG")}\n`;
   text += `تطوير وتصميم: ياسين عمرو عبد الرحيم\n`;
   text += `---------------------------------------------------\n\n`;
 
   state.messages.forEach(m => {
-    const role = m.role === "user" ? "👤 المستخدم" : "✦ T.M.D_AI_Pro";
+    const role = m.role === "user" ? "👤 المستخدم" : "✦ SPARTA AI";
     text += `${role}:\n${m.content || ""}\n\n`;
   });
 
@@ -2354,5 +2500,5 @@ window.TMDAI = {
   showToast
 };
 
-console.log("T.M.D_AI_Pro loaded — Engineered & Designed by Yassin Amr Abdelrahim (ياسين عمرو عبد الرحيم)");
+console.log("SPARTA AI loaded — Engineered & Designed by Yassin Amr Abdelrahim (ياسين عمرو عبد الرحيم)");
 

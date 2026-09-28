@@ -1,27 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI">
   <defs>
-    <linearGradient id="mono-edge" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="60%" stop-color="#b5b5b5"/>
-      <stop offset="100%" stop-color="#6a6a6a"/>
-    </linearGradient>
-    <radialGradient id="mono-core" cx="36%" cy="28%" r="80%">
-      <stop offset="0%" stop-color="#262626"/>
-      <stop offset="70%" stop-color="#0d0d0d"/>
-      <stop offset="100%" stop-color="#000000"/>
-    </radialGradient>
+    <linearGradient id="edge" x1="28" y1="18" x2="131" y2="142" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".48" stop-color="#bbb"/><stop offset="1" stop-color="#555"/></linearGradient>
+    <linearGradient id="bolt" x1="79" y1="39" x2="84" y2="121" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".53" stop-color="#f4f4f4"/><stop offset="1" stop-color="#bdbdbd"/></linearGradient>
+    <radialGradient id="core" cx=".35" cy=".2" r=".9"><stop stop-color="#303030"/><stop offset=".6" stop-color="#0b0b0b"/><stop offset="1"/></radialGradient>
+    <filter id="glow" x="-55%" y="-55%" width="210%" height="210%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
-
-  <rect width="100" height="100" rx="26" fill="url(#mono-core)"/>
-  <rect x="2.4" y="2.4" width="95.2" height="95.2" rx="23.8" fill="none"
-        stroke="url(#mono-edge)" stroke-width="2.2"/>
-
-  <circle cx="50" cy="46" r="26" fill="none" stroke="#ffffff" stroke-opacity="0.45"
-          stroke-width="1.1" stroke-dasharray="6 4"/>
-
-  <path d="M50 18 C51.4 30.6 58.4 37.6 71 39 C58.4 40.4 51.4 47.4 50 60 C48.6 47.4 41.6 40.4 29 39 C41.6 37.6 48.6 30.6 50 18 Z"
-        fill="#ffffff"/>
-
-  <text x="50" y="84" font-family="'Space Grotesk',sans-serif" font-size="16" font-weight="800"
-        fill="#ffffff" text-anchor="middle" letter-spacing="2.5">TMD</text>
+  <path d="M80 8 137 40v62l-57 50-57-50V40L80 8Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m91 35-39 48h25l-8 42 39-52H83l8-38Z" fill="url(#bolt)" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="80" cy="80" r="55" stroke="#fff" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 8"/>
 </svg>

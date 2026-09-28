@@ -1,7 +1,7 @@
 "use strict";
 
 /* =========================================================
-   T.M.D_AI_Pro
+   SPARTA AI
    Groq + MiniMax API Router
    Vercel Serverless Function
    /api/chat.js
@@ -103,7 +103,7 @@ const IMAGE_DATA_URL_PATTERN = /^data:image\/(?:png|jpe?g|webp|gif);base64,[a-z0
    ========================================================= */
 
 const SYSTEM_PROMPT = `
-أنت T.M.D_AI_Pro، مساعد ذكاء اصطناعي محترف فائق الذكاء، صممه وطوره المطور والمهندس المبدع "ياسين عمرو عبد الرحيم".
+أنت SPARTA AI، مساعد ذكاء اصطناعي محترف فائق الذكاء، صممه وطوره المطور والمهندس المبدع "ياسين عمرو عبد الرحيم".
 
 قواعد الهوية والتكوين والمطور (قاعدة صارمة وأساسية):
 - من طورك / صممك / برمجك / صنعك / أنشأك / ما هو تكوينك / من صاحبك / من أنت / من صاحب الموقع:
@@ -1067,7 +1067,7 @@ const MINIMAX_BILLING_HELP =
   "② أو تأكد من استخدام المفتاح الصحيح: مفتاح الدفع حسب الاستخدام (API Key) يحتاج رصيدًا، " +
   "أما مفتاح الاشتراك (Token Plan Subscription Key) فيعمل بنافذة استخدام متجددة — " +
   "وحدّث MINIMAX_API_KEY في إعدادات Vercel ثم أعد النشر، " +
-  "③ أو اختر أحد نماذج Groq من قائمة النماذج (T.M.D Pro / Fast / Vision) لمواصلة العمل فورًا.";
+  "③ أو اختر أحد نماذج Groq من قائمة النماذج (SPARTA Core / Fast / Vision) لمواصلة العمل فورًا.";
 
 const MINIMAX_AUTH_HELP =
   "مفتاح MiniMax غير صالح (الرمز 2049: invalid api key). " +
@@ -1926,7 +1926,7 @@ module.exports =
                       text:
                         "رصيد MiniMax غير كافٍ (1008)، لذلك تم تحويل هذا الطلب تلقائيًا إلى Groq (" +
                         billingFallback.model +
-                        ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل T.M.D Max."
+                        ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل SPARTA Max."
 
                     }
 
@@ -1981,7 +1981,7 @@ module.exports =
                     text:
                       "رصيد MiniMax غير كافٍ (1008)، لذلك تم تحويل هذا الطلب تلقائيًا إلى Groq (" +
                       billingFallback.model +
-                      ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل T.M.D Max."
+                      ") ليبقى الموقع يعمل. اشحن رصيد MiniMax لإعادة تفعيل SPARTA Max."
 
                   }
 
@@ -1997,7 +1997,7 @@ module.exports =
     ) {
 
       console.error(
-        "T.M.D_AI_Pro /api/chat error",
+        "SPARTA AI /api/chat error",
         error
       );
 

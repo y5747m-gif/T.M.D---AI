@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- =====================================================
-     T.M.D_AI_Pro — sitemap.xml
+     SPARTA AI — sitemap.xml
      جميع الصفحات العامة القابلة للفهرسة.
      لتغيير الدومين: استبدل https://t-m-d-ai.vercel.app
      في هذا الملف وفي robots.txt وفي ترويسات الصفحات.
@@ -9,25 +9,25 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://t-m-d-ai.vercel.app/</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://t-m-d-ai.vercel.app/about</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://t-m-d-ai.vercel.app/faq</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://t-m-d-ai.vercel.app/privacy</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

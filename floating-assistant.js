@@ -1,10 +1,10 @@
 /* ==========================================================
-   T.M.D_AI — المساعد العائم فوق كل التطبيقات
+   SPARTA AI — المساعد العائم فوق كل التطبيقات
    ----------------------------------------------------------
    • فقاعة عائمة قابلة للسحب مع شعار الشرارة (ب نمط Gemini).
    • زر «تثبيت» 📌: يرفع المساعد إلى نافذة عائمة دائمة تبقى
      فوق كل البرامج والتطبيقات (Document Picture-in-Picture)
-     وهي متصلة بالموقع — دون بقاء المستخدم داخل T.M.D_AI.
+     وهي متصلة بالموقع — دون بقاء المستخدم داخل SPARTA AI.
    • على المتصفحات التي لا تدعم ذلك: نافذة مستقلة مدمجة.
    • دردشة سريعة + مشاركة شاشة + نطق + ميكروفون.
    • مزامنة المحادثة بين النوافذ عبر BroadcastChannel.
@@ -24,16 +24,15 @@
   const SITE_URL = new URL("/", window.location.href).href;
   const TEXT_MODEL = "openai/gpt-oss-120b";
   const VISION_MODEL = "qwen/qwen3.8-27b";
-  /* الباقة المدفوعة «MiniMax» */
+  /* SPARTA Pro المدفوع: MiniMax ومهمة اليوم للنسخة المدفوعة فقط.
+     لا تمنح أي باقة أرصدة يومية تلقائية. */
   const PLAN_KEY = "tmd_float_plan";
-  const CREDITS_KEY = "tmd_float_credits";
   const MINIMAX_MODEL = "MiniMax-M3";
-  const DAILY_CREDITS = 15;
   const MAX_TURNS = 14;
   const REQUEST_TIMEOUT_MS = 45000;
 
   const SYSTEM_PROMPT =
-    "أنت T.M.D_AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة عائمة فوق بقية التطبيقات. " +
+    "أنت SPARTA AI، مساعد ذكي عربي احترافي يعمل الآن داخل نافذة عائمة فوق بقية التطبيقات. " +
     "أجب بإيجاز وبأسلوب محادثة طبيعي مناسب للقراءة الصوتية (2-5 جمل غالبًا) ما لم يطلب المستخدم التفصيل. " +
     "تجنّب الإفراط في الرموز والتنسيق لأن ردّك يُقرأ بصوت مسموع. " +
     "إذا أُرسلت لك لقطة من شاشة المستخدم فحلّلها بدقة وصف ما تراه وساعده عمليًا فيما يفعله. " +
@@ -46,21 +45,20 @@
     "ساعدني في الخطوة التالية"
   ];
 
-  /* ============ شعار الشرارة (ب نمط Gemini) ============ */
+  /* ============ برق SPARTA أحادي اللون ============ */
   let sparkSeq = 0;
   function sparkSVG(className) {
-    const gid = "tmdSparkGrad" + (++sparkSeq);
+    const gid = "spartaBoltGrad" + (++sparkSeq);
     return (
       '<svg class="' + (className || "tmd-spark") + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       '<defs>' +
-      '<linearGradient id="' + gid + '" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">' +
-      '<stop offset="0" stop-color="#4285f4"/>' +
-      '<stop offset="0.48" stop-color="#9b72cb"/>' +
-      '<stop offset="1" stop-color="#d96570"/>' +
+      '<linearGradient id="' + gid + '" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">' +
+      '<stop offset="0" stop-color="#ffffff"/>' +
+      '<stop offset="0.52" stop-color="#dedede"/>' +
+      '<stop offset="1" stop-color="#8f8f8f"/>' +
       "</linearGradient>" +
       "</defs>" +
-      '<path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 ' +
-      'C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#' + gid + ')"/>' +
+      '<path d="M14.1 1.8 4.5 13h6L9.4 22.2 19.5 10h-6.1l.7-8.2Z" fill="url(#' + gid + ')" stroke="#fff" stroke-opacity=".6" stroke-width=".55" stroke-linejoin="round"/>' +
       "</svg>"
     );
   }
@@ -132,41 +130,13 @@
 
   state.enabled = store.readFlag(ENABLE_KEY, true);
 
-  /* ============ الباقة المدفوعة MiniMax + الرصيد اليومي ============ */
-  function todayKey() {
-    const d = new Date();
-    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  }
-
+  /* ============ اشتراك SPARTA Pro ============ */
   const plan = {
     isPro() {
       return store.read(PLAN_KEY, "free") === "minimax";
     },
     setPro(value) {
       store.write(PLAN_KEY, value ? "minimax" : "free");
-      if (value) plan.credits(); // تهيئة رصيد اليوم
-      updatePlanUI();
-    },
-    /** رصيد اليوم المتبقي (يتجدّد تلقائيًا كل يوم) */
-    credits() {
-      const data = store.read(CREDITS_KEY, null);
-      if (!data || data.day !== todayKey() || typeof data.left !== "number") {
-        const fresh = { day: todayKey(), left: DAILY_CREDITS };
-        store.write(CREDITS_KEY, fresh);
-        return fresh.left;
-      }
-      return Math.max(0, Math.min(DAILY_CREDITS, data.left));
-    },
-    consume() {
-      const left = plan.credits();
-      if (left <= 0) return false;
-      store.write(CREDITS_KEY, { day: todayKey(), left: left - 1 });
-      updatePlanUI();
-      return true;
-    },
-    refund() {
-      const left = plan.credits();
-      store.write(CREDITS_KEY, { day: todayKey(), left: Math.min(DAILY_CREDITS, left + 1) });
       updatePlanUI();
     }
   };
@@ -205,8 +175,8 @@
   const fab = document.createElement("button");
   fab.type = "button";
   fab.className = "tmd-fab";
-  fab.setAttribute("aria-label", "فتح مساعد T.M.D_AI العائم");
-  fab.title = "T.M.D_AI — المساعد العائم (اسحب لتحريكه)";
+  fab.setAttribute("aria-label", "فتح مساعد SPARTA AI العائم");
+  fab.title = "SPARTA AI — المساعد العائم (اسحب لتحريكه)";
   fab.innerHTML =
     '<span class="tmd-fab__ring"></span>' +
     '<span class="tmd-fab__ring tmd-fab__ring--gold"></span>' +
@@ -217,17 +187,17 @@
   const win = document.createElement("section");
   win.className = "tmd-mini";
   win.setAttribute("role", "dialog");
-  win.setAttribute("aria-label", "نافذة T.M.D_AI العائمة");
+  win.setAttribute("aria-label", "نافذة SPARTA AI العائمة");
   win.innerHTML =
     '<header class="tmd-mini__head" data-el="head">' +
     '<div class="tmd-mini__avatar">' + sparkSVG() + "</div>" +
     '<div class="tmd-mini__titles">' +
-    '<div class="tmd-mini__title">T.M.D_AI — المساعد العائم</div>' +
+    '<div class="tmd-mini__title">SPARTA AI — المساعد العائم</div>' +
     '<div class="tmd-mini__status" data-el="status">جاهز للدردشة</div>' +
     "</div>" +
-    '<button type="button" class="tmd-plan-chip" data-el="planBtn" title="باقة MiniMax — الرصيد اليومي">' +
+    '<button type="button" class="tmd-plan-chip" data-el="planBtn" title="SPARTA Pro — MiniMax ومهمة يومية للنسخة المدفوعة">' +
     '<span class="tmd-plan-chip__name" data-el="planName">مجاني</span>' +
-    '<span class="tmd-plan-chip__credits" data-el="planCredits">' + DAILY_CREDITS + "</span>" +
+    '<span class="tmd-plan-chip__credits" data-el="planCredits">—</span>' +
     "</button>" +
     '<button type="button" class="tmd-mini__head-btn tmd-pin-btn" data-el="pinBtn" title="تثبيت فوق كل التطبيقات — نافذة عائمة دائمة تبقى أمامك أثناء استخدام أي برنامج آخر">' + ICONS.pin + "</button>" +
     '<button type="button" class="tmd-mini__head-btn" data-el="clear" title="محادثة جديدة">' + ICONS.trash + "</button>" +
@@ -248,14 +218,13 @@
     "</div>" +
     '<div class="tmd-plan-card" data-plan="free">' +
     '<div class="tmd-plan-card__title">المجانية</div>' +
-    '<div class="tmd-plan-card__desc">نموذج سريع للدردشة اليومية بدون رصيد.</div>' +
-    '<button type="button" class="tmd-plan-card__btn" data-el="planFree">تفعيل المجانية</button>' +
+    '<div class="tmd-plan-card__desc">دردشة أساسية. لا تشمل MiniMax أو مهمة SPARTA Pro اليومية.</div>' +
+    '<button type="button" class="tmd-plan-card__btn" data-el="planFree">استخدام المجانية</button>' +
     "</div>" +
     '<div class="tmd-plan-card tmd-plan-card--pro" data-plan="minimax">' +
-    '<div class="tmd-plan-card__title">MiniMax <span class="tmd-plan-card__tag">Pro</span></div>' +
-    '<div class="tmd-plan-card__desc">' + DAILY_CREDITS + " رسالة يوميًا (كتابةً أو صوتًا) بنموذج MiniMax المتقدّم، مع تجدّد الرصيد كل يوم.</div>" +
-    '<div class="tmd-plan-card__meter"><span data-el="planMeter"></span></div>' +
-    '<button type="button" class="tmd-plan-card__btn tmd-plan-card__btn--pro" data-el="planPro">تفعيل باقة MiniMax</button>' +
+    '<div class="tmd-plan-card__title">SPARTA Max <span class="tmd-plan-card__tag">PRO</span></div>' +
+    '<div class="tmd-plan-card__desc">MiniMax M3 ومهمة Pro واحدة كل يوم داخل الأداة الكاملة. لا تشمل الخطة أرصدة يومية تلقائية.</div>' +
+    '<button type="button" class="tmd-plan-card__btn tmd-plan-card__btn--pro" data-el="planPro">يتطلب اشتراكًا مدفوعًا</button>' +
     "</div>" +
     "</div>" +
     "</div>" +
@@ -275,7 +244,7 @@
     '<button type="button" class="tmd-mini__send" data-el="send" title="إرسال">' + ICONS.send + "</button>" +
     "</div>" +
 
-    '<a class="tmd-open-site" data-el="openSite" href="/" title="فتح موقع T.M.D_AI الكامل">' + ICONS.site + "<span>الموقع الكامل</span></a>";
+    '<a class="tmd-open-site" data-el="openSite" href="/" title="فتح موقع SPARTA AI الكامل">' + ICONS.site + "<span>الموقع الكامل</span></a>";
 
   const el = {};
   win.querySelectorAll("[data-el]").forEach((node) => {
@@ -293,27 +262,18 @@
   /* ============ واجهة الباقة ============ */
   function updatePlanUI() {
     const pro = plan.isPro();
-    const left = pro ? plan.credits() : DAILY_CREDITS;
-    if (el.planName) el.planName.textContent = pro ? "MiniMax" : "مجاني";
-    if (el.planCredits) {
-      el.planCredits.textContent = pro ? left + "/" + DAILY_CREDITS : "∞";
-    }
+    if (el.planName) el.planName.textContent = pro ? "Max Pro" : "مجاني";
+    if (el.planCredits) el.planCredits.textContent = pro ? "PRO" : "—";
     if (el.planBtn) {
       el.planBtn.classList.toggle("is-pro", pro);
-      el.planBtn.classList.toggle("is-empty", pro && left <= 0);
+      el.planBtn.classList.remove("is-empty");
       el.planBtn.title = pro
-        ? "باقة MiniMax — متبقٍ " + left + " من " + DAILY_CREDITS + " رسالة اليوم"
-        : "الباقة المجانية — اضغط للترقية إلى MiniMax";
+        ? "SPARTA Max Pro — MiniMax ومهمة يومية، من دون رصيد يومي تلقائي"
+        : "الباقة المجانية — لا تشمل MiniMax أو مهمة SPARTA Pro";
     }
-    if (el.planBtn && el.planBtn.dataset.left !== String(left)) {
-      el.planBtn.dataset.left = String(left);
-      el.planBtn.classList.remove("is-bump");
-      void el.planBtn.offsetWidth; // إعادة تشغيل الحركة
-      el.planBtn.classList.add("is-bump");
-    }
-    if (el.planMeter) el.planMeter.style.width = Math.round((left / DAILY_CREDITS) * 100) + "%";
-    if (el.planPro) el.planPro.textContent = pro ? "باقة MiniMax مفعّلة ✓" : "تفعيل باقة MiniMax";
+    if (el.planPro) el.planPro.textContent = pro ? "SPARTA Max Pro مفعّلة ✓" : "يتطلب اشتراكًا مدفوعًا";
     if (el.planPro) el.planPro.disabled = pro;
+    if (el.planFree) el.planFree.textContent = pro ? "التحويل إلى المجانية" : "الخطة الحالية";
     if (el.planFree) el.planFree.disabled = !pro;
     win.classList.toggle("is-pro", pro);
   }
@@ -429,7 +389,7 @@
       bubble({
         role: "assistant",
         content:
-          "مرحبًا 👋 أنا T.M.D_AI في نافذة عائمة.\n" +
+          "مرحبًا 👋 أنا SPARTA AI في نافذة عائمة.\n" +
           "اكتب لي، أو اضغط 🎙️ وتحدّث معي، أو شارك شاشتك لأرى ما تعمل عليه.\n" +
           "واضغط زر التثبيت 📌 بالأعلى لأبقى فوق كل التطبيقات أثناء عملك."
       });
@@ -725,18 +685,8 @@
 
     stopSpeaking();
 
-    /* الباقة المدفوعة: خصم رصيد يومي لكل رسالة (كتابة أو صوت) */
-    let useMiniMax = false;
-    if (plan.isPro()) {
-      if (plan.consume()) {
-        useMiniMax = true;
-      } else {
-        pushError(
-          "انتهى رصيدك اليومي في باقة MiniMax (" + DAILY_CREDITS + " رسالة/يوم). " +
-          "سيتم إكمال هذه الرسالة بالنموذج المجاني، ويتجدّد رصيدك تلقائيًا غدًا."
-        );
-      }
-    }
+    /* MiniMax جزء من SPARTA Max Pro فقط؛ لا ننشئ أو نمنح رصيدًا يوميًا. */
+    const useMiniMax = plan.isPro();
 
     const image = captureFrame();
 
@@ -791,7 +741,6 @@
       speak(reply);
     } catch (error) {
       typing.remove();
-      if (useMiniMax) plan.refund(); // لا نخصم رصيدًا على طلب فاشل
       if (error && error.name === "AbortError") {
         if (state.abortReason === "timeout") {
           pushError("استغرق الطلب وقتًا أطول من المتوقع، حاول مرة أخرى.");
@@ -847,7 +796,7 @@
     doc.documentElement.lang = "ar";
     doc.documentElement.dir = "rtl";
     doc.documentElement.dataset.theme = document.documentElement.dataset.theme || "dark";
-    doc.title = "T.M.D_AI — مساعد عائم";
+    doc.title = "SPARTA AI — مساعد عائم";
 
     /* نسخ التنسيقات إلى نافذة التثبيت */
     Array.prototype.forEach.call(document.styleSheets, (sheet) => {
@@ -1030,7 +979,7 @@
     win.classList.add("is-open");
     win.classList.remove("is-collapsed");
     state.collapsed = false;
-    fab.setAttribute("aria-label", "إغلاق مساعد T.M.D_AI العائم");
+    fab.setAttribute("aria-label", "إغلاق مساعد SPARTA AI العائم");
     setTimeout(() => el.input.focus(), 120);
     scrollDown();
   }
@@ -1114,14 +1063,12 @@
   el.planBtn.addEventListener("click", () => togglePlanSheet());
   el.planClose.addEventListener("click", () => togglePlanSheet(false));
   el.planPro.addEventListener("click", () => {
-    plan.setPro(true);
-    togglePlanSheet(false);
-    setStatus("باقة MiniMax مفعّلة — " + plan.credits() + " رسالة اليوم");
+    // لا نحوّل المستخدم إلى Pro محليًا: التفعيل يأتي من تحقق الاشتراك المدفوع.
+    setStatus("SPARTA Max Pro يتطلب اشتراكًا مدفوعًا");
     bubble({
       role: "assistant",
       content:
-        "تم تفعيل باقة MiniMax ✨\n" +
-        "لديك " + DAILY_CREDITS + " رسالة يوميًا (كتابةً أو صوتًا) بنموذج MiniMax المتقدّم، ويتجدّد الرصيد تلقائيًا كل يوم."
+        "SPARTA Max Pro يتطلب اشتراكًا مدفوعًا ومؤكدًا. بعد التفعيل ستحصل على MiniMax M3 ومهمة Pro يومية داخل الأداة الكاملة. لا تتضمن الخطط أرصدة يومية تلقائية."
     });
     scrollDown();
   });
@@ -1253,6 +1200,13 @@
     stopShare,
     setEnabled,
     isEnabled() { return state.enabled; },
+    // جسر التكامل مع بوابة دفع موثوقة: يجب ألا يستدعى إلا بعد تأكيد الاشتراك.
+    // لا يوجد زر في الواجهة يحوّل الباقة المجانية إلى Pro من تلقاء نفسه.
+    setPaidPlan(active) {
+      plan.setPro(Boolean(active));
+      if (active) setStatus("SPARTA Max Pro مفعّلة — MiniMax ومهمة اليوم جاهزان");
+    },
+    isProPlan() { return plan.isPro(); },
     speak,
     stopSpeaking,
     state
