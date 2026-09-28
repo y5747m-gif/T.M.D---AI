@@ -24,6 +24,11 @@
   const SITE_URL = new URL("/", window.location.href).href;
   const TEXT_MODEL = "openai/gpt-oss-120b";
   const VISION_MODEL = "qwen/qwen3.8-27b";
+  /* الباقة المدفوعة «MiniMax» */
+  const PLAN_KEY = "tmd_float_plan";
+  const CREDITS_KEY = "tmd_float_credits";
+  const MINIMAX_MODEL = "MiniMax-M3";
+  const DAILY_CREDITS = 15;
   const MAX_TURNS = 14;
   const REQUEST_TIMEOUT_MS = 45000;
 
@@ -127,6 +132,45 @@
 
   state.enabled = store.readFlag(ENABLE_KEY, true);
 
+  /* ============ الباقة المدفوعة MiniMax + الرصيد اليومي ============ */
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  const plan = {
+    isPro() {
+      return store.read(PLAN_KEY, "free") === "minimax";
+    },
+    setPro(value) {
+      store.write(PLAN_KEY, value ? "minimax" : "free");
+      if (value) plan.credits(); // تهيئة رصيد اليوم
+      updatePlanUI();
+    },
+    /** رصيد اليوم المتبقي (يتجدّد تلقائيًا كل يوم) */
+    credits() {
+      const data = store.read(CREDITS_KEY, null);
+      if (!data || data.day !== todayKey() || typeof data.left !== "number") {
+        const fresh = { day: todayKey(), left: DAILY_CREDITS };
+        store.write(CREDITS_KEY, fresh);
+        return fresh.left;
+      }
+      return Math.max(0, Math.min(DAILY_CREDITS, data.left));
+    },
+    consume() {
+      const left = plan.credits();
+      if (left <= 0) return false;
+      store.write(CREDITS_KEY, { day: todayKey(), left: left - 1 });
+      updatePlanUI();
+      return true;
+    },
+    refund() {
+      const left = plan.credits();
+      store.write(CREDITS_KEY, { day: todayKey(), left: Math.min(DAILY_CREDITS, left + 1) });
+      updatePlanUI();
+    }
+  };
+
   function persistableMessages(messages) {
     if (!Array.isArray(messages)) return [];
     return messages
@@ -181,6 +225,10 @@
     '<div class="tmd-mini__title">T.M.D_AI — المساعد العائم</div>' +
     '<div class="tmd-mini__status" data-el="status">جاهز للدردشة</div>' +
     "</div>" +
+    '<button type="button" class="tmd-plan-chip" data-el="planBtn" title="باقة MiniMax — الرصيد اليومي">' +
+    '<span class="tmd-plan-chip__name" data-el="planName">مجاني</span>' +
+    '<span class="tmd-plan-chip__credits" data-el="planCredits">' + DAILY_CREDITS + "</span>" +
+    "</button>" +
     '<button type="button" class="tmd-mini__head-btn tmd-pin-btn" data-el="pinBtn" title="تثبيت فوق كل التطبيقات — نافذة عائمة دائمة تبقى أمامك أثناء استخدام أي برنامج آخر">' + ICONS.pin + "</button>" +
     '<button type="button" class="tmd-mini__head-btn" data-el="clear" title="محادثة جديدة">' + ICONS.trash + "</button>" +
     '<button type="button" class="tmd-mini__head-btn" data-el="collapse" title="تصغير">' + ICONS.minus + "</button>" +
@@ -190,6 +238,26 @@
     '<div class="tmd-mini__screen" data-el="screenBox">' +
     '<video data-el="video" muted playsinline autoplay></video>' +
     '<span class="tmd-mini__screen-tag">مشاركة الشاشة نشطة</span>' +
+    "</div>" +
+
+    '<div class="tmd-plan-sheet" data-el="planSheet" hidden>' +
+    '<div class="tmd-plan-sheet__inner">' +
+    '<div class="tmd-plan-sheet__head">' +
+    '<strong>الباقات</strong>' +
+    '<button type="button" class="tmd-mini__head-btn" data-el="planClose" title="إغلاق">' + ICONS.close + "</button>" +
+    "</div>" +
+    '<div class="tmd-plan-card" data-plan="free">' +
+    '<div class="tmd-plan-card__title">المجانية</div>' +
+    '<div class="tmd-plan-card__desc">نموذج سريع للدردشة اليومية بدون رصيد.</div>' +
+    '<button type="button" class="tmd-plan-card__btn" data-el="planFree">تفعيل المجانية</button>' +
+    "</div>" +
+    '<div class="tmd-plan-card tmd-plan-card--pro" data-plan="minimax">' +
+    '<div class="tmd-plan-card__title">MiniMax <span class="tmd-plan-card__tag">Pro</span></div>' +
+    '<div class="tmd-plan-card__desc">' + DAILY_CREDITS + " رسالة يوميًا (كتابةً أو صوتًا) بنموذج MiniMax المتقدّم، مع تجدّد الرصيد كل يوم.</div>" +
+    '<div class="tmd-plan-card__meter"><span data-el="planMeter"></span></div>' +
+    '<button type="button" class="tmd-plan-card__btn tmd-plan-card__btn--pro" data-el="planPro">تفعيل باقة MiniMax</button>' +
+    "</div>" +
+    "</div>" +
     "</div>" +
 
     '<div class="tmd-mini__body" data-el="body"></div>' +
@@ -221,6 +289,34 @@
   document.body.appendChild(win);
   state.fab = fab;
   state.win = win;
+
+  /* ============ واجهة الباقة ============ */
+  function updatePlanUI() {
+    const pro = plan.isPro();
+    const left = pro ? plan.credits() : DAILY_CREDITS;
+    if (el.planName) el.planName.textContent = pro ? "MiniMax" : "مجاني";
+    if (el.planCredits) {
+      el.planCredits.textContent = pro ? left + "/" + DAILY_CREDITS : "∞";
+    }
+    if (el.planBtn) {
+      el.planBtn.classList.toggle("is-pro", pro);
+      el.planBtn.classList.toggle("is-empty", pro && left <= 0);
+      el.planBtn.title = pro
+        ? "باقة MiniMax — متبقٍ " + left + " من " + DAILY_CREDITS + " رسالة اليوم"
+        : "الباقة المجانية — اضغط للترقية إلى MiniMax";
+    }
+    if (el.planMeter) el.planMeter.style.width = Math.round((left / DAILY_CREDITS) * 100) + "%";
+    if (el.planPro) el.planPro.textContent = pro ? "باقة MiniMax مفعّلة ✓" : "تفعيل باقة MiniMax";
+    if (el.planPro) el.planPro.disabled = pro;
+    if (el.planFree) el.planFree.disabled = !pro;
+    win.classList.toggle("is-pro", pro);
+  }
+
+  function togglePlanSheet(force) {
+    const show = typeof force === "boolean" ? force : el.planSheet.hidden;
+    el.planSheet.hidden = !show;
+    if (show) updatePlanUI();
+  }
 
   /* ============ أدوات مساعدة ============ */
   function setStatus(text) {
@@ -621,6 +717,20 @@
     }
 
     stopSpeaking();
+
+    /* الباقة المدفوعة: خصم رصيد يومي لكل رسالة (كتابة أو صوت) */
+    let useMiniMax = false;
+    if (plan.isPro()) {
+      if (plan.consume()) {
+        useMiniMax = true;
+      } else {
+        pushError(
+          "انتهى رصيدك اليومي في باقة MiniMax (" + DAILY_CREDITS + " رسالة/يوم). " +
+          "سيتم إكمال هذه الرسالة بالنموذج المجاني، ويتجدّد رصيدك تلقائيًا غدًا."
+        );
+      }
+    }
+
     const image = captureFrame();
 
     state.messages.push({ role: "user", content: text, image: image || undefined });
@@ -646,7 +756,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          model: image ? VISION_MODEL : TEXT_MODEL,
+          model: image ? VISION_MODEL : (useMiniMax ? MINIMAX_MODEL : TEXT_MODEL),
           messages: buildApiMessages(image)
         }),
         signal: state.controller.signal
@@ -674,6 +784,7 @@
       speak(reply);
     } catch (error) {
       typing.remove();
+      if (useMiniMax) plan.refund(); // لا نخصم رصيدًا على طلب فاشل
       if (error && error.name === "AbortError") {
         if (state.abortReason === "timeout") {
           pushError("استغرق الطلب وقتًا أطول من المتوقع، حاول مرة أخرى.");
@@ -993,6 +1104,26 @@
     setStatus("بدأنا محادثة جديدة");
   });
 
+  el.planBtn.addEventListener("click", () => togglePlanSheet());
+  el.planClose.addEventListener("click", () => togglePlanSheet(false));
+  el.planPro.addEventListener("click", () => {
+    plan.setPro(true);
+    togglePlanSheet(false);
+    setStatus("باقة MiniMax مفعّلة — " + plan.credits() + " رسالة اليوم");
+    bubble({
+      role: "assistant",
+      content:
+        "تم تفعيل باقة MiniMax ✨\n" +
+        "لديك " + DAILY_CREDITS + " رسالة يوميًا (كتابةً أو صوتًا) بنموذج MiniMax المتقدّم، ويتجدّد الرصيد تلقائيًا كل يوم."
+    });
+    scrollDown();
+  });
+  el.planFree.addEventListener("click", () => {
+    plan.setPro(false);
+    togglePlanSheet(false);
+    setStatus("تم الرجوع إلى الباقة المجانية");
+  });
+
   el.send.addEventListener("click", send);
   el.input.addEventListener("input", () => { autoGrow(); updateSendAvailability(); });
   el.input.addEventListener("keydown", (event) => {
@@ -1044,6 +1175,7 @@
     state.speak = prefs.speak !== false;
     el.speakBtn.classList.toggle("is-active", state.speak);
     el.speakBtn.querySelector("span").textContent = state.speak ? "النطق" : "صامت";
+    updatePlanUI();
 
     if (prefs.fab && prefs.fab.top && prefs.vh) {
       /* إعادة تموضع الفقاعة بالنسبة لأبعاد الشاشة الحالية */

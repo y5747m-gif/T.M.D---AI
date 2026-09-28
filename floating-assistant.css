@@ -879,3 +879,295 @@
     padding-inline: 9px;
   }
 }
+
+/* ==========================================================
+   T.M.D_AI — الطبقة الزجاجية (Glass v4)
+   إعادة تصميم مظهر الودجة: زجاج ضبابي، حواف مضيئة،
+   زوايا ناعمة، وحركات هادئة — مع الحفاظ على الهوية.
+   ========================================================== */
+
+.tmd-fab,
+.tmd-mini {
+  --tmd-glass: rgba(14, 20, 40, 0.58);
+  --tmd-glass-2: rgba(10, 15, 32, 0.72);
+  --tmd-glass-line: rgba(255, 255, 255, 0.14);
+  --tmd-radius: 26px;
+}
+
+:root[data-theme="light"] .tmd-fab,
+:root[data-theme="light"] .tmd-mini {
+  --tmd-glass: rgba(255, 255, 255, 0.62);
+  --tmd-glass-2: rgba(244, 247, 255, 0.78);
+  --tmd-glass-line: rgba(16, 24, 40, 0.12);
+}
+
+/* ---------- الفقاعة ---------- */
+.tmd-fab {
+  --fab-size: 64px;
+  border: 1px solid var(--tmd-glass-line);
+  background: var(--tmd-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    0 18px 40px rgba(3, 7, 18, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4), box-shadow 0.25s ease;
+}
+
+.tmd-fab::before {
+  inset: -6px;
+  filter: blur(14px);
+  opacity: 0.5;
+}
+
+.tmd-fab::after {
+  inset: 1px;
+  background:
+    radial-gradient(120% 80% at 28% 12%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(100% 100% at 80% 100%, rgba(77, 124, 254, 0.22), transparent 60%);
+}
+
+.tmd-fab:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow:
+    0 22px 50px rgba(3, 7, 18, 0.55),
+    0 0 0 1px rgba(223, 181, 84, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* ---------- النافذة ---------- */
+.tmd-mini {
+  width: min(410px, calc(100vw - 24px));
+  border-radius: var(--tmd-radius);
+  border: 1px solid var(--tmd-glass-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)),
+    var(--tmd-glass-2);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  backdrop-filter: blur(26px) saturate(170%);
+  box-shadow:
+    0 34px 90px rgba(2, 5, 14, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.tmd-mini.is-open {
+  animation: tmdGlassIn 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.15);
+}
+
+@keyframes tmdGlassIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.tmd-mini__head {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border-bottom: 1px solid var(--tmd-glass-line);
+  padding: 12px 13px;
+  gap: 10px;
+}
+
+.tmd-mini__avatar {
+  border-radius: 16px;
+  border: 1px solid var(--tmd-glass-line);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(135deg, rgba(77, 124, 254, 0.35), rgba(223, 181, 84, 0.22));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.tmd-mini__head-btn {
+  border-radius: 12px;
+  border-color: var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.tmd-mini__head-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+/* ---------- شارة الباقة ---------- */
+.tmd-plan-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 27px;
+  padding: 0 9px;
+  cursor: pointer;
+  font: 700 10.5px/1 "Cairo", system-ui, sans-serif;
+  color: var(--tmd-text);
+  border-radius: 999px;
+  border: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tmd-plan-chip:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.16); }
+
+.tmd-plan-chip__credits {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(77, 124, 254, 0.22);
+  color: #dfe7ff;
+  font-size: 10px;
+}
+
+.tmd-plan-chip.is-pro {
+  border-color: rgba(223, 181, 84, 0.55);
+  background: linear-gradient(135deg, rgba(223, 181, 84, 0.26), rgba(77, 124, 254, 0.2));
+  box-shadow: 0 0 18px rgba(223, 181, 84, 0.22);
+}
+
+.tmd-plan-chip.is-pro .tmd-plan-chip__credits {
+  background: rgba(223, 181, 84, 0.3);
+  color: #ffeec4;
+}
+
+.tmd-plan-chip.is-empty .tmd-plan-chip__credits {
+  background: rgba(255, 92, 116, 0.28);
+  color: #ffdde3;
+}
+
+/* ---------- لوحة الباقات ---------- */
+.tmd-plan-sheet {
+  padding: 12px;
+  border-bottom: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.04);
+  animation: tmdGlassIn 0.26s ease;
+}
+
+.tmd-plan-sheet[hidden] { display: none; }
+
+.tmd-plan-sheet__inner { display: grid; gap: 10px; }
+
+.tmd-plan-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--tmd-text);
+}
+
+.tmd-plan-card {
+  padding: 11px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tmd-plan-card--pro {
+  border-color: rgba(223, 181, 84, 0.42);
+  background: linear-gradient(135deg, rgba(223, 181, 84, 0.14), rgba(77, 124, 254, 0.12));
+}
+
+.tmd-plan-card__title { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+
+.tmd-plan-card__tag {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(223, 181, 84, 0.3);
+  color: #ffeec4;
+  margin-inline-start: 4px;
+}
+
+.tmd-plan-card__desc { font-size: 11.5px; color: var(--tmd-muted); line-height: 1.6; }
+
+.tmd-plan-card__meter {
+  height: 6px;
+  margin: 9px 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tmd-plan-card__meter span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4d7cfe, #dfb554);
+  transition: width 0.3s ease;
+}
+
+.tmd-plan-card__btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 13px;
+  cursor: pointer;
+  font: 700 12px/1 "Cairo", system-ui, sans-serif;
+  color: var(--tmd-text);
+  border: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.08);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.tmd-plan-card__btn--pro {
+  color: #11162b;
+  border-color: transparent;
+  background: linear-gradient(135deg, #e6c35c, #dfb554 55%, #4d7cfe);
+}
+
+.tmd-plan-card__btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.07); }
+.tmd-plan-card__btn:disabled { opacity: 0.55; cursor: default; }
+
+/* ---------- فقاعات الرسائل ---------- */
+.tmd-msg {
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.tmd-msg--user {
+  background: linear-gradient(135deg, rgba(77, 124, 254, 0.9), rgba(44, 63, 168, 0.88)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.tmd-msg--ai {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid var(--tmd-glass-line);
+}
+
+/* ---------- الأدوات والحقل ---------- */
+.tmd-tool {
+  border-radius: 999px;
+  border: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.tmd-tool:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.14); }
+
+.tmd-mini__foot {
+  border-top: 1px solid var(--tmd-glass-line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tmd-mini__input {
+  border-radius: 16px !important;
+  border: 1px solid var(--tmd-glass-line) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.tmd-mini__send {
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(77, 124, 254, 0.3);
+}
+
+.tmd-mini.is-pro .tmd-mini__send {
+  background: linear-gradient(135deg, #e6c35c, #4d7cfe) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tmd-mini.is-open,
+  .tmd-plan-sheet { animation: none; }
+  .tmd-fab::before { animation: none; }
+}
