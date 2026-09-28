@@ -2870,3 +2870,171 @@ html, body {
     gap: 5px;
   }
 }
+
+/* ============================================================
+   T.M.D_AI_Pro — MONOCHROME THEME (أبيض وأسود)
+   الوضع الليلي: أسود/أبيض — الوضع النهاري: أبيض/أسود.
+   ============================================================ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-core: #000000;
+  --bg-deep: #070707;
+  --bg-panel: rgba(10, 10, 10, 0.82);
+  --bg-panel-solid: #0b0b0b;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-card-hover: rgba(255, 255, 255, 0.1);
+  --bg-input: rgba(12, 12, 12, 0.9);
+
+  --line-glass: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.26);
+  --line-glow: rgba(255, 255, 255, 0.45);
+
+  --text-main: #f7f7f7;
+  --text-muted: #b3b3b3;
+  --text-dim: #7d7d7d;
+
+  --accent-cyan: #ffffff;
+  --accent-purple: #d4d4d4;
+  --accent-magenta: #a8a8a8;
+  --accent-gold: #ededed;
+  --accent-blue: #ffffff;
+
+  --accent-grad: linear-gradient(135deg, #ffffff 0%, #b5b5b5 55%, #6e6e6e 100%);
+  --accent-grad-warm: linear-gradient(135deg, #ffffff 0%, #8a8a8a 100%);
+  --accent-grad-subtle: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+
+  --glow-cyan: 0 0 24px rgba(255, 255, 255, 0.22);
+  --glow-purple: 0 0 30px rgba(255, 255, 255, 0.16);
+  --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.75);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-core: #ffffff;
+  --bg-deep: #f3f3f3;
+  --bg-panel: rgba(255, 255, 255, 0.9);
+  --bg-panel-solid: #ffffff;
+  --bg-card: rgba(0, 0, 0, 0.04);
+  --bg-card-hover: rgba(0, 0, 0, 0.08);
+  --bg-input: rgba(255, 255, 255, 0.96);
+
+  --line-glass: rgba(0, 0, 0, 0.12);
+  --line-strong: rgba(0, 0, 0, 0.24);
+  --line-glow: rgba(0, 0, 0, 0.35);
+
+  --text-main: #000000;
+  --text-muted: #4a4a4a;
+  --text-dim: #7a7a7a;
+
+  --accent-cyan: #000000;
+  --accent-purple: #2e2e2e;
+  --accent-magenta: #545454;
+  --accent-gold: #1a1a1a;
+  --accent-blue: #000000;
+
+  --accent-grad: linear-gradient(135deg, #000000 0%, #3d3d3d 55%, #7a7a7a 100%);
+  --accent-grad-warm: linear-gradient(135deg, #1a1a1a 0%, #6e6e6e 100%);
+  --accent-grad-subtle: linear-gradient(135deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.03));
+
+  --glow-cyan: 0 0 18px rgba(0, 0, 0, 0.18);
+  --glow-purple: 0 0 22px rgba(0, 0, 0, 0.12);
+  --shadow-panel: 0 16px 45px rgba(0, 0, 0, 0.16);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* شبكة أمان: أي لون متبقٍ (صور، خلفيات مخصّصة، رموز) يُعرض رماديًا */
+html { filter: grayscale(1); }
+
+/* خلفية الفضاء بالأبيض والأسود */
+.stars-canvas { filter: grayscale(1) contrast(1.08); }
+[data-theme="light"] .stars-canvas { filter: grayscale(1) invert(1) contrast(1.1); opacity: 0.55; }
+
+/* الشعار: هالات ومدارات رمادية */
+.cosmic-halo {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 68%) !important;
+}
+.cosmic-ring { border-color: rgba(255, 255, 255, 0.35) !important; }
+.sparkle-dot { background: #ffffff !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.7) !important; }
+[data-theme="light"] .cosmic-halo { background: radial-gradient(circle, rgba(0, 0, 0, 0.12), transparent 68%) !important; }
+[data-theme="light"] .cosmic-ring { border-color: rgba(0, 0, 0, 0.3) !important; }
+[data-theme="light"] .sparkle-dot { background: #000000 !important; box-shadow: 0 0 10px rgba(0, 0, 0, 0.4) !important; }
+
+/* ============================================================
+   SEND ARROW FLIGHT (سهم الإرسال الطائر)
+   ============================================================ */
+.send-arrow-fly {
+  position: fixed;
+  z-index: 99997;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  pointer-events: none;
+  color: var(--bg-core);
+  background: var(--text-main);
+  box-shadow: 0 0 0 1px var(--line-strong), 0 10px 26px rgba(0, 0, 0, 0.45);
+  will-change: transform, opacity;
+}
+
+.send-arrow-fly svg { width: 18px; height: 18px; }
+
+.send-arrow-fly__trail {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid var(--line-glass);
+  animation: tmdArrowTrail 0.5s ease-out infinite;
+}
+
+@keyframes tmdArrowTrail {
+  from { transform: scale(0.75); opacity: 0.55; }
+  to { transform: scale(1.5); opacity: 0; }
+}
+
+/* الرسالة تنتظر وصول السهم ثم تظهر نصّها تدريجيًا */
+.message.user.is-arriving {
+  opacity: 0.25;
+  transform: translateY(-10px) scale(0.98);
+  transition: opacity 0.35s var(--ease-smooth), transform 0.45s var(--ease-smooth);
+}
+
+.message.user.is-arriving.is-landed {
+  opacity: 1;
+  transform: none;
+}
+
+.message.user.is-arriving .message-content.is-revealing {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.7s var(--ease-smooth);
+}
+
+.message.user.is-arriving.is-landed .message-content.is-revealing {
+  clip-path: inset(0 0 0 0);
+}
+
+@keyframes tmdLandPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35); }
+  100% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0); }
+}
+
+.message.user.is-landed .message-content {
+  animation: tmdLandPulse 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .send-arrow-fly,
+  .send-arrow-fly__trail,
+  .message.user.is-arriving,
+  .message.user.is-arriving .message-content.is-revealing {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}

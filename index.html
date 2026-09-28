@@ -169,19 +169,21 @@
             <div class="cosmic-ring ring-2"></div>
             <div class="cosmic-core">
               <svg class="logo-svg" viewBox="0 0 100 100" fill="none">
-                <polygon points="50,15 82,33 82,67 50,85 18,67 18,33" fill="url(#core-grad-sb)" stroke="url(#stroke-grad-sb)" stroke-width="3"/>
                 <defs>
-                  <linearGradient id="core-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#0e1734" stop-opacity="0.95"/>
-                    <stop offset="100%" stop-color="#0a1128" stop-opacity="0.95"/>
+                  <linearGradient id="mono-edge-sb" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="60%" stop-color="#b9b9b9"/>
+                    <stop offset="100%" stop-color="#6d6d6d"/>
                   </linearGradient>
-                  <linearGradient id="stroke-grad-sb" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#6d9bff"/>
-                    <stop offset="55%" stop-color="#4353c9"/>
-                    <stop offset="100%" stop-color="#dfb554"/>
-                  </linearGradient>
+                  <radialGradient id="mono-core-sb" cx="36%" cy="28%" r="80%">
+                    <stop offset="0%" stop-color="#242424"/>
+                    <stop offset="100%" stop-color="#000000"/>
+                  </radialGradient>
                 </defs>
-                <text x="50" y="58" font-family="'Cairo', sans-serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">T</text>
+                <polygon points="50,12 83,31 83,69 50,88 17,69 17,31" fill="url(#mono-core-sb)" stroke="url(#mono-edge-sb)" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="50" cy="50" r="24" fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="1" stroke-dasharray="5 4"/>
+                <path d="M50 26 C51.2 36.4 57.6 42.8 68 44 C57.6 45.2 51.2 51.6 50 62 C48.8 51.6 42.4 45.2 32 44 C42.4 42.8 48.8 36.4 50 26 Z" fill="#ffffff"/>
+                <text x="50" y="80" font-family="'Space Grotesk', sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="2">TMD</text>
               </svg>
             </div>
             <span class="sparkle-dot dot-1"></span>
@@ -365,17 +367,16 @@
             <div class="cosmic-core">
               <svg class="logo-svg-hero" viewBox="0 0 120 120" fill="none">
                 <defs>
-                  <linearGradient id="hero-grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#0a1026"/>
-                    <stop offset="50%" stop-color="#160c2b"/>
-                    <stop offset="100%" stop-color="#060914"/>
+                  <linearGradient id="hero-mono-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="55%" stop-color="#bdbdbd"/>
+                    <stop offset="100%" stop-color="#6e6e6e"/>
                   </linearGradient>
-                  <linearGradient id="hero-grad-poly" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#6d9bff"/>
-                    <stop offset="40%" stop-color="#4353c9"/>
-                    <stop offset="75%" stop-color="#dfb554"/>
-                    <stop offset="100%" stop-color="#e6c35c"/>
-                  </linearGradient>
+                  <radialGradient id="hero-mono-core" cx="38%" cy="30%" r="75%">
+                    <stop offset="0%" stop-color="#2a2a2a"/>
+                    <stop offset="60%" stop-color="#101010"/>
+                    <stop offset="100%" stop-color="#000000"/>
+                  </radialGradient>
                   <filter id="hero-glow" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="3" result="blur"/>
                     <feMerge>
@@ -384,12 +385,14 @@
                     </feMerge>
                   </filter>
                 </defs>
-                <polygon points="60,16 98,38 98,82 60,104 22,82 22,38" fill="url(#hero-grad-bg)" stroke="url(#hero-grad-poly)" stroke-width="2.8" filter="url(#hero-glow)"/>
-                <circle cx="60" cy="60" r="28" fill="none" stroke="url(#hero-grad-poly)" stroke-width="1.2" stroke-dasharray="6 3"/>
-                <text x="60" y="66" font-family="'Cairo', sans-serif" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">TMD</text>
-                <text x="60" y="80" font-family="'Space Grotesk', sans-serif" font-size="8" font-weight="700" fill="#8fb0ff" text-anchor="middle" letter-spacing="3">AI PRO</text>
-                <!-- النجم اللامع فوق الشعار -->
-                <path d="M 60 12 Q 60 17 65 17 Q 60 17 60 22 Q 60 17 55 17 Q 60 17 60 12 Z" fill="#ffffff"/>
+                <polygon points="60,10 103,34 103,86 60,110 17,86 17,34" fill="url(#hero-mono-core)" stroke="url(#hero-mono-edge)" stroke-width="2.8" stroke-linejoin="round" filter="url(#hero-glow)"/>
+                <circle cx="60" cy="60" r="33" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1.2" stroke-dasharray="7 5"/>
+                <ellipse cx="60" cy="60" rx="40" ry="16" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1.1" transform="rotate(-24 60 60)"/>
+                <path d="M60 28 C61.6 42 70 50.4 84 52 C70 53.6 61.6 62 60 76 C58.4 62 50 53.6 36 52 C50 50.4 58.4 42 60 28 Z" fill="#ffffff"/>
+                <text x="60" y="94" font-family="'Space Grotesk', sans-serif" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="3.2">TMD</text>
+                <text x="60" y="104" font-family="'Space Grotesk', sans-serif" font-size="6.5" font-weight="700" fill="#bdbdbd" text-anchor="middle" letter-spacing="3">AI PRO</text>
+                <circle cx="94" cy="44" r="2.4" fill="#ffffff"/>
+                <circle cx="26" cy="74" r="1.9" fill="#ffffff" fill-opacity="0.7"/>
               </svg>
             </div>
 
