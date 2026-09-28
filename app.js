@@ -163,7 +163,7 @@ function botSparkHTML() {
   return (
     '<svg class="bot-spark-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
     '<defs><linearGradient id="' + gid + '" x1="4" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">' +
-    '<stop offset="0" stop-color="#4285f4"/><stop offset="0.48" stop-color="#9b72cb"/><stop offset="1" stop-color="#d96570"/>' +
+    '<stop offset="0" stop-color="#ffffff"/><stop offset="0.48" stop-color="#c9c9c9"/><stop offset="1" stop-color="#8a8a8a"/>' +
     "</linearGradient></defs>" +
     '<path d="M12 1.4 C12.85 6.85 17.15 11.15 22.6 12 C17.15 12.85 12.85 17.15 12 22.6 ' +
     'C11.15 17.15 6.85 12.85 1.4 12 C6.85 11.15 11.15 6.85 12 1.4 Z" fill="url(#' + gid + ')"/>' +
@@ -283,12 +283,13 @@ class StarfieldEngine {
     const count = Math.min(320, Math.max(70, Math.floor(baseCount * (this.densityMultiplier * 0.65))));
 
     this.stars = [];
+    // لوحة رمادية بالكامل — فضاء بالأبيض والأسود
     const colors = [
       "rgba(255, 255, 255,",
-      "rgba(127, 165, 255,",
-      "rgba(230, 195, 92,",
-      "rgba(143, 176, 255,",
-      "rgba(217, 164, 65,"
+      "rgba(226, 226, 226,",
+      "rgba(196, 196, 196,",
+      "rgba(168, 168, 168,",
+      "rgba(240, 240, 240,"
     ];
 
     for (let i = 0; i < count; i++) {
@@ -441,8 +442,8 @@ class StarfieldEngine {
         m.y - m.dy * (m.length / m.speed)
       );
       grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.95})`);
-      grad.addColorStop(0.2, `rgba(109, 155, 255, ${alpha * 0.8})`);
-      grad.addColorStop(1, "rgba(109, 155, 255, 0)");
+      grad.addColorStop(0.2, `rgba(205, 205, 205, ${alpha * 0.8})`);
+      grad.addColorStop(1, "rgba(180, 180, 180, 0)");
 
       this.ctx.strokeStyle = grad;
       this.ctx.lineWidth = 1.8;
@@ -1573,7 +1574,11 @@ async function sendMessage() {
 
   state.messages.push(userMessage);
   saveMessages();
+
+  // حركة سهم الإرسال: يطير من الزر إلى منطقة المحادثة ثم ينزل حتى نهايتها
+  const arrowOrigin = sendButton ? sendButton.getBoundingClientRect() : null;
   renderMessages();
+  flySendArrow(arrowOrigin);
 
   if (input) {
     input.value = "";
@@ -2057,6 +2062,83 @@ function setSendingState(sending) {
 function stopRequest() {
   state.abortReason = "manual";
   if (state.controller) state.controller.abort();
+}
+
+
+/* =========================================================
+   SEND ARROW FLIGHT (حركة سهم الإرسال إلى نهاية المحادثة)
+   ========================================================= */
+function flySendArrow(origin) {
+  if (!chat || !origin) return;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bubbles = chat.querySelectorAll(".message.user");
+  const target = bubbles[bubbles.length - 1];
+
+  if (target) {
+    target.classList.add("is-arriving");
+    const body = target.querySelector(".message-content");
+    if (body) body.classList.add("is-revealing");
+  }
+
+  if (reduce) {
+    if (target) target.classList.add("is-landed");
+    scrollToBottom();
+    return;
+  }
+
+  const arrow = document.createElement("div");
+  arrow.className = "send-arrow-fly";
+  arrow.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>' +
+    '<span class="send-arrow-fly__trail"></span>';
+  document.body.appendChild(arrow);
+
+  const chatRect = chat.getBoundingClientRect();
+  const startX = origin.left + origin.width / 2;
+  const startY = origin.top + origin.height / 2;
+
+  // نقطة الوصول: منتصف منطقة المحادثة ثم نهاية الرسالة الأخيرة
+  const midX = target ? (target.getBoundingClientRect().left + target.getBoundingClientRect().width / 2) : (chatRect.left + chatRect.width / 2);
+  const midY = chatRect.top + chatRect.height * 0.35;
+  const endRect = target ? target.getBoundingClientRect() : chatRect;
+  const endX = endRect.left + endRect.width / 2;
+  const endY = Math.min(chatRect.bottom - 18, endRect.bottom - 6);
+
+  arrow.style.left = startX + "px";
+  arrow.style.top = startY + "px";
+
+  const frames = [
+    { transform: "translate(-50%, -50%) scale(0.85) rotate(0deg)", opacity: 0.2, offset: 0 },
+    { transform: "translate(-50%, -50%) scale(1.15) rotate(-8deg)", opacity: 1, offset: 0.12 },
+    {
+      transform: "translate(calc(-50% + " + (midX - startX) + "px), calc(-50% + " + (midY - startY) + "px)) scale(1.05) rotate(6deg)",
+      opacity: 1,
+      offset: 0.55
+    },
+    {
+      transform: "translate(calc(-50% + " + (endX - startX) + "px), calc(-50% + " + (endY - startY) + "px)) scale(0.6) rotate(180deg)",
+      opacity: 0,
+      offset: 1
+    }
+  ];
+
+  let done = false;
+  const land = () => {
+    if (done) return;
+    done = true;
+    arrow.remove();
+    if (target) target.classList.add("is-landed");
+    scrollToBottom();
+  };
+
+  if (typeof arrow.animate === "function") {
+    const anim = arrow.animate(frames, { duration: 820, easing: "cubic-bezier(0.34, 0.9, 0.3, 1)", fill: "forwards" });
+    anim.onfinish = land;
+    window.setTimeout(land, 1100);
+  } else {
+    window.setTimeout(land, 200);
+  }
 }
 
 function scrollToBottom() {

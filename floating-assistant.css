@@ -1427,3 +1427,41 @@
     animation: none !important;
   }
 }
+
+/* ---------- الودجة: هوية أبيض وأسود ---------- */
+.tmd-fab,
+.tmd-mini {
+  --tmd-bg: #000000;
+  --tmd-bg-2: #0a0a0a;
+  --tmd-line: rgba(255, 255, 255, 0.18);
+  --tmd-text: #f7f7f7;
+  --tmd-muted: #a8a8a8;
+  --tmd-blue: #ffffff;
+  --tmd-blue-deep: #8a8a8a;
+  --tmd-gold: #ffffff;
+  --tmd-gold-soft: #d6d6d6;
+  --tmd-grad: linear-gradient(135deg, #ffffff 0%, #b5b5b5 55%, #6e6e6e 100%);
+  --tmd-glass: rgba(18, 18, 18, 0.6);
+  --tmd-glass-2: rgba(8, 8, 8, 0.75);
+}
+
+:root[data-theme="light"] .tmd-fab,
+:root[data-theme="light"] .tmd-mini {
+  --tmd-bg: #ffffff;
+  --tmd-bg-2: #f2f2f2;
+  --tmd-line: rgba(0, 0, 0, 0.16);
+  --tmd-text: #000000;
+  --tmd-muted: #4a4a4a;
+  --tmd-blue: #000000;
+  --tmd-gold: #1a1a1a;
+  --tmd-glass: rgba(255, 255, 255, 0.65);
+  --tmd-glass-2: rgba(248, 248, 248, 0.82);
+}
+
+.tmd-fab,
+.tmd-mini,
+.tmd-fab::before,
+.tmd-msg--user,
+.tmd-mini__send,
+.tmd-plan-chip,
+.tmd-plan-card--pro { filter: grayscale(1); }

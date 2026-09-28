@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="T.M.D_AI">
+  <defs>
+    <linearGradient id="tmdMonoStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#bdbdbd"/>
+      <stop offset="100%" stop-color="#6e6e6e"/>
+    </linearGradient>
+    <radialGradient id="tmdMonoCore" cx="38%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="60%" stop-color="#101010"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="tmdMonoGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- درع سداسي أسود -->
+  <polygon points="60,8 105,33 105,87 60,112 15,87 15,33"
+           fill="url(#tmdMonoCore)" stroke="url(#tmdMonoStroke)" stroke-width="3"
+           stroke-linejoin="round" filter="url(#tmdMonoGlow)"/>
+
+  <!-- مدار متقطّع -->
+  <circle cx="60" cy="60" r="34" fill="none" stroke="#ffffff" stroke-opacity="0.55"
+          stroke-width="1.2" stroke-dasharray="7 5"/>
+  <ellipse cx="60" cy="60" rx="41" ry="17" fill="none" stroke="#ffffff" stroke-opacity="0.28"
+           stroke-width="1.1" transform="rotate(-24 60 60)"/>
+
+  <!-- شرارة الذكاء -->
+  <path d="M60 28 C61.6 42 70 50.4 84 52 C70 53.6 61.6 62 60 76 C58.4 62 50 53.6 36 52 C50 50.4 58.4 42 60 28 Z"
+        fill="#ffffff"/>
+
+  <!-- المونوغرام -->
+  <text x="60" y="94" font-family="'Space Grotesk','Cairo',sans-serif" font-size="17" font-weight="800"
+        fill="#ffffff" text-anchor="middle" letter-spacing="3.5">TMD</text>
+
+  <!-- نقاط مدارية -->
+  <circle cx="94" cy="44" r="2.6" fill="#ffffff"/>
+  <circle cx="26" cy="74" r="2" fill="#ffffff" fill-opacity="0.75"/>
+</svg>
