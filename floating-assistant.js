@@ -305,6 +305,12 @@
         ? "باقة MiniMax — متبقٍ " + left + " من " + DAILY_CREDITS + " رسالة اليوم"
         : "الباقة المجانية — اضغط للترقية إلى MiniMax";
     }
+    if (el.planBtn && el.planBtn.dataset.left !== String(left)) {
+      el.planBtn.dataset.left = String(left);
+      el.planBtn.classList.remove("is-bump");
+      void el.planBtn.offsetWidth; // إعادة تشغيل الحركة
+      el.planBtn.classList.add("is-bump");
+    }
     if (el.planMeter) el.planMeter.style.width = Math.round((left / DAILY_CREDITS) * 100) + "%";
     if (el.planPro) el.planPro.textContent = pro ? "باقة MiniMax مفعّلة ✓" : "تفعيل باقة MiniMax";
     if (el.planPro) el.planPro.disabled = pro;
@@ -683,6 +689,7 @@
   }
 
   function setSendBusy(busy) {
+    win.classList.toggle("is-busy", Boolean(busy));
     if (busy) {
       el.send.disabled = false;
       el.send.classList.add("is-stop");
