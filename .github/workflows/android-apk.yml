@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, arena/01a0e156-t-m-d-ai]
+    branches: [main, arena/01a0ec4b-t-m-d-ai]
     paths:
       - 'android-app/**'
       - 'floating-assistant.js'
