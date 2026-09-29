@@ -64,6 +64,7 @@
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
     screen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>',
     mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>',
     speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>',
@@ -84,6 +85,7 @@
     abortReason: "",
     controller: null,
     stream: null,
+    attachment: null,
     messages: [],
     fab: null,
     win: null
@@ -226,12 +228,20 @@
 
     '<div class="tmd-mini__chips" data-el="chips"></div>' +
 
+    '<div class="tmd-attachment" data-el="attachment" hidden>' +
+    '<img data-el="attachmentImage" alt="معاينة الصورة المرفقة">' +
+    '<div class="tmd-attachment__info"><strong data-el="attachmentName">صورة</strong><span>جاهزة للتحليل مع رسالتك</span></div>' +
+    '<button type="button" class="tmd-mini__head-btn" data-el="removeAttachment" title="إزالة المرفق">' + ICONS.close + "</button>" +
+    "</div>" +
+
     '<div class="tmd-mini__tools">' +
+    '<button type="button" class="tmd-tool" data-el="imageBtn">' + ICONS.image + "<span>إضافة صورة</span></button>" +
     '<button type="button" class="tmd-tool" data-el="shareBtn">' + ICONS.screen + "<span>مشاركة الشاشة</span></button>" +
     '<button type="button" class="tmd-tool" data-el="micBtn">' + ICONS.mic + "<span>تحدّث</span></button>" +
     '<button type="button" class="tmd-tool" data-el="speakBtn">' + ICONS.speak + "<span>النطق</span></button>" +
     "</div>" +
 
+    '<input type="file" data-el="imageInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden>' +
     '<div class="tmd-mini__foot">' +
     '<textarea class="tmd-mini__input" data-el="input" rows="1" placeholder="اكتب رسالتك أو تحدّث بالميكروفون…"></textarea>' +
     '<button type="button" class="tmd-mini__send" data-el="send" title="إرسال">' + ICONS.send + "</button>" +
@@ -495,6 +505,13 @@
   }
 
   function toggleMic() {
+    if (androidBridge && typeof androidBridge.startVoiceInput === "function") {
+      try {
+        setStatus("افتح نافذة التحدث وابدأ الكلام…");
+        androidBridge.startVoiceInput();
+      } catch (e) { pushError("تعذّر تشغيل الإدخال الصوتي في Android."); }
+      return;
+    }
     if (!SR) {
       pushError("متصفحك لا يدعم التعرّف على الكلام. جرّب Chrome أو Edge.");
       return;
@@ -512,6 +529,97 @@
     }
   }
 
+  /* ============ الصور والمرفقات ============ */
+  const MAX_IMAGE_DATA_URL_CHARS = 2600000;
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("تعذّرت قراءة الصورة."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function prepareImage(file) {
+    if (!file || !String(file.type || "").startsWith("image/")) {
+      throw new Error("اختر صورة بصيغة JPG أو PNG أو WEBP أو GIF.");
+    }
+    if (file.size > 12 * 1024 * 1024) throw new Error("حجم الصورة كبير جدًا. الحد الأقصى 12MB.");
+    const direct = await fileToDataURL(file);
+    if (direct.length <= MAX_IMAGE_DATA_URL_CHARS) return direct;
+
+    const url = URL.createObjectURL(file);
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const node = new Image();
+        node.onload = () => resolve(node);
+        node.onerror = () => reject(new Error("تعذّر فتح الصورة."));
+        node.src = url;
+      });
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      canvas.getContext("2d", { alpha: false }).drawImage(image, 0, 0, canvas.width, canvas.height);
+      let quality = 0.82;
+      let output = canvas.toDataURL("image/jpeg", quality);
+      while (output.length > MAX_IMAGE_DATA_URL_CHARS && quality > 0.4) {
+        quality -= 0.08;
+        output = canvas.toDataURL("image/jpeg", quality);
+      }
+      if (output.length > MAX_IMAGE_DATA_URL_CHARS) throw new Error("تعذّر ضغط الصورة إلى حجم مناسب.");
+      return output;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function showAttachment(dataUrl, name) {
+    if (!/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(String(dataUrl || ""))) {
+      pushError("لم تصل صورة صالحة من الهاتف.");
+      return;
+    }
+    state.attachment = { dataUrl, name: String(name || "صورة مرفقة").slice(0, 120) };
+    el.attachmentImage.src = dataUrl;
+    el.attachmentName.textContent = state.attachment.name;
+    el.attachment.hidden = false;
+    setStatus("الصورة جاهزة للتحليل");
+    updateSendAvailability();
+  }
+
+  function clearAttachment() {
+    state.attachment = null;
+    el.attachment.hidden = true;
+    el.attachmentImage.removeAttribute("src");
+    el.imageInput.value = "";
+    updateSendAvailability();
+  }
+
+  async function handleImageFile(file) {
+    if (!file) return;
+    setStatus("جاري تجهيز الصورة…");
+    try {
+      showAttachment(await prepareImage(file), file.name || "صورة مرفقة");
+    } catch (error) {
+      pushError(error?.message || "تعذّر تجهيز الصورة.");
+    }
+  }
+
+  function pickImage() {
+    if (androidBridge && typeof androidBridge.openImagePicker === "function") {
+      try { androidBridge.openImagePicker(); }
+      catch (error) { pushError("تعذّر فتح معرض الصور في Android."); }
+      return;
+    }
+    el.imageInput.click();
+  }
+
+  // يستدعيها تطبيق Android بعد اختيار صورة من منتقي النظام.
+  window.tmdAndroidImageSelected = (dataUrl, name) => showAttachment(dataUrl, name);
+  window.tmdAndroidImageSelectionFailed = (message) => pushError(message || "تعذّر قراءة الصورة المختارة.");
+
   /* ============ مشاركة الشاشة / جسر Android ============ */
   // لا يظهر هذا الجسر إلا داخل APK. الاستعلام مفيد أثناء تحميل صفحة Android
   // لكنه لا يمنح أي صلاحيات في المتصفح العادي.
@@ -519,6 +627,15 @@
   const isAndroidApp = Boolean(androidBridge) || new URLSearchParams(window.location.search).get("android") === "1";
 
   if (isAndroidApp) document.body.classList.add("tmd-android-overlay");
+
+  window.tmdAndroidVoiceResult = (text) => {
+    el.input.value = String(text || "").trim();
+    autoGrow();
+    updateSendAvailability();
+    setStatus(el.input.value ? "تم تحويل الصوت إلى نص" : pinnedLabel());
+    el.input.focus();
+  };
+  window.tmdAndroidVoiceError = (message) => pushError(message || "تعذّر التعرف على الصوت.");
 
   function setNativeOverlayExpanded(value) {
     if (!androidBridge || typeof androidBridge.setOverlayExpanded !== "function") return;
@@ -569,8 +686,10 @@
       stream.getVideoTracks()[0].addEventListener("ended", stopShare);
       markShareStarted();
     } catch (e) {
-      if (e && e.name !== "NotAllowedError") {
-        pushError("تعذّر بدء مشاركة الشاشة: " + (e.message || e.name));
+      if (e && (e.name === "NotAllowedError" || e.name === "AbortError")) {
+        setStatus("أُلغيت مشاركة الشاشة");
+      } else {
+        pushError("تعذّر بدء مشاركة الشاشة: " + (e?.message || e?.name || "خطأ غير معروف"));
       }
     }
   }
@@ -670,7 +789,7 @@
       el.send.disabled = false;
       return;
     }
-    el.send.disabled = !el.input.value.trim();
+    el.send.disabled = !el.input.value.trim() && !state.attachment;
   }
 
   async function send() {
@@ -680,7 +799,7 @@
       return;
     }
     const text = el.input.value.trim();
-    if (!text) {
+    if (!text && !state.attachment) {
       updateSendAvailability();
       return;
     }
@@ -690,10 +809,14 @@
     /* MiniMax جزء من SPARTA Max Pro فقط؛ لا ننشئ أو نمنح رصيدًا يوميًا. */
     const useMiniMax = plan.isPro();
 
-    const image = captureFrame();
+    const attachedImage = state.attachment?.dataUrl || null;
+    const screenImage = attachedImage ? null : captureFrame();
+    const image = attachedImage || screenImage;
+    const prompt = text || (attachedImage ? "حلّل هذه الصورة واذكر أهم التفاصيل فيها." : "حلّل لقطة شاشتي الحالية.");
 
-    state.messages.push({ role: "user", content: text, image: image || undefined });
-    bubble({ role: "user", content: text, image: image || undefined });
+    state.messages.push({ role: "user", content: prompt, image: image || undefined });
+    bubble({ role: "user", content: prompt, image: image || undefined });
+    clearAttachment();
     el.input.value = "";
     autoGrow();
     saveChat();
@@ -1017,9 +1140,31 @@
 
   /* ============ الربط ============ */
   if (isAndroidApp) {
-    // حجم نافذة Android يساوي حجم الفقاعة عند الإغلاق؛ تحريك عنصر HTML
-    // داخله لن يحرّك النافذة الأصلية، لذلك نحافظ على لمسة واحدة موثوقة للفتح.
-    fab.addEventListener("click", toggleWin);
+    // تحريك الفقاعة يحرك نافذة Android الأصلية، لا عنصر HTML داخلها فقط.
+    let nativeDrag = null;
+    fab.addEventListener("pointerdown", (event) => {
+      nativeDrag = { x: event.screenX, y: event.screenY, moved: false };
+      try { fab.setPointerCapture(event.pointerId); } catch (e) { /* اختياري */ }
+    });
+    fab.addEventListener("pointermove", (event) => {
+      if (!nativeDrag) return;
+      const dx = event.screenX - nativeDrag.x;
+      const dy = event.screenY - nativeDrag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 2) nativeDrag.moved = true;
+      if (nativeDrag.moved && androidBridge && typeof androidBridge.moveBubbleBy === "function") {
+        try { androidBridge.moveBubbleBy(dx, dy); } catch (e) { /* تجاهل إطار حركة واحد */ }
+      }
+      nativeDrag.x = event.screenX;
+      nativeDrag.y = event.screenY;
+    });
+    const endNativeDrag = () => {
+      if (!nativeDrag) return;
+      const moved = nativeDrag.moved;
+      nativeDrag = null;
+      if (!moved) toggleWin();
+    };
+    fab.addEventListener("pointerup", endNativeDrag);
+    fab.addEventListener("pointercancel", () => { nativeDrag = null; });
   } else {
     makeDraggable(fab, fab, (moved) => {
       if (moved) snapFabToEdge();
@@ -1092,6 +1237,9 @@
     }
   });
 
+  el.imageBtn.addEventListener("click", pickImage);
+  el.imageInput.addEventListener("change", () => handleImageFile(el.imageInput.files?.[0]));
+  el.removeAttachment.addEventListener("click", clearAttachment);
   el.shareBtn.addEventListener("click", toggleShare);
   el.micBtn.addEventListener("click", toggleMic);
   el.speakBtn.addEventListener("click", () => {

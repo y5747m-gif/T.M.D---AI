@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -45,6 +46,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import org.json.JSONObject;
+
 /**
  * خدمة أمامية دائمة تملك نافذة Android من النوع TYPE_APPLICATION_OVERLAY.
  * حين تكون مغلقة تشغل مساحة الفقاعة فقط؛ وحين يفتحها المستخدم تتسع WebView للدردشة.
@@ -68,6 +71,8 @@ public class OverlayService extends Service {
     private WebView web;
     private WindowManager.LayoutParams params;
     private boolean expanded;
+    private int compactX;
+    private int compactY;
 
     private MediaProjection projection;
     private VirtualDisplay virtualDisplay;
@@ -189,6 +194,8 @@ public class OverlayService extends Service {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
+        compactX = dp(8);
+        compactY = dp(72);
         applyOverlaySize(false, false);
         windowManager.addView(overlay, params);
     }
@@ -247,13 +254,25 @@ public class OverlayService extends Service {
             params.width = dp(COMPACT_DP);
             params.height = dp(COMPACT_DP);
             params.gravity = Gravity.BOTTOM | Gravity.END;
-            params.x = dp(8);
-            params.y = dp(72);
+            params.x = compactX;
+            params.y = compactY;
         }
         if (update && overlay != null) {
             try { windowManager.updateViewLayout(overlay, params); }
             catch (IllegalArgumentException ignored) { /* الخدمة أزيلت للتو */ }
         }
+    }
+
+    private void moveCompactBubble(float dx, float dy) {
+        if (expanded || overlay == null || params == null) return;
+        DisplayMetrics display = Resources.getSystem().getDisplayMetrics();
+        // مع Gravity.END/BOTTOM: x وy هما المسافة من الحافتين اليمنى والسفلى.
+        compactX = Math.max(0, Math.min(display.widthPixels - dp(COMPACT_DP), compactX - Math.round(dx)));
+        compactY = Math.max(0, Math.min(display.heightPixels - dp(COMPACT_DP), compactY - Math.round(dy)));
+        params.x = compactX;
+        params.y = compactY;
+        try { windowManager.updateViewLayout(overlay, params); }
+        catch (IllegalArgumentException ignored) { }
     }
 
     private void startCapture(int resultCode, Intent data) {
@@ -369,6 +388,80 @@ public class OverlayService extends Service {
         });
     }
 
+    public static void deliverPickedImage(Uri uri) {
+        OverlayService service = instance;
+        if (service == null || uri == null) {
+            notifyImageError("المساعد العائم غير جاهز. افتحه ثم حاول مجددًا.");
+            return;
+        }
+        new Thread(() -> service.readPickedImage(uri), "tmd-image-picker").start();
+    }
+
+    private void readPickedImage(Uri uri) {
+        try {
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            bounds.inJustDecodeBounds = true;
+            try (InputStream first = getContentResolver().openInputStream(uri)) {
+                BitmapFactory.decodeStream(first, null, bounds);
+            }
+            if (bounds.outWidth < 1 || bounds.outHeight < 1) throw new IOException("Invalid image");
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 1;
+            while (Math.max(bounds.outWidth, bounds.outHeight) / options.inSampleSize > 2400) {
+                options.inSampleSize *= 2;
+            }
+            Bitmap bitmap;
+            try (InputStream second = getContentResolver().openInputStream(uri)) {
+                bitmap = BitmapFactory.decodeStream(second, null, options);
+            }
+            if (bitmap == null) throw new IOException("Invalid image");
+
+            int maxSide = 1600;
+            float scale = Math.min(1f, (float) maxSide / Math.max(bitmap.getWidth(), bitmap.getHeight()));
+            Bitmap output = bitmap;
+            if (scale < 1f) {
+                output = Bitmap.createScaledBitmap(bitmap,
+                        Math.max(1, Math.round(bitmap.getWidth() * scale)),
+                        Math.max(1, Math.round(bitmap.getHeight() * scale)), true);
+            }
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            output.compress(Bitmap.CompressFormat.JPEG, 82, bytes);
+            String dataUrl = "data:image/jpeg;base64," + Base64.encodeToString(bytes.toByteArray(), Base64.NO_WRAP);
+            String name = uri.getLastPathSegment() == null ? "صورة من الهاتف" : uri.getLastPathSegment();
+            callJs("window.tmdAndroidImageSelected&&window.tmdAndroidImageSelected("
+                    + JSONObject.quote(dataUrl) + "," + JSONObject.quote(name) + ")");
+            if (output != bitmap) output.recycle();
+            bitmap.recycle();
+        } catch (Exception error) {
+            notifyImageError("تعذّر قراءة الصورة المختارة. جرّب صورة أخرى.");
+        }
+    }
+
+    public static void notifyImageError(String message) {
+        if (instance != null) instance.callJs(
+                "window.tmdAndroidImageSelectionFailed&&window.tmdAndroidImageSelectionFailed("
+                        + JSONObject.quote(message == null ? "تعذّر اختيار الصورة." : message) + ")");
+    }
+
+    public static void deliverVoiceText(String text) {
+        if (instance != null) instance.callJs(
+                "window.tmdAndroidVoiceResult&&window.tmdAndroidVoiceResult("
+                        + JSONObject.quote(text == null ? "" : text) + ")");
+    }
+
+    public static void notifyVoiceError(String message) {
+        if (instance != null) instance.callJs(
+                "window.tmdAndroidVoiceError&&window.tmdAndroidVoiceError("
+                        + JSONObject.quote(message == null ? "تعذّر التعرف على الصوت." : message) + ")");
+    }
+
+    public static void notifyPermissionError(String message) {
+        if (instance != null) instance.callJs(
+                "window.tmdAndroidVoiceError&&window.tmdAndroidVoiceError("
+                        + JSONObject.quote(message == null ? "الصلاحية مطلوبة." : message) + ")");
+    }
+
     public static void notifyShareDenied() {
         if (instance != null) {
             instance.callJs("window.tmdAndroidScreenShareDenied&&window.tmdAndroidScreenShareDenied()");
@@ -389,11 +482,33 @@ public class OverlayService extends Service {
             startActivity(intent);
         }
 
+        @JavascriptInterface public void openImagePicker() {
+            Intent intent = new Intent(OverlayService.this, MainActivity.class)
+                    .setAction(MainActivity.ACTION_PICK_IMAGE)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+
+        @JavascriptInterface public void startVoiceInput() {
+            Intent intent = new Intent(OverlayService.this, MainActivity.class)
+                    .setAction(MainActivity.ACTION_VOICE)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+
         @JavascriptInterface public void stopScreenShare() {
             new Handler(Looper.getMainLooper()).post(() -> {
                 stopCapture();
                 callJs("window.tmdAndroidScreenShareStopped&&window.tmdAndroidScreenShareStopped()");
             });
+        }
+
+        @JavascriptInterface public void moveBubbleBy(final float dx, final float dy) {
+            new Handler(Looper.getMainLooper()).post(() -> moveCompactBubble(dx, dy));
         }
 
         @JavascriptInterface public void setOverlayExpanded(final boolean value) {

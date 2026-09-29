@@ -718,6 +718,54 @@
   background: rgba(242, 118, 118, 0.07);
 }
 
+/* ---------- Attachments ---------- */
+.tmd-attachment {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 11px 0;
+  padding: 7px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 12px;
+  background: var(--tmd-card);
+}
+
+.tmd-attachment[hidden] {
+  display: none !important;
+}
+
+.tmd-attachment img {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--tmd-surface);
+}
+
+.tmd-attachment__info {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.tmd-attachment__info strong,
+.tmd-attachment__info span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tmd-attachment__info strong {
+  font-size: 0.68rem;
+}
+
+.tmd-attachment__info span {
+  color: var(--tmd-subtle);
+  font-size: 0.58rem;
+}
+
 /* ---------- Input ---------- */
 .tmd-mini__foot {
   display: flex;
@@ -817,6 +865,7 @@
 .tmd-mini.is-collapsed .tmd-mini__body,
 .tmd-mini.is-collapsed .tmd-mini__foot,
 .tmd-mini.is-collapsed .tmd-mini__tools,
+.tmd-mini.is-collapsed .tmd-attachment,
 .tmd-mini.is-collapsed .tmd-mini__chips,
 .tmd-mini.is-collapsed .tmd-mini__screen,
 .tmd-mini.is-collapsed .tmd-plan-sheet,
