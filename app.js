@@ -14,7 +14,8 @@ const STORAGE_KEYS = {
   theme: "tmd_theme",
   model: "tmd_model",
   minimaxBilling: "tmd_minimax_billing",
-  floatingBubble: "tmd_float_enabled"
+  floatingBubble: "tmd_float_enabled",
+  aiMode: "tmd_ai_mode"
 };
 
 function safeGetItem(key) {
@@ -44,6 +45,47 @@ function safeRemoveItem(key) {
   }
 }
 
+
+const AI_MODES = {
+  competition: {
+    title: "وضع المنافسة",
+    label: "منافسة",
+    icon: "⚔",
+    placeholder: "اكتب موضوع البحث لتتنافس أداتان ذكيتان على أفضل نتيجة...",
+    description: "يشغّل مسارين مستقلين للموضوع نفسه، ثم يعرض نتيجتين واضحتين لتختار النتيجة المرضية.",
+    steps: ["محرك أول", "محرك ثانٍ", "اختيار النتيجة"],
+    directive: "أنت في وضع المنافسة. عالج طلب المستخدم عبر نتيجتين مستقلتين بأسلوبين مختلفين، ثم اختم بملخص يساعد المستخدم على اختيار النتيجة الأنسب. لا تخلط النتيجتين، واجعل كل نتيجة كاملة ومنظمة.",
+    engineA: "أنت المحرك الأول في وضع المنافسة داخل SPARTA AI. قدّم نتيجة دقيقة ومنظمة ومحافظة على الموثوقية، مع نقاط واضحة وخلاصة عملية.",
+    engineB: "أنت المحرك الثاني في وضع المنافسة داخل SPARTA AI. قدّم نتيجة مستقلة من زاوية مختلفة وأكثر إبداعًا، مع ترتيب واضح وخلاصة قابلة للتنفيذ."
+  },
+  comparison: {
+    title: "وضع المقارنة",
+    label: "مقارنة",
+    icon: "⚖",
+    placeholder: "اكتب الشيئين المحتار بينهما لأقارن وأرشّح الأفضل...",
+    description: "يقارن بين خيارين أو أكثر بمعايير استخدام حقيقية، ثم يرشّح الحل الأمثل بوضوح.",
+    steps: ["معايير", "جدول مقارنة", "ترشيح نهائي"],
+    directive: "أنت في وضع المقارنة. استخرج الخيارات التي يريد المستخدم المقارنة بينها، وحدد معايير عادلة، ثم قدّم جدول مقارنة مختصرًا، واذكر الخيار الأفضل حسب الاستخدام العملي مع سبب واضح. إذا كانت الخيارات غير واضحة فاطلب توضيحًا قصيرًا أولًا."
+  },
+  "deep-search": {
+    title: "وضع البحث العميق",
+    label: "بحث عميق",
+    icon: "⌕",
+    placeholder: "اكتب موضوع البحث العميق وسأرتبه بمصادر ومحاور موثوقة...",
+    description: "ينظم بحثًا موسعًا: محاور، مصادر موثوقة، ترتيب النتائج، خلاصة، ونقاط تحقق.",
+    steps: ["محاور البحث", "مصادر موثوقة", "ملخص مرتب"],
+    directive: "أنت في وضع البحث العميق. قدّم بحثًا مرتبًا وشاملًا حول طلب المستخدم: عرّف السؤال، قسّم المحاور، اذكر مصادر موثوقة ومعتمدة أو أنواع المصادر المناسبة، رتّب النتائج حسب الأهمية، واختم بخلاصة وتوصيات. لا تخترع روابط أو مراجع غير مؤكدة؛ إذا احتاج الموضوع معلومات لحظية غير متاحة من السياق فوضّح ذلك واطلب روابط أو ملفات داعمة."
+  }
+};
+
+function isValidAiMode(mode) {
+  return Object.prototype.hasOwnProperty.call(AI_MODES, mode);
+}
+
+function normalizeAiMode(mode) {
+  return isValidAiMode(mode) ? mode : "";
+}
+
 function safeReadJSON(key, fallback) {
   const raw = safeGetItem(key);
   if (raw == null || raw === "") return fallback;
@@ -71,6 +113,7 @@ function sanitizeMessageForStorage(message) {
     content
   };
 
+  if (typeof message.mode === "string" && isValidAiMode(message.mode)) clean.mode = message.mode;
   if (typeof message.fileName === "string") clean.fileName = message.fileName.slice(0, 180);
   if (typeof message.imageName === "string") clean.imageName = message.imageName.slice(0, 180);
   if (typeof message.model === "string") clean.model = message.model.slice(0, 80);
@@ -127,6 +170,7 @@ const state = {
   conversations: sanitizeConversationsForStorage(safeReadJSON(STORAGE_KEYS.conversations, [])),
   theme: safeGetItem(STORAGE_KEYS.theme) === "light" ? "light" : "dark",
   model: safeGetItem(STORAGE_KEYS.model) || "openai/gpt-oss-120b",
+  aiMode: normalizeAiMode(safeGetItem(STORAGE_KEYS.aiMode)),
   floatingBubbleEnabled: safeGetItem(STORAGE_KEYS.floatingBubble) !== "0",
   busy: false,
   controller: null,
@@ -352,6 +396,7 @@ class StarfieldEngine {
     this.layers = [];
     this.meteors = [];
     this.nebulae = [];
+    this.mythicSigils = [];
     this.running = false;
     this.densityMultiplier = 2; // 1: calm, 2: balanced, 3: dense
     this.width = window.innerWidth;
@@ -405,6 +450,7 @@ class StarfieldEngine {
   createScene() {
     this.createNebulae();
     this.createStars();
+    this.createMythicSigils();
     this.paintNebulaLayer();
   }
 
@@ -488,6 +534,109 @@ class StarfieldEngine {
       }
       return { depth: spec.depth, stars };
     });
+  }
+
+
+  createMythicSigils() {
+    const side = Math.max(1, Math.min(this.width, this.height));
+    const large = Math.max(this.width, this.height);
+    this.mythicSigils = [
+      {
+        x: this.width * 0.18,
+        y: this.height * 0.72,
+        radius: Math.max(78, side * 0.16),
+        points: 3,
+        rotation: -0.22,
+        spin: -0.000018,
+        color: "244, 195, 106",
+        accent: "255, 95, 109",
+        alpha: 0.16,
+        depth: 0.55
+      },
+      {
+        x: this.width * 0.78,
+        y: this.height * 0.28,
+        radius: Math.max(72, side * 0.13),
+        points: 6,
+        rotation: 0.18,
+        spin: 0.000016,
+        color: "116, 231, 255",
+        accent: "244, 195, 106",
+        alpha: 0.13,
+        depth: 0.78
+      },
+      {
+        x: this.width * 0.55,
+        y: this.height * 0.86,
+        radius: Math.max(110, large * 0.13),
+        points: 8,
+        rotation: Math.PI / 8,
+        spin: -0.00001,
+        color: "255, 95, 109",
+        accent: "244, 195, 106",
+        alpha: 0.1,
+        depth: 0.35
+      }
+    ];
+  }
+
+  drawMythicSigils(now) {
+    if (!this.mythicSigils.length) return;
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (const sigil of this.mythicSigils) {
+      const pulse = this.reducedMotion ? 0 : Math.sin(now * 0.0011 + sigil.radius) * 0.035;
+      const parX = this.pointerEased.x * -30 * sigil.depth;
+      const parY = this.pointerEased.y * -22 * sigil.depth;
+      const rotation = sigil.rotation + (this.reducedMotion ? 0 : now * sigil.spin);
+      const r = sigil.radius * (1 + pulse * 0.18);
+
+      ctx.save();
+      ctx.translate(sigil.x + parX, sigil.y + parY);
+      ctx.rotate(rotation);
+      ctx.globalAlpha = Math.max(0.03, sigil.alpha + pulse);
+      ctx.strokeStyle = `rgba(${sigil.color}, 1)`;
+      ctx.lineWidth = 1.05;
+      ctx.setLineDash([Math.max(8, r * 0.08), Math.max(8, r * 0.06)]);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      ctx.lineWidth = 0.85;
+      ctx.strokeStyle = `rgba(${sigil.color}, 0.8)`;
+      ctx.beginPath();
+      for (let i = 0; i <= sigil.points; i++) {
+        const angle = (Math.PI * 2 * i) / sigil.points - Math.PI / 2;
+        const px = Math.cos(angle) * r * 0.68;
+        const py = Math.sin(angle) * r * 0.68;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = `rgba(${sigil.accent}, 0.5)`;
+      ctx.lineWidth = 0.65;
+      for (let i = 0; i < sigil.points; i++) {
+        const angle = (Math.PI * 2 * i) / sigil.points - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(angle) * r * 0.54, Math.sin(angle) * r * 0.54);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = `rgba(${sigil.accent}, 0.72)`;
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.restore();
   }
 
   /* ---------- Meteors ---------- */
@@ -650,6 +799,9 @@ class StarfieldEngine {
       );
     }
 
+    // Mythic geometry sits in the far background so the interface feels carved into space.
+    this.drawMythicSigils(now);
+
     // Star layers, far to near, each with its own parallax strength.
     for (const layer of this.layers) {
       const offsetX = this.pointerEased.x * -26 * layer.depth;
@@ -787,7 +939,7 @@ class UserBackgroundManager {
       "nebula": "#1d1430",
       "cyberpunk": "#211d35",
       "aurora": "#10252c",
-      "obsidian": "#100b0c",
+      "obsidian": "#070812",
       "galaxy-gold": "#241a10"
     };
 
@@ -1083,6 +1235,7 @@ let themeSelect, modelSelect, modelName, floatBubbleToggle;
 let toast, sidebar, openSidebar, closeSidebar, sidebarBackdrop;
 let exportChatBtn, clearChatBtn, clearAllHistoryBtn;
 let scrollBottomBtn;
+let modeWheel, modeInterface, modeInterfaceOrb, modeInterfaceTitle, modeInterfaceDescription, modeInterfaceSteps, modeInterfaceClear;
 let developerCardBtn, developerModalBackdrop, devModalClose;
 
 
@@ -1110,6 +1263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHistory();
   renderMessages();
   setupTextarea();
+  setupModeWheel();
   setupScrollBottom();
   setupVisualViewportFix();
   syncFloatingBubbleToggle();
@@ -1161,6 +1315,14 @@ function cacheElements() {
   clearChatBtn = document.getElementById("clearChatBtn");
   clearAllHistoryBtn = document.getElementById("clearAllHistoryBtn");
   scrollBottomBtn = document.getElementById("scrollBottomBtn");
+
+  modeWheel = document.getElementById("modeWheel");
+  modeInterface = document.getElementById("modeInterface");
+  modeInterfaceOrb = document.getElementById("modeInterfaceOrb");
+  modeInterfaceTitle = document.getElementById("modeInterfaceTitle");
+  modeInterfaceDescription = document.getElementById("modeInterfaceDescription");
+  modeInterfaceSteps = document.getElementById("modeInterfaceSteps");
+  modeInterfaceClear = document.getElementById("modeInterfaceClear");
 
   developerCardBtn = document.getElementById("developerCardBtn");
   developerModalBackdrop = document.getElementById("developerModalBackdrop");
@@ -1441,6 +1603,73 @@ function setupTextarea() {
   });
 }
 
+
+function setupModeWheel() {
+  state.aiMode = normalizeAiMode(state.aiMode);
+  modeWheel?.querySelectorAll(".mode-node[data-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const mode = normalizeAiMode(button.dataset.mode);
+      if (!mode) return;
+      setAiMode(mode, button);
+    });
+  });
+
+  modeInterfaceClear?.addEventListener("click", () => {
+    state.aiMode = "";
+    safeRemoveItem(STORAGE_KEYS.aiMode);
+    updateModeWheel();
+    showToast("تم إلغاء الوضع الذكي والعودة للمحادثة العادية.", "info");
+  });
+
+  updateModeWheel();
+}
+
+function setAiMode(mode, button) {
+  const next = normalizeAiMode(mode);
+  if (!next) return;
+  state.aiMode = next;
+  safeSetItem(STORAGE_KEYS.aiMode, next);
+
+  if (button) {
+    button.classList.remove("is-bursting");
+    // Restart the launch/burst animation even when the same mode is selected again.
+    void button.offsetWidth;
+    button.classList.add("is-bursting");
+    window.setTimeout(() => button.classList.remove("is-bursting"), 760);
+  }
+
+  updateModeWheel();
+  showToast(`${AI_MODES[next].title} جاهز — اكتب طلبك الآن.`, "info");
+}
+
+function updateModeWheel() {
+  const activeMode = normalizeAiMode(state.aiMode);
+  const activeConfig = activeMode ? AI_MODES[activeMode] : null;
+
+  modeWheel?.querySelectorAll(".mode-node[data-mode]").forEach((button) => {
+    const selected = button.dataset.mode === activeMode;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
+
+  if (input) {
+    input.placeholder = activeConfig?.placeholder || "اكتب رسالتك وأطلق شرارة الفكرة...";
+  }
+
+  if (!modeInterface) return;
+  modeInterface.classList.toggle("hidden", !activeConfig);
+
+  if (!activeConfig) return;
+  if (modeInterfaceOrb) modeInterfaceOrb.textContent = activeConfig.icon;
+  if (modeInterfaceTitle) modeInterfaceTitle.textContent = activeConfig.title;
+  if (modeInterfaceDescription) modeInterfaceDescription.textContent = activeConfig.description;
+  if (modeInterfaceSteps) {
+    modeInterfaceSteps.innerHTML = activeConfig.steps
+      .map((step) => `<span>${escapeHTML(step)}</span>`)
+      .join("");
+  }
+}
+
 function setupScrollBottom() {
   if (!chat || !scrollBottomBtn) return;
   chat.addEventListener("scroll", () => {
@@ -1527,7 +1756,7 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FAF6F1" : "#100B0C");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FAF6F1" : "#070812");
   const themeIcon = state.theme === "light" ? UI_ICONS.moon : UI_ICONS.sun;
   document.querySelectorAll(".theme-icon, .theme-icon-indicator").forEach((node) => {
     node.innerHTML = themeIcon;
@@ -1828,8 +2057,8 @@ function setMiniMaxBillingBlocked(blocked) {
   updateModelUI();
 }
 
-function describeHttpError(status) {
-  const usingMiniMax = state.model === MODELS.minimax;
+function describeHttpError(status, requestedModel = state.model) {
+  const usingMiniMax = requestedModel === MODELS.minimax;
   const provider = usingMiniMax ? "MiniMax" : "Groq";
   const keyName = usingMiniMax ? "MINIMAX_API_KEY" : "GROQ_API_KEY";
 
@@ -1856,6 +2085,122 @@ function describeHttpError(status) {
   }
 }
 
+
+function getModeDirective(mode, variant = "") {
+  const config = AI_MODES[mode];
+  if (!config) return "";
+  if (mode === "competition" && variant === "engineA") return config.engineA;
+  if (mode === "competition" && variant === "engineB") return config.engineB;
+  return config.directive;
+}
+
+function withModeInstruction(content, mode, variant = "") {
+  const directive = getModeDirective(mode, variant);
+  if (!directive) return content || "";
+  const userContent = (content || "").trim() || "ابدأ بتطبيق هذا الوضع على طلبي الحالي.";
+  return `${directive}\n\nطلب المستخدم:\n${userContent}`;
+}
+
+function applyDirectiveToLatestUser(messages, directive) {
+  const cloned = Array.isArray(messages)
+    ? messages.map((msg) => ({ ...msg }))
+    : [];
+
+  for (let i = cloned.length - 1; i >= 0; i--) {
+    if (cloned[i]?.role === "user" && typeof cloned[i].content === "string") {
+      cloned[i].content = `${directive}\n\nطلب المستخدم:\n${cloned[i].content.trim() || "ابدأ البحث الآن."}`;
+      break;
+    }
+  }
+
+  return cloned;
+}
+
+async function requestChatCompletion(model, messages, signal) {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({ model, messages }),
+    signal
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (jsonError) {
+    if (response.ok) {
+      throw new Error("تعذر قراءة رد الخادم، حاول مرة أخرى.");
+    }
+    data = {};
+  }
+
+  if (!response.ok) {
+    const httpError = new Error(
+      data?.error ||
+      describeHttpError(response.status, model)
+    );
+    if (data?.notice && typeof data.notice.text === "string") {
+      httpError.notice = data.notice.text;
+    }
+    if (data?.code === "MINIMAX_INSUFFICIENT_BALANCE") {
+      setMiniMaxBillingBlocked(true);
+    }
+    throw httpError;
+  }
+
+  if (!data?.ok) {
+    throw new Error(data?.error || "لم يتم الحصول على رد.");
+  }
+
+  return data;
+}
+
+async function runCompetitionMode(apiMessages, signal) {
+  const engineA = requestChatCompletion(
+    MODELS.smart,
+    applyDirectiveToLatestUser(apiMessages, getModeDirective("competition", "engineA")),
+    signal
+  );
+  const engineB = requestChatCompletion(
+    MODELS.fast,
+    applyDirectiveToLatestUser(apiMessages, getModeDirective("competition", "engineB")),
+    signal
+  );
+
+  const [first, second] = await Promise.allSettled([engineA, engineB]);
+
+  if (first.status === "rejected" && second.status === "rejected") {
+    throw first.reason || second.reason || new Error("تعذر تشغيل وضع المنافسة حالياً.");
+  }
+
+  const renderResult = (settled, label, modelLabel) => {
+    if (settled.status === "fulfilled") {
+      const reply = cleanAssistantReply(settled.value?.reply || "");
+      return `### ${label} — ${modelLabel}\n${reply || "لم يرجع هذا المحرك نتيجة نصية واضحة."}`;
+    }
+    const reason = settled.reason?.message || "تعذر الحصول على نتيجة من هذا المحرك.";
+    return `### ${label} — ${modelLabel}\n> ${reason}`;
+  };
+
+  const reply = [
+    "## ⚔ وضع المنافسة — نتيجتان مستقلتان",
+    "قمت بتشغيل مسارين مختلفين للطلب نفسه. راجع النتيجتين واختر الأنسب لك من أزرار الاعتماد أسفل الرد.",
+    renderResult(first, "النتيجة الأولى", "SPARTA Core"),
+    renderResult(second, "النتيجة الثانية", "SPARTA Fast"),
+    "### طريقة الاختيار",
+    "- اختر **اعتماد النتيجة الأولى** إذا أردت الدقة والتنظيم المحافظ.\n- اختر **اعتماد النتيجة الثانية** إذا أردت زاوية مختلفة أو أسلوبًا أكثر سرعة.\n- أو اطلب **دمج الأفضل** للحصول على نسخة نهائية تجمع أقوى النقاط."
+  ].join("\n\n");
+
+  return {
+    reply,
+    model: "SPARTA Competition",
+    provider: "groq"
+  };
+}
+
 async function sendMessage() {
   if (state.busy) {
     stopRequest();
@@ -1863,6 +2208,7 @@ async function sendMessage() {
   }
 
   const text = input?.value?.trim() || "";
+  const activeAiMode = normalizeAiMode(state.aiMode);
   if (!text && !state.selectedImage && !state.selectedDocument) {
     return;
   }
@@ -1880,7 +2226,8 @@ async function sendMessage() {
   // Build User Message
   const userMessage = {
     role: "user",
-    content: text
+    content: text,
+    mode: activeAiMode || undefined
   };
 
   if (state.selectedImage) {
@@ -1930,56 +2277,46 @@ async function sendMessage() {
       return;
     }
 
-    // 2. Normal Request to Backend
-    const apiMessages = buildApiMessages();
+    // 2. Normal Request to Backend (or advanced mode routing)
     const hasImage = Boolean(attachedImage);
+    const hasDocument = Boolean(attachedDoc);
+    const runDualCompetition = activeAiMode === "competition" && !hasImage && !hasDocument;
+    const apiMessages = buildApiMessages({
+      applyModes: !runDualCompetition,
+      ignoreAttachments: runDualCompetition
+    });
+
+    if (runDualCompetition) {
+      const competitionData = await runCompetitionMode(apiMessages, state.controller.signal);
+      removeLoadingMessage(loadingId);
+
+      state.messages.push({
+        role: "assistant",
+        content: competitionData.reply,
+        mode: "competition",
+        model: competitionData.model,
+        provider: competitionData.provider
+      });
+
+      saveMessages();
+      renderMessages();
+      saveConversation();
+      return;
+    }
+
     const selectedModel = VALID_MODELS.has(state.model) ? state.model : MODELS.smart;
-    const model = hasImage && selectedModel !== MODELS.minimax
+    let model = hasImage && selectedModel !== MODELS.minimax
       ? MODELS.vision
       : selectedModel;
 
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        model,
-        messages: apiMessages
-      }),
-      signal: state.controller.signal
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch (jsonError) {
-      if (response.ok) {
-        throw new Error("تعذر قراءة رد الخادم، حاول مرة أخرى.");
-      }
-      data = {};
+    if (!hasImage && activeAiMode === "comparison") {
+      model = hasSpartaPro() ? MODELS.minimax : MODELS.smart;
+    } else if (!hasImage && activeAiMode === "deep-search") {
+      model = MODELS.smart;
     }
+
+    const data = await requestChatCompletion(model, apiMessages, state.controller.signal);
     removeLoadingMessage(loadingId);
-
-    if (!response.ok) {
-      const httpError = new Error(
-        data?.error ||
-        describeHttpError(response.status)
-      );
-      // The backend may attach a billing/provider notice to the error.
-      if (data?.notice && typeof data.notice.text === "string") {
-        httpError.notice = data.notice.text;
-      }
-      if (data?.code === "MINIMAX_INSUFFICIENT_BALANCE") {
-        setMiniMaxBillingBlocked(true);
-      }
-      throw httpError;
-    }
-
-    if (!data?.ok) {
-      throw new Error(data?.error || "لم يتم الحصول على رد.");
-    }
 
     let reply = typeof data.reply === "string" ? data.reply : "";
     reply = cleanAssistantReply(reply);
@@ -1999,6 +2336,7 @@ async function sendMessage() {
     state.messages.push({
       role: "assistant",
       content: reply,
+      mode: activeAiMode || undefined,
       model: typeof data.model === "string" ? data.model : model,
       provider: data.provider === "minimax" ? "minimax" : "groq",
       usage: data.usage && typeof data.usage === "object" ? data.usage : undefined,
@@ -2054,13 +2392,15 @@ async function sendMessage() {
   }
 }
 
-function buildApiMessages() {
+function buildApiMessages(options = {}) {
+  const applyModes = options.applyModes !== false;
+  const ignoreAttachments = options.ignoreAttachments === true;
   const historyMessages = Array.isArray(state.messages) ? state.messages.slice(-16) : [];
 
   const lastImageIndex = historyMessages.reduce((idx, msg, i) => msg?.image ? i : idx, -1);
   const lastFileIndex = historyMessages.reduce((idx, msg, i) => msg?.fileText ? i : idx, -1);
 
-  if (lastImageIndex !== -1) {
+  if (!ignoreAttachments && lastImageIndex !== -1) {
     const msg = historyMessages[lastImageIndex];
     return [
       {
@@ -2068,7 +2408,9 @@ function buildApiMessages() {
         content: [
           {
             type: "text",
-            text: msg.content?.trim() || "حلل هذه الصورة وقدم النتيجة النهائية فقط."
+            text: applyModes
+              ? withModeInstruction(msg.content?.trim() || "حلل هذه الصورة وقدم النتيجة النهائية فقط.", msg.mode)
+              : (msg.content?.trim() || "حلل هذه الصورة وقدم النتيجة النهائية فقط.")
           },
           {
             type: "image_url",
@@ -2079,7 +2421,7 @@ function buildApiMessages() {
     ];
   }
 
-  if (lastFileIndex !== -1) {
+  if (!ignoreAttachments && lastFileIndex !== -1) {
     const context = [];
     for (let i = Math.max(0, lastFileIndex - 2); i < lastFileIndex; i++) {
       const msg = historyMessages[i];
@@ -2089,10 +2431,13 @@ function buildApiMessages() {
     }
 
     const fileMsg = historyMessages[lastFileIndex];
+    const filePrompt = applyModes
+      ? withModeInstruction(fileMsg.content || "حلل الملف المرفق.", fileMsg.mode)
+      : (fileMsg.content || "حلل الملف المرفق.");
     context.push({
       role: "user",
       content:
-        `${fileMsg.content || "حلل الملف المرفق."}\n\n` +
+        `${filePrompt}\n\n` +
         `اسم الملف: ${fileMsg.fileName || "file"}\n\n` +
         `محتوى الملف:\n--- BEGIN FILE ---\n` +
         `${truncateText(fileMsg.fileText || "", 12000)}\n` +
@@ -2103,10 +2448,15 @@ function buildApiMessages() {
 
   return historyMessages
     .filter(msg => msg && (msg.role === "user" || msg.role === "assistant") && typeof msg.content === "string" && msg.content.trim())
-    .map(msg => ({
-      role: msg.role,
-      content: msg.content.slice(-2500)
-    }));
+    .map(msg => {
+      const content = msg.content.slice(-2500);
+      return {
+        role: msg.role,
+        content: applyModes && msg.role === "user"
+          ? withModeInstruction(content, msg.mode)
+          : content
+      };
+    });
 }
 
 function cleanAssistantReply(text) {
@@ -2184,6 +2534,14 @@ function renderMessage(message, index) {
     content.appendChild(fileBox);
   }
 
+  // Active AI mode badge
+  if (message.mode && AI_MODES[message.mode]) {
+    const modeBadge = document.createElement("div");
+    modeBadge.className = "message-mode-badge";
+    modeBadge.textContent = `${AI_MODES[message.mode].icon} ${AI_MODES[message.mode].title}`;
+    content.appendChild(modeBadge);
+  }
+
   // Text Content
   if (message.content) {
     const text = document.createElement("div");
@@ -2211,6 +2569,10 @@ function renderMessage(message, index) {
 
       meta.textContent = parts.join(" • ");
       content.appendChild(meta);
+    }
+
+    if (message.role === "assistant" && message.mode === "competition") {
+      content.appendChild(createCompetitionChoiceActions());
     }
 
     // Message Actions Toolbar (Copy & TTS)
@@ -2254,6 +2616,46 @@ function speakText(text) {
   utterance.rate = 1.0;
   window.speechSynthesis.speak(utterance);
   showToast("جاري القراءة الصوتية...");
+}
+
+
+function createCompetitionChoiceActions() {
+  const wrap = document.createElement("div");
+  wrap.className = "mode-choice-actions";
+
+  const choices = [
+    {
+      label: "اعتماد النتيجة الأولى",
+      prompt: "اعتمد النتيجة الأولى من وضع المنافسة وحوّلها إلى خطة نهائية مختصرة ومنظمة."
+    },
+    {
+      label: "اعتماد النتيجة الثانية",
+      prompt: "اعتمد النتيجة الثانية من وضع المنافسة وحوّلها إلى خطة نهائية مختصرة ومنظمة."
+    },
+    {
+      label: "ادمج الأفضل",
+      prompt: "ادمج أفضل ما في النتيجتين من وضع المنافسة وقدّم نسخة نهائية واحدة أقوى وأكثر دقة."
+    }
+  ];
+
+  for (const choice of choices) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mode-choice-btn";
+    btn.textContent = choice.label;
+    btn.addEventListener("click", () => {
+      if (!input) return;
+      input.value = choice.prompt;
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 180) + "px";
+      input.focus();
+      updateComposerState();
+      showToast("تم تجهيز اختيارك في صندوق الكتابة.", "success");
+    });
+    wrap.appendChild(btn);
+  }
+
+  return wrap;
 }
 
 function renderMarkdown(text) {
