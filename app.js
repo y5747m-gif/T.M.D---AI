@@ -1610,7 +1610,7 @@ function setupModeWheel() {
     button.addEventListener("click", () => {
       const mode = normalizeAiMode(button.dataset.mode);
       if (!mode) return;
-      setAiMode(mode, button);
+      setAiMode(mode);
     });
   });
 
@@ -1624,19 +1624,11 @@ function setupModeWheel() {
   updateModeWheel();
 }
 
-function setAiMode(mode, button) {
+function setAiMode(mode) {
   const next = normalizeAiMode(mode);
   if (!next) return;
   state.aiMode = next;
   safeSetItem(STORAGE_KEYS.aiMode, next);
-
-  if (button) {
-    button.classList.remove("is-bursting");
-    // Restart the launch/burst animation even when the same mode is selected again.
-    void button.offsetWidth;
-    button.classList.add("is-bursting");
-    window.setTimeout(() => button.classList.remove("is-bursting"), 760);
-  }
 
   updateModeWheel();
   showToast(`${AI_MODES[next].title} جاهز — اكتب طلبك الآن.`, "info");
