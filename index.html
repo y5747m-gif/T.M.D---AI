@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#100B0C">
+  <meta name="theme-color" content="#070812">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SPARTA AI">
@@ -99,7 +99,7 @@
   <a class="skip-link" href="#mainContent">تخطي إلى المحتوى الرئيسي</a>
 
   <noscript>
-    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#100B0C;color:#F6F1EC;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
+    <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#070812;color:#F6F1EC;font-family:Cairo,sans-serif;text-align:center;padding:24px;line-height:2;">
       <div>
         <p style="font-size:1.35rem;font-weight:700;margin-bottom:10px;">SPARTA AI</p>
         <p style="color:#BFB2AB;margin-bottom:14px;">المحادثة وتحليل المستندات والصور يتطلبان تفعيل JavaScript في المتصفح.</p>
@@ -112,12 +112,21 @@
   <div class="bg-dim-overlay" id="bgDimOverlay" aria-hidden="true"></div>
   <canvas class="stars-canvas" id="starsCanvas" aria-hidden="true"></canvas>
   <div class="cosmos-nebula" id="cosmosNebula" aria-hidden="true"></div>
+  <div class="mythic-space-layer" aria-hidden="true">
+    <span class="mythic-shape mythic-shape--gate"></span>
+    <span class="mythic-shape mythic-shape--triangle"></span>
+    <span class="mythic-shape mythic-shape--crest"></span>
+    <span class="mythic-shape mythic-shape--runes"></span>
+  </div>
 
   <div class="app" id="appContainer">
     <aside class="sidebar" id="sidebar" aria-label="القائمة الجانبية">
       <div class="sidebar-header">
         <div class="brand" title="SPARTA AI">
           <div class="sparta-logo sparta-logo--sm" aria-hidden="true">
+            <span class="sparta-logo__beam"></span>
+            <span class="sparta-logo__orbit sparta-logo__orbit--outer"></span>
+            <span class="sparta-logo__orbit sparta-logo__orbit--inner"></span>
             <img src="/images/sparta-mark.svg" width="40" height="40" alt="">
           </div>
           <div class="brand-info">
@@ -229,12 +238,17 @@
       <section class="chat" id="chat" aria-live="polite">
         <div class="welcome" id="welcome">
           <div class="sparta-logo sparta-logo--hero" aria-label="شعار SPARTA AI">
+            <span class="sparta-logo__beam"></span>
+            <span class="sparta-logo__orbit sparta-logo__orbit--outer"></span>
+            <span class="sparta-logo__orbit sparta-logo__orbit--inner"></span>
+            <span class="sparta-logo__orbit sparta-logo__orbit--tilt"></span>
             <img src="/images/sparta-mark.svg" width="72" height="72" alt="SPARTA AI">
           </div>
 
           <div class="welcome-heading-wrap">
-            <h1 class="welcome-title">كيف يمكنني مساعدتك؟</h1>
-            <p class="welcome-sub">اكتب سؤالك أو اطلب ما تحتاجه، وسأساعدك على الوصول إلى نتيجة واضحة.</p>
+            <div class="mythic-kicker" aria-hidden="true"><span>بوابة فضائية</span><span>هالة أسطورية</span><span>ذكاء عربي</span></div>
+            <h1 class="welcome-title"><span class="brand-highlight">SPARTA AI</span> جاهز لرحلتك الأسطورية</h1>
+            <p class="welcome-sub">اكتب فكرتك أو سؤالك داخل مدارٍ كوني، وسأحوّلها إلى إجابة واضحة بتجربة فاخرة متوازنة مع الفضاء.</p>
             <div class="creator-badge" id="welcomeCreatorBadge">
               <span class="creator-sparkle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg></span>
               <span>تصميم وهندسة <strong>ياسين عمرو عبد الرحيم</strong></span>
@@ -245,7 +259,7 @@
             <div class="daily-mission__light" aria-hidden="true"></div>
             <div class="daily-mission__mark" aria-hidden="true"><img src="/images/sparta-mark.svg" width="42" height="42" alt=""></div>
             <div class="daily-mission__copy">
-              <span class="daily-mission__eyebrow">مهمة اليوم · SPARTA PRO</span>
+              <span class="daily-mission__eyebrow">بوابة اليوم · SPARTA PRO</span>
               <h2 id="dailyMissionTitle">حلّل قرارًا واحدًا بوضوح</h2>
               <p id="dailyMissionDescription">حوّل قرارًا مهنيًا أو شخصيًا إلى خيارات، معايير، وخطوة تالية عملية خلال خمس دقائق.</p>
               <span class="daily-mission__meta" id="dailyMissionMeta">يتجدد التحدي كل يوم</span>
@@ -330,11 +344,43 @@
               </div>
             </div>
 
-            <textarea class="input-area" id="input" rows="1" placeholder="اكتب رسالتك هنا..." aria-label="رسالتك إلى SPARTA AI" autocomplete="off" spellcheck="true"></textarea>
+            <textarea class="input-area" id="input" rows="1" placeholder="اكتب رسالتك وأطلق شرارة الفكرة..." aria-label="رسالتك إلى SPARTA AI" autocomplete="off" spellcheck="true"></textarea>
             <button class="circle-button send-button" id="send" type="button" aria-label="إرسال" title="إرسال (Enter)">
               <svg class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>
           </div>
+
+          <section class="mode-wheel" id="modeWheel" aria-label="أوضاع SPARTA الذكية المتقدمة">
+            <div class="mode-wheel__track" aria-hidden="true"></div>
+            <button class="mode-node" type="button" data-mode="competition" aria-pressed="false" title="وضع المنافسة">
+              <span class="mode-node__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="m6 4 7 7"/><path d="m10 8 2-2 6 6-2 2"/><path d="m4 18 6-6"/><path d="m18 4-7 7"/><path d="m14 8-2-2-6 6 2 2"/><path d="m20 18-6-6"/><path d="M7 21l-4-4M17 21l4-4"/></svg>
+              </span>
+              <span class="mode-node__label">منافسة</span>
+            </button>
+            <button class="mode-node" type="button" data-mode="comparison" aria-pressed="false" title="وضع المقارنة">
+              <span class="mode-node__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 6h14"/><path d="M6 6l-3 7h6L6 6Z"/><path d="m18 6-3 7h6l-3-7Z"/><path d="M8 21h8"/><path d="M10 17h4"/></svg>
+              </span>
+              <span class="mode-node__label">مقارنة</span>
+            </button>
+            <button class="mode-node" type="button" data-mode="deep-search" aria-pressed="false" title="وضع البحث العميق">
+              <span class="mode-node__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="5"/><path d="m16 16 4 4"/><path d="M11 2v3M11 17v3M2 11h3M17 11h3"/><path d="M5 5l2 2M17 5l-2 2M5 17l2-2"/></svg>
+              </span>
+              <span class="mode-node__label">بحث عميق</span>
+            </button>
+          </section>
+
+          <section class="mode-interface hidden" id="modeInterface" aria-live="polite">
+            <div class="mode-interface__orb" id="modeInterfaceOrb" aria-hidden="true">✦</div>
+            <div class="mode-interface__copy">
+              <strong id="modeInterfaceTitle">اختر وضعًا ذكيًا</strong>
+              <p id="modeInterfaceDescription">اختر أيقونة من البكرة لتغيير طريقة معالجة الطلب قبل الإرسال.</p>
+              <div class="mode-interface__steps" id="modeInterfaceSteps"></div>
+            </div>
+            <button class="mode-interface__clear" id="modeInterfaceClear" type="button">إلغاء الوضع</button>
+          </section>
 
           <div class="composer-note">
             <span>قد يخطئ الذكاء الاصطناعي؛ تحقق من المعلومات المهمة.</span>

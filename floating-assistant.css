@@ -5,22 +5,22 @@
 .tmd-fab,
 .tmd-mini,
 .tmd-assistant-page {
-  --tmd-bg: #100b0c;
-  --tmd-surface: #181113;
-  --tmd-card: #1e1518;
-  --tmd-card-hover: #271b1f;
-  --tmd-primary: #e0554e;
-  --tmd-primary-hover: #ea6f68;
-  --tmd-secondary: #d9a45b;
-  --tmd-cyan: #e8b25c;
-  --tmd-text: #f6f1ec;
-  --tmd-muted: #bfb2ab;
-  --tmd-subtle: #8c7f78;
-  --tmd-line: rgba(255, 255, 255, 0.08);
-  --tmd-line-strong: rgba(255, 255, 255, 0.14);
+  --tmd-bg: #070812;
+  --tmd-surface: #120d1d;
+  --tmd-card: #171123;
+  --tmd-card-hover: #251936;
+  --tmd-primary: #ff5f6d;
+  --tmd-primary-hover: #ff7f73;
+  --tmd-secondary: #f4c36a;
+  --tmd-cyan: #74e7ff;
+  --tmd-text: #fff8ef;
+  --tmd-muted: #d5c6bd;
+  --tmd-subtle: #9e8f9e;
+  --tmd-line: rgba(255, 255, 255, 0.11);
+  --tmd-line-strong: rgba(255, 255, 255, 0.2);
   --tmd-success: #55c98a;
   --tmd-error: #f27676;
-  --tmd-shadow: 0 14px 36px rgba(0, 0, 0, 0.26);
+  --tmd-shadow: 0 22px 60px rgba(0, 0, 0, 0.38);
   --tmd-fast: 160ms ease;
   --tmd-normal: 220ms cubic-bezier(0.2, 0.75, 0.25, 1);
   box-sizing: border-box;
@@ -855,7 +855,7 @@
 .tmd-pip-body {
   margin: 0;
   overflow: hidden;
-  background: #100b0c;
+  background: #070812;
 }
 
 .tmd-pip-shell {
