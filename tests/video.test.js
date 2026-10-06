@@ -309,3 +309,81 @@ test("retrieves a completed task with its temporary video URL", async (t) => {
   assert.equal(request.url, "https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks/cgt-complete");
   assert.equal(request.options.method, "GET");
 });
+
+test("reports configuration state through the health probe without a key", async (t) => {
+  rememberEnvironment(t);
+  delete process.env.SEEDANCE_API_KEY;
+  delete process.env.ARK_API_KEY;
+
+  const result = await invoke({ action: "health" });
+
+  assert.equal(result.status, 200);
+  assert.equal(result.body.ok, true);
+  assert.equal(result.body.configured, false);
+  assert.equal(result.body.model, handler._test.MODEL);
+  assert.match(result.body.baseUrl, /^https:\/\/ark\./);
+  assert.match(result.body.error, /SEEDANCE_API_KEY/);
+});
+
+test("health reports the configured model override and access requirement", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_ACCESS_CODE = "team-code";
+  process.env.SEEDANCE_MODEL = "dreamina-seedance-2-5-999999";
+  t.after(() => { delete process.env.SEEDANCE_MODEL; });
+
+  const result = await invoke({ action: "health" });
+
+  assert.equal(result.body.configured, true);
+  assert.equal(result.body.accessCodeRequired, true);
+  assert.equal(result.body.model, "dreamina-seedance-2-5-999999");
+});
+
+test("sends the overridden model id to the provider", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_MODEL = "dreamina-seedance-2-5-999999";
+  t.after(() => { delete process.env.SEEDANCE_MODEL; });
+
+  let sent = null;
+  global.fetch = async (url, options) => {
+    sent = { url, body: JSON.parse(options.body) };
+    return mockFetchResponse({ id: "cgt-override", status: "queued" });
+  };
+
+  const result = await invoke({ action: "create", prompt: "A quiet harbour at dawn." });
+
+  assert.equal(result.status, 202);
+  assert.equal(sent.body.model, "dreamina-seedance-2-5-999999");
+  assert.equal(result.body.capabilities.model, "dreamina-seedance-2-5-999999");
+});
+
+test("surfaces a non-JSON provider response instead of a blank error", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+
+  global.fetch = async () => ({
+    ok: false,
+    status: 502,
+    async text() { return "<html><body>Bad gateway</body></html>"; }
+  });
+
+  const result = await invoke({ action: "create", prompt: "A quiet harbour at dawn." });
+
+  assert.equal(result.status, 502);
+  assert.equal(result.body.ok, false);
+  assert.match(result.body.error, /Bad gateway/);
+});
+
+test("maps a network failure to a retryable gateway error", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+
+  global.fetch = async () => { throw new Error("socket hang up"); };
+
+  const result = await invoke({ action: "create", prompt: "A quiet harbour at dawn." });
+
+  assert.equal(result.status, 504);
+  assert.equal(result.body.code, "SEEDANCE_UNREACHABLE");
+  assert.equal(result.body.retryable, true);
+});

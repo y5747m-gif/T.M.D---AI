@@ -205,8 +205,26 @@ ARK_API_KEY=مفتاح_BytePlus_ModelArk
 
 ```text
 SEEDANCE_ACCESS_CODE=رمز_وصول_خاص_بالموقع
-SEEDANCE_MAX_REQUESTS_PER_HOUR=3
+SEEDANCE_MAX_REQUESTS_PER_HOUR=10
 ```
+
+ومتغيرات تشغيلية اختيارية إذا غيّرت BytePlus المُعرّف أو أردت منطقة أخرى:
+
+```text
+# لاحقة الإصدار في مُعرّف الموديل تتغيّر؛ هذا المتغير يسمح بتصحيحها دون نشر كود.
+SEEDANCE_MODEL=dreamina-seedance-2-5-260628
+# يجب أن ينتهي المسار بـ /api/v3، والافتراضي منطقة سنغافورة.
+SEEDANCE_BASE_URL=https://ark.ap-southeast.bytepluses.com/api/v3
+```
+
+#### فحص سريع للتهيئة
+
+```bash
+curl -s -X POST https://YOUR-SITE/api/video \
+  -H 'Content-Type: application/json' -d '{"action":"health"}'
+```
+
+يرجع `configured: true` عند وجود المفتاح، مع الموديل والمنطقة الفعليين. لا يكشف هذا الفحص المفتاح نفسه، ويستدعيه الاستوديو تلقائيًا عند فتحه ليعرض سبب التعطّل بدل الفشل عند أول ضغطة إنشاء.
 
 - `SEEDANCE_ACCESS_CODE` **ليس** مفتاح مزوّد الفيديو؛ إنه رمز وصول مستقل يكتبه المستخدم في قسم «وصول خاص» داخل الاستوديو إذا فعّله المالك.
 - حد IP هو حماية ذاكرية أفضلية فقط في Serverless، وليس بديلًا عن نظام حسابات/حصص إنتاجي عندما تفتح الأداة للجمهور.

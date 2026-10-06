@@ -10,9 +10,37 @@
 
 const crypto = require("crypto");
 
-const MODEL = "dreamina-seedance-2-5-260628";
-const BASE_URL = "https://ark.ap-southeast.bytepluses.com/api/v3";
-const TASKS_URL = `${BASE_URL}/contents/generations/tasks`;
+/* Model IDs carry a release-date suffix that BytePlus rotates. A stale ID is a
+   silent production failure, so both the model and the regional base URL can be
+   corrected from the environment without shipping new code. */
+const DEFAULT_MODEL = "dreamina-seedance-2-5-260628";
+const DEFAULT_BASE_URL = "https://ark.ap-southeast.bytepluses.com/api/v3";
+const PROVIDER_TIMEOUT_MS = 25_000;
+
+function getModel() {
+  const value = String(process.env.SEEDANCE_MODEL || process.env.ARK_VIDEO_MODEL || "").trim();
+  return /^[A-Za-z0-9._-]{3,120}$/.test(value) ? value : DEFAULT_MODEL;
+}
+
+function getBaseUrl() {
+  const raw = String(process.env.SEEDANCE_BASE_URL || process.env.ARK_BASE_URL || "").trim();
+  if (!raw) return DEFAULT_BASE_URL;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "https:") return DEFAULT_BASE_URL;
+    return raw.replace(/\/+$/, "");
+  } catch {
+    return DEFAULT_BASE_URL;
+  }
+}
+
+function getTasksUrl() {
+  return `${getBaseUrl()}/contents/generations/tasks`;
+}
+
+/* Kept as a named export for the test-suite and for callers that still read the
+   pinned default. Runtime code must call getModel(). */
+const MODEL = DEFAULT_MODEL;
 
 /* Seedance 2.5 natively supports a single continuous 30s segment. The old
    [5, 15] window was a tool-layer artifact of an earlier integration, not a
@@ -85,7 +113,7 @@ function getClientKey(req) {
 }
 
 function enforceCreateLimit(req) {
-  const limit = Math.max(1, Math.min(30, Number(process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR || 3) || 3));
+  const limit = Math.max(1, Math.min(60, Number(process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR || 10) || 10));
   const now = Date.now();
   const windowMs = 60 * 60 * 1000;
   const key = getClientKey(req);
@@ -330,7 +358,7 @@ function toTask(data) {
   const content = task.content && typeof task.content === "object" ? task.content : {};
   return {
     id: String(task.id || ""),
-    model: String(task.model || MODEL),
+    model: String(task.model || getModel()),
     status: String(task.status || "queued"),
     createdAt: Number(task.created_at) || undefined,
     duration: Number.isFinite(Number(task.duration)) ? Number(task.duration) : undefined,
@@ -343,22 +371,63 @@ function toTask(data) {
 }
 
 async function callProvider(path, apiKey, options = {}) {
-  const response = await fetch(`${TASKS_URL}${path}`, {
-    method: options.method || "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined
-  });
-  const data = await response.json().catch(() => ({}));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
+
+  let response;
+  let raw = "";
+  try {
+    response = await fetch(`${getTasksUrl()}${path}`, {
+      method: options.method || "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal
+    });
+    if (typeof response.text === "function") {
+      raw = await response.text();
+    } else if (typeof response.json === "function") {
+      /* Minimal Response-likes (tests, some polyfills) expose json() only. */
+      raw = JSON.stringify((await response.json()) ?? {});
+    }
+  } catch (error) {
+    const aborted = error?.name === "AbortError";
+    const err = new Error(
+      aborted
+        ? "انتهت مهلة الاتصال بخدمة Seedance. حاول مرة أخرى."
+        : `تعذر الوصول إلى خدمة Seedance: ${error?.message || "خطأ في الشبكة"}`
+    );
+    err.transient = true;
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  let data = {};
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      /* The gateway occasionally answers with an HTML error page (bad base URL,
+         proxy, WAF). Surface a trimmed excerpt instead of a blank message. */
+      data = { __nonJson: raw.replace(/\s+/g, " ").trim().slice(0, 300) };
+    }
+  }
   return { response, data };
 }
 
 function providerError(data, fallback) {
-  return String(
-    data?.error?.message || data?.message || data?.base_resp?.status_msg || fallback || "تعذر الاتصال بخدمة Seedance."
-  ).trim();
+  const detail =
+    data?.error?.message ||
+    data?.message ||
+    data?.base_resp?.status_msg ||
+    data?.__nonJson ||
+    fallback ||
+    "تعذر الاتصال بخدمة Seedance.";
+  const code = data?.error?.code ? ` (${data.error.code})` : "";
+  return `${String(detail).trim()}${code}`;
 }
 
 async function createTask(req, res, body, apiKey) {
@@ -379,8 +448,9 @@ async function createTask(req, res, body, apiKey) {
     });
   }
 
+  const model = getModel();
   const payload = {
-    model: MODEL,
+    model,
     content: buildContent(input.prompt, input.references, input.mode),
     ratio: input.ratio,
     duration: input.duration,
@@ -390,9 +460,13 @@ async function createTask(req, res, body, apiKey) {
     return_last_frame: input.returnLastFrame
   };
 
-  if (input.mode === "reference") payload.omni_reference_task_type = "reference";
-  if (input.mode === "edit") payload.omni_reference_task_type = "edit";
-  if (input.mode === "extend") payload.omni_reference_task_type = "extend";
+  /* omni_reference_task_type is a Seedance 2.5 only hint. Sending it to another
+     model version would be rejected, so it is gated on the active model. */
+  if (/seedance-2-5/.test(model)) {
+    if (input.mode === "reference") payload.omni_reference_task_type = "reference";
+    if (input.mode === "edit") payload.omni_reference_task_type = "edit";
+    if (input.mode === "extend") payload.omni_reference_task_type = "extend";
+  }
 
   const { response, data } = await callProvider("", apiKey, { method: "POST", body: payload });
   if (!response.ok || !data?.id) {
@@ -423,7 +497,7 @@ async function createTask(req, res, body, apiKey) {
     task: toTask(data),
     notes: input.notes,
     capabilities: {
-      model: MODEL,
+      model,
       duration: { min: MIN_DURATION, max: MAX_DURATION },
       resolutions: ["480p", "720p"],
       frameRate: 24,
@@ -477,6 +551,30 @@ module.exports = async function handler(req, res) {
 
   try {
     const apiKey = getApiKey();
+    const body = parseBody(req);
+    const action = String(body.action || "create").trim().toLowerCase();
+
+    /* A key-free probe so the studio can tell the user exactly what is missing
+       instead of failing on the first (expensive) generate click. */
+    if (action === "health") {
+      return json(res, 200, {
+        ok: true,
+        configured: Boolean(apiKey),
+        model: getModel(),
+        baseUrl: getBaseUrl(),
+        accessCodeRequired: Boolean(String(process.env.SEEDANCE_ACCESS_CODE || "").trim()),
+        capabilities: {
+          duration: { min: MIN_DURATION, max: MAX_DURATION },
+          resolutions: ["480p", "720p"],
+          frameRate: 24,
+          maxReferences: { images: MAX_IMAGES, videos: MAX_VIDEOS, audio: MAX_AUDIO, total: MAX_REFERENCES }
+        },
+        error: apiKey
+          ? ""
+          : "لم يتم إعداد Seedance بعد. أضف SEEDANCE_API_KEY أو ARK_API_KEY إلى متغيرات البيئة ثم أعد النشر."
+      });
+    }
+
     if (!apiKey) {
       return json(res, 503, {
         ok: false,
@@ -485,14 +583,23 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const body = parseBody(req);
-    const action = String(body.action || "create").trim().toLowerCase();
-    if (action === "create") return createTask(req, res, body, apiKey);
-    if (action === "status") return getTask(req, res, body, apiKey);
-    if (action === "cancel") return cancelTask(req, res, body, apiKey);
+    /* These must be awaited: returning the promise directly would let a
+       rejection escape this try/catch and leave the request without a
+       response until the platform times it out. */
+    if (action === "create") return await createTask(req, res, body, apiKey);
+    if (action === "status") return await getTask(req, res, body, apiKey);
+    if (action === "cancel") return await cancelTask(req, res, body, apiKey);
     return json(res, 400, { ok: false, code: "INVALID_ACTION", error: "الإجراء المطلوب غير مدعوم." });
   } catch (error) {
     console.error("Seedance video gateway error:", error);
+    if (error?.transient) {
+      return json(res, 504, {
+        ok: false,
+        code: "SEEDANCE_UNREACHABLE",
+        error: error.message,
+        retryable: true
+      });
+    }
     return json(res, 500, { ok: false, code: "VIDEO_SERVER_ERROR", error: error?.message || "حدث خطأ غير متوقع أثناء معالجة الفيديو." });
   }
 };
