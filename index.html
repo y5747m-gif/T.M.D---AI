@@ -7,19 +7,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SPARTA AI">
-  <meta name="description" content="SPARTA AI — منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءتها. تطوير وتصميم ياسين عمرو عبد الرحيم.">
+  <meta name="description" content="SPARTA AI — منصة عربية للمحادثة الذكية، تحليل المستندات وفهم الصور، وإنشاء فيديو Seedance 2.5 حتى 30 ثانية. تطوير وتصميم ياسين عمرو عبد الرحيم.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="ياسين عمرو عبد الرحيم">
-  <meta name="keywords" content="ذكاء اصطناعي, مساعد ذكي, محادثة ذكاء اصطناعي, تحليل ملفات, تحليل صور, SPARTA AI">
+  <meta name="keywords" content="ذكاء اصطناعي, مساعد ذكي, محادثة ذكاء اصطناعي, تحليل ملفات, تحليل صور, إنشاء فيديو, Seedance 2.5, SPARTA AI">
 
-  <title>SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور</title>
+  <title>SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة والفيديو</title>
   <link rel="canonical" href="https://t-m-d-ai.vercel.app/">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SPARTA AI">
   <meta property="og:locale" content="ar_AR">
-  <meta property="og:title" content="SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة وتحليل الملفات والصور">
-  <meta property="og:description" content="محادثة ذكية فورية، تحليل مستندات PDF وWord، وفهم الصور — منصة ذكاء اصطناعي عربية احترافية بواجهة حديثة ومتجاوبة.">
+  <meta property="og:title" content="SPARTA AI — مساعد الذكاء الاصطناعي العربي للمحادثة والفيديو">
+  <meta property="og:description" content="محادثة ذكية فورية، تحليل مستندات وفهم صور، وإنشاء فيديو Seedance 2.5 حتى 30 ثانية — منصة عربية احترافية بواجهة متجاوبة.">
   <meta property="og:url" content="https://t-m-d-ai.vercel.app/">
   <meta property="og:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
   <meta property="og:image:width" content="1200">
@@ -29,7 +29,7 @@
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="SPARTA AI — مساعد الذكاء الاصطناعي العربي">
-  <meta name="twitter:description" content="محادثة ذكية فورية، تحليل مستندات، وفهم صور — منصة ذكاء اصطناعي عربية احترافية.">
+  <meta name="twitter:description" content="محادثة ذكية فورية، تحليل مستندات وفهم صور، وإنشاء فيديو Seedance 2.5 حتى 30 ثانية.">
   <meta name="twitter:image" content="https://t-m-d-ai.vercel.app/images/og-image.jpg">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -43,6 +43,7 @@
 
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/seedance-studio.css">
   <link rel="stylesheet" href="/floating-assistant.css">
 
   <script>
@@ -65,7 +66,7 @@
         "@id": "https://t-m-d-ai.vercel.app/#website",
         "url": "https://t-m-d-ai.vercel.app/",
         "name": "SPARTA AI",
-        "description": "منصة ذكاء اصطناعي عربية احترافية للمحادثة الذكية وتحليل المستندات والصور.",
+        "description": "منصة ذكاء اصطناعي عربية للمحادثة الذكية وتحليل المستندات والصور وإنشاء فيديو Seedance 2.5 حتى 30 ثانية.",
         "inLanguage": "ar",
         "publisher": { "@id": "https://t-m-d-ai.vercel.app/#person" },
         "image": "https://t-m-d-ai.vercel.app/images/og-image.jpg"
@@ -78,7 +79,7 @@
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript",
-        "description": "مساعد ذكاء اصطناعي عربي للمحادثة الفورية، تحليل مستندات PDF وWord، وفهم الصور وقراءة النصوص منها.",
+        "description": "مساعد ذكاء اصطناعي عربي للمحادثة الفورية، تحليل مستندات PDF وWord، وفهم الصور، وإنشاء فيديو Seedance 2.5 حتى 30 ثانية.",
         "inLanguage": "ar",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@id": "https://t-m-d-ai.vercel.app/#person" },
@@ -219,6 +220,10 @@
             <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg></span>
             <span class="topbar-btn-text">تثبيت المساعد</span>
           </button>
+          <button class="topbar-action-btn seedance-open-btn" id="openSeedanceStudioBtn" data-open-seedance-studio type="button" title="فتح Seedance 2.5 Studio">
+            <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></span>
+            <span class="topbar-btn-text">Seedance Studio</span>
+          </button>
           <button class="topbar-action-btn bg-customizer-trigger" id="openBgCustomizerBtn" type="button" title="تخصيص المظهر والخلفية">
             <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="10.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="15" cy="7.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="12" r=".5" fill="currentColor"/></svg></span>
             <span class="topbar-btn-text">تخصيص المظهر</span>
@@ -286,6 +291,11 @@
               <div class="card-text"><strong>فهم وتحليل صورة</strong><span>وصف الصور واستخراج النصوص والبيانات.</span></div>
               <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
+            <button class="welcome-card card--seedance" type="button" data-open-seedance-studio>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></div>
+              <div class="card-text"><strong>إنشاء فيديو Seedance 2.5</strong><span>حتى 30 ثانية، من النص أو الصور أو المراجع.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </button>
             <button class="welcome-card card--creator" type="button" data-prompt="من صممك وبرمجك ومن هو المطور الذي قام بابتكار وتطوير هذه الأداة؟">
               <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6M14.5 4l-5 16"/></svg></div>
               <div class="card-text"><strong>عن المنصة والمطور</strong><span>تعرف على التصميم والهندسة وراء المنتج.</span></div>
@@ -340,6 +350,10 @@
                 <button class="plus-option" id="imageEditButton" type="button">
                   <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg></span>
                   <span class="plus-option-content"><span class="plus-option-title">تجهيز أو تعديل صورة</span><span class="plus-option-desc">إرسال صورة مع تعليمات مخصصة</span></span>
+                </button>
+                <button class="plus-option plus-option--seedance" id="openSeedanceFromPlus" data-open-seedance-studio type="button">
+                  <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></span>
+                  <span class="plus-option-content"><span class="plus-option-title">إنشاء فيديو Seedance 2.5</span><span class="plus-option-desc">نص أو صورة أو مراجع فعلية حتى 30 ثانية</span></span>
                 </button>
               </div>
             </div>
@@ -496,6 +510,56 @@
     </div>
   </div>
 
+  <div class="modal-backdrop hidden" id="seedanceStudioBackdrop">
+    <section class="modal modal--seedance" role="dialog" aria-modal="true" aria-labelledby="seedanceStudioTitle">
+      <header class="modal-header seedance-header">
+        <div class="modal-title-group">
+          <span class="modal-title-icon seedance-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></span>
+          <div><h2 class="modal-title" id="seedanceStudioTitle">Seedance 2.5 Studio</h2><p class="modal-subtitle">فيديو حتى 30 ثانية من النص أو المراجع — يعمل عبر مزوّد مرخّص، ومفتاحه لا يغادر الخادم.</p></div>
+        </div>
+        <button class="icon-button" id="seedanceStudioClose" type="button" aria-label="إغلاق استوديو الفيديو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </header>
+      <div class="modal-body seedance-body">
+        <div class="seedance-hero-note"><span aria-hidden="true">✦</span><div><strong>قدرة 30 ثانية حقيقية</strong><p>لا يفرض الاستوديو سقف 15 ثانية قديمًا: المدة المتاحة من 4 إلى 30 ثانية في الطلب الواحد. تتبع المهمة تلقائيًا في الخلفية حتى تكتمل.</p></div></div>
+        <p class="seedance-status" id="seedanceStudioStatus" role="status" aria-live="polite">اكتب الوصف وأضف مراجعك إن احتجت.</p>
+
+        <div class="seedance-grid">
+          <label class="seedance-field"><span>طريقة الإنشاء</span><select id="seedanceMode"><option value="text">نص إلى فيديو</option><option value="first-frame">صورة إلى فيديو — إطار بداية</option><option value="first-last">صورة إلى فيديو — بداية ونهاية</option><option value="reference">إنشاء بالمراجع المتعددة</option><option value="edit">تعديل فيديو مرجعي</option><option value="extend">تمديد فيديو مرجعي</option></select></label>
+          <label class="seedance-field"><span>نسبة الأبعاد</span><select id="seedanceRatio"><option value="16:9">أفقي 16:9</option><option value="9:16">عمودي 9:16</option><option value="1:1">مربع 1:1</option><option value="adaptive">تلقائية من المراجع</option></select></label>
+          <label class="seedance-field"><span>الدقة</span><select id="seedanceResolution"><option value="720p">720p — موصى بها</option><option value="480p">480p — مسودة أسرع</option></select><small>يدعم الإصدار الحالي 480p و720p بمعدل 24fps.</small></label>
+          <label class="seedance-field seedance-duration-field"><span>المدة <strong id="seedanceDurationLabel">30 ثانية</strong></span><input id="seedanceDuration" type="range" min="4" max="30" step="1" value="30" aria-label="مدة الفيديو بالثواني"><small>4–30 ثانية. وضع التعديل يطابق فيديو المصدر.</small></label>
+        </div>
+        <p class="seedance-mode-rule" id="seedanceModeRule"></p>
+
+        <label class="seedance-field seedance-prompt-field" for="seedancePrompt"><span>وصف الفيديو <b>بالإنجليزية مفضّل</b></span><textarea id="seedancePrompt" dir="ltr" rows="5" placeholder="Cinematic tracking shot of a lone explorer crossing a crimson desert at dawn, wind moving the fabric, slow camera push-in, realistic lighting, natural sound."></textarea><small>صف الموضوع والحركة والكاميرا والإضاءة والصوت بوضوح. يدعم النموذج العربية أيضًا، لكن صياغة skill الافتراضية بالإنجليزية.</small></label>
+
+        <section class="seedance-reference-panel" aria-labelledby="seedanceReferenceTitle">
+          <div class="seedance-section-heading"><div><h3 id="seedanceReferenceTitle">المراجع الفعلية وخريطة الاستخدام</h3><p>كل مرجع مُضاف يُرسل إلى النموذج نفسه، لا كنص وصفي فقط. عيّن دوره بدقة لتحافظ على الهوية والحركة والمشهد.</p></div><span class="seedance-limit-badge">30 صورة · 10 فيديو · 10 صوت · 50 إجمالًا</span></div>
+          <div class="seedance-reference-builder">
+            <label class="seedance-field"><span>نوع المرجع</span><select id="seedanceReferenceType"><option value="image">صورة</option><option value="video">فيديو</option><option value="audio">صوت</option></select></label>
+            <label class="seedance-field"><span>المصدر</span><select id="seedanceReferenceSourceMode"><option value="file">ملف صورة من الجهاز</option><option value="url">رابط HTTPS / asset://</option></select></label>
+            <label class="seedance-field seedance-file-field" id="seedanceReferenceFileWrap"><span>الصورة المرجعية</span><input id="seedanceReferenceFile" type="file" accept="image/jpeg,image/png,image/webp,image/bmp,image/gif,image/heic,image/heif,image/tiff"></label>
+            <label class="seedance-field hidden" id="seedanceReferenceUrlWrap"><span>رابط المرجع</span><input id="seedanceReferenceUrl" dir="ltr" type="url" placeholder="https://… أو asset://…"></label>
+            <label class="seedance-field seedance-purpose-field"><span>خريطة المرجع — ما الذي يجب أن يحافظ عليه؟</span><input id="seedanceReferencePurpose" dir="ltr" type="text" placeholder="Character identity and outfit; preserve the original scene composition."></label>
+            <div class="seedance-reference-action"><button class="btn btn-secondary" id="seedanceAddReference" type="button">إضافة مرجع فعلي</button><small id="seedanceReferenceSourceHint"></small></div>
+          </div>
+          <div class="seedance-references" id="seedanceReferences" aria-live="polite"></div>
+        </section>
+
+        <section class="seedance-options" aria-label="خيارات إنشاء الفيديو">
+          <label class="seedance-check"><input id="seedanceGenerateAudio" type="checkbox" checked><span>توليد صوت متزامن مع الفيديو</span></label>
+          <label class="seedance-check"><input id="seedanceWatermark" type="checkbox"><span>إضافة علامة مائية</span></label>
+          <label class="seedance-check seedance-rights"><input id="seedanceRights" type="checkbox"><span>أؤكد امتلاكي الحقوق والتفويض اللازم لاستخدام كل صورة أو فيديو أو صوت مرجعي، خصوصًا أي مادة تحتوي أشخاصًا حقيقيين.</span></label>
+        </section>
+
+        <details class="seedance-advanced"><summary>وصول خاص وحالة التوافق</summary><div><p>إذا عيّن مالك الموقع <code>SEEDANCE_ACCESS_CODE</code>، أدخل الرمز هنا. لا تضع مفتاح مزوّد الفيديو في هذا الحقل.</p><label class="seedance-field" for="seedanceAccessCode"><span>رمز الوصول (اختياري)</span><input id="seedanceAccessCode" type="password" autocomplete="off" placeholder="رمز يحدده مالك الموقع"></label><p>فيديوهات التعديل تحتاج فيديو مرجعيًا وتستخدم نسبة ومدة تكيفيتين. مخرجات الفيديو وروابط إطار النهاية مؤقتة؛ نزّل ما يهمك فورًا.</p></div></details>
+
+        <section class="seedance-jobs-panel" aria-labelledby="seedanceJobsTitle"><div class="seedance-section-heading"><div><h3 id="seedanceJobsTitle">مهام الفيديو</h3><p>يستمر التوليد بصورة غير متزامنة ويُستأنف فحص المهام المفتوحة بعد إعادة تحميل الصفحة.</p></div><span class="seedance-auto-retry">إعادة تلقائية للأخطاء المؤقتة: حتى 3 مرات</span></div><div class="seedance-jobs" id="seedanceJobs"></div></section>
+      </div>
+      <footer class="modal-footer seedance-footer"><p>تطبق الحدود وسياسة المحتوى الخاصة بمزوّد Seedance. يُرسل المفتاح من الخادم فقط.</p><button class="btn btn-primary" id="seedanceGenerate" type="button">إنشاء الفيديو الآن</button></footer>
+    </section>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <input type="file" id="imageInput" accept="image/*" hidden>
   <input type="file" id="documentInput" accept=".pdf,.docx,.txt,.md,.js,.json,.html,.htm,.css,.py,.csv,.xml,.yaml,.yml,.log" hidden>
@@ -513,6 +577,7 @@
   </script>
   <script defer src="/pwa.js"></script>
   <script src="/app.js"></script>
+  <script defer src="/video-studio.js"></script>
   <script defer src="/floating-assistant.js"></script>
 </body>
 </html>
