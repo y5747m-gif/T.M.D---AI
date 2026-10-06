@@ -20,7 +20,9 @@
     jobs: [],
     busy: false,
     polling: false,
-    accessCode: ""
+    accessCode: "",
+    health: null,
+    healthChecked: false
   };
 
   const el = {};
@@ -131,6 +133,48 @@
     return status === "queued" || status === "running";
   }
 
+  /* The gateway is probed once per session so a missing provider key is
+     reported before the user writes a prompt, instead of after they click
+     generate. The probe never exposes the key itself. */
+  async function checkHealth() {
+    if (state.healthChecked) return state.health;
+    state.healthChecked = true;
+    try {
+      const response = await fetch("/api/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "health" })
+      });
+      const data = await response.json().catch(() => ({}));
+      state.health = data && typeof data === "object" ? data : null;
+    } catch (error) {
+      console.warn("Seedance health probe failed:", error);
+      state.health = null;
+    }
+    applyHealth();
+    return state.health;
+  }
+
+  function applyHealth() {
+    const health = state.health;
+    if (!health) return;
+
+    if (health.configured === false) {
+      if (el.generate) el.generate.disabled = true;
+      setStatus(
+        health.error ||
+          "خدمة الفيديو غير مُهيّأة على هذا الخادم. على مالك الموقع إضافة SEEDANCE_API_KEY (أو ARK_API_KEY) في متغيرات البيئة ثم إعادة النشر.",
+        "error"
+      );
+      return;
+    }
+
+    if (el.generate) el.generate.disabled = false;
+    if (health.accessCodeRequired && !state.accessCode) {
+      setStatus("هذا الاستوديو محمي برمز وصول. افتح «وصول خاص وحالة التوافق» وأدخل الرمز قبل الإنشاء.", "info");
+    }
+  }
+
   function setModalOpen(open) {
     if (!el.backdrop) return;
     el.backdrop.classList.toggle("hidden", !open);
@@ -138,6 +182,7 @@
       updateModeUI();
       renderReferences();
       renderJobs();
+      checkHealth();
       requestAnimationFrame(() => el.prompt?.focus());
     }
   }
@@ -465,6 +510,17 @@
       schedulePoll(800);
     } catch (error) {
       let message = error?.message || "تعذر بدء مهمة الفيديو.";
+      if (error?.code === "SEEDANCE_NOT_CONFIGURED") {
+        state.health = { configured: false, error: message };
+        applyHealth();
+      }
+      if (error?.code === "VIDEO_RATE_LIMIT" && Number(error.retryAfterSeconds) > 0) {
+        const minutes = Math.ceil(Number(error.retryAfterSeconds) / 60);
+        message = `${message} أعد المحاولة بعد نحو ${minutes} دقيقة.`;
+      }
+      if (error?.code === "SEEDANCE_UNREACHABLE") {
+        message = `${message} إن تكرر ذلك فتحقق من SEEDANCE_BASE_URL وحالة مزوّد الفيديو.`;
+      }
       if (error?.code === "SEEDANCE_DURATION_CAPPED" && error.fallback?.segments?.length) {
         const segments = error.fallback.segments.join(" + ");
         message = `طبقة الخدمة ما زالت تفرض حدًا قديمًا، لكن النموذج يدعم 30 ثانية. أنتج المقطع على جزأين (${segments} ثانية) ثم استخدم وضع "تمديد" على الجزء الأول للحصول على 30 ثانية متصلة.`;
@@ -474,7 +530,7 @@
     } finally {
       state.busy = false;
       el.generate?.removeAttribute("aria-busy");
-      if (el.generate) el.generate.disabled = false;
+      if (el.generate) el.generate.disabled = state.health?.configured === false;
     }
   }
 
