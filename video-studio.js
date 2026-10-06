@@ -200,7 +200,7 @@
   }
 
   function updateDurationLabel() {
-    const duration = Number(el.duration?.value || 30);
+    const duration = clampDuration(el.duration?.value ?? 30);
     if (el.durationLabel) el.durationLabel.textContent = `${duration} ثانية`;
   }
 
@@ -364,9 +364,15 @@
     });
   }
 
+  function clampDuration(value) {
+    const seconds = Math.round(Number(value));
+    if (!Number.isFinite(seconds)) return 30;
+    return Math.min(30, Math.max(4, seconds));
+  }
+
   function buildPayload() {
     const mode = el.mode?.value || "text";
-    const duration = Number(el.duration?.value || 30);
+    const duration = clampDuration(el.duration?.value ?? 30);
     if (mode === "reference" && !state.references.length) throw new Error("أضف مرجعًا فعليًا واحدًا على الأقل.");
     if (mode === "first-frame" && (state.references.length !== 1 || state.references[0].type !== "image")) {
       throw new Error("أضف صورة واحدة فقط لإطار البداية.");
@@ -416,6 +422,7 @@
       error.code = data.code;
       error.retryable = data.retryable === true;
       error.retryAfterSeconds = data.retryAfterSeconds;
+      error.fallback = data.fallback;
       throw error;
     }
     return data;
@@ -448,12 +455,22 @@
       state.jobs = state.jobs.slice(0, 12);
       saveJobs();
       renderJobs();
-      setStatus("بدأت المهمة دون حدّ قديم قدره 15 ثانية — يمكن للنموذج إنشاء حتى 30 ثانية في طلب واحد.", "success");
+      const notes = Array.isArray(data.notes) ? data.notes.filter((note) => note?.message) : [];
+      if (notes.length) {
+        setStatus(notes.map((note) => note.message).join(" "), "info");
+      } else {
+        setStatus("بدأت المهمة دون حدّ قديم قدره 15 ثانية — يمكن للنموذج إنشاء حتى 30 ثانية في طلب واحد.", "success");
+      }
       emitToast("بدأ إنشاء فيديو Seedance 2.5.", "success");
       schedulePoll(800);
     } catch (error) {
-      setStatus(error?.message || "تعذر بدء مهمة الفيديو.", "error");
-      emitToast(error?.message || "تعذر بدء مهمة الفيديو.", "error");
+      let message = error?.message || "تعذر بدء مهمة الفيديو.";
+      if (error?.code === "SEEDANCE_DURATION_CAPPED" && error.fallback?.segments?.length) {
+        const segments = error.fallback.segments.join(" + ");
+        message = `طبقة الخدمة ما زالت تفرض حدًا قديمًا، لكن النموذج يدعم 30 ثانية. أنتج المقطع على جزأين (${segments} ثانية) ثم استخدم وضع "تمديد" على الجزء الأول للحصول على 30 ثانية متصلة.`;
+      }
+      setStatus(message, "error");
+      emitToast(message, "error");
     } finally {
       state.busy = false;
       el.generate?.removeAttribute("aria-busy");
