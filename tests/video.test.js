@@ -133,6 +133,8 @@ test("maps actual image references into the provider content and prompt mapping"
   assert.equal(payload.omni_reference_task_type, "reference");
   assert.match(payload.content[0].text, /@Image 1: Character identity/);
   assert.match(payload.content[0].text, /@Audio 2: Use as quiet/);
+  assert.match(payload.content[0].text, /Reference fidelity \(authoritative inputs/);
+  assert.match(payload.content[0].text, /exact visual source/);
   assert.deepEqual(payload.content[1], {
     type: "image_url",
     image_url: { url: "data:image/png;base64,AAAA" },
@@ -145,30 +147,107 @@ test("maps actual image references into the provider content and prompt mapping"
   });
 });
 
-test("enforces the Seedance 2.5 4–30 second range instead of a legacy 15 second cap", async (t) => {
+test("clamps an over-long request to the true 30 second maximum instead of failing", async (t) => {
   rememberEnvironment(t);
   process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR = "10";
 
-  let fetchCalled = false;
-  global.fetch = async () => {
-    fetchCalled = true;
-    return mockFetchResponse({});
+  let payload;
+  global.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return mockFetchResponse({ id: "cgt-clamped", status: "queued" });
   };
 
   const result = await invoke({
     action: "create",
     prompt: "A test video",
     mode: "text",
-    duration: 31,
+    duration: 60,
     ratio: "16:9",
     resolution: "720p",
     references: []
   }, { "x-forwarded-for": "203.0.113.3" });
 
-  assert.equal(fetchCalled, false);
+  assert.equal(result.status, 202);
+  assert.equal(payload.duration, 30);
+  assert.equal(result.body.notes[0].code, "DURATION_CAPPED");
+});
+
+test("raises a too-short request to the 4 second model minimum", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR = "10";
+
+  let payload;
+  global.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return mockFetchResponse({ id: "cgt-raised", status: "queued" });
+  };
+
+  const result = await invoke({
+    action: "create",
+    prompt: "A test video",
+    mode: "text",
+    duration: 2,
+    ratio: "16:9",
+    resolution: "720p",
+    references: []
+  }, { "x-forwarded-for": "203.0.113.31" });
+
+  assert.equal(result.status, 202);
+  assert.equal(payload.duration, 4);
+  assert.equal(result.body.notes[0].code, "DURATION_RAISED");
+});
+
+test("defaults to the maximum native 30 seconds when no duration is given", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR = "10";
+
+  let payload;
+  global.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return mockFetchResponse({ id: "cgt-default", status: "queued" });
+  };
+
+  const result = await invoke({
+    action: "create",
+    prompt: "A test video",
+    mode: "text",
+    ratio: "16:9",
+    resolution: "720p",
+    references: []
+  }, { "x-forwarded-for": "203.0.113.32" });
+
+  assert.equal(result.status, 202);
+  assert.equal(payload.duration, 30);
+  assert.deepEqual(result.body.notes, []);
+});
+
+test("offers a two-segment extension plan when the tool layer rejects 30 seconds", async (t) => {
+  rememberEnvironment(t);
+  process.env.SEEDANCE_API_KEY = "seedance-test-key";
+  process.env.SEEDANCE_MAX_REQUESTS_PER_HOUR = "10";
+
+  global.fetch = async () => mockFetchResponse(
+    { error: { message: "duration must be between 5 and 15" } },
+    400
+  );
+
+  const result = await invoke({
+    action: "create",
+    prompt: "A test video",
+    mode: "text",
+    duration: 30,
+    ratio: "16:9",
+    resolution: "720p",
+    references: []
+  }, { "x-forwarded-for": "203.0.113.33" });
+
   assert.equal(result.status, 400);
-  assert.equal(result.body.code, "INVALID_VIDEO_REQUEST");
-  assert.match(result.body.error, /4.*30/);
+  assert.equal(result.body.code, "SEEDANCE_DURATION_CAPPED");
+  assert.equal(result.body.fallback.strategy, "extend");
+  assert.deepEqual(result.body.fallback.segments, [15, 15]);
 });
 
 test("uses adaptive ratio and matching source duration for video edit tasks", async (t) => {

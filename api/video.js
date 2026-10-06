@@ -14,8 +14,17 @@ const MODEL = "dreamina-seedance-2-5-260628";
 const BASE_URL = "https://ark.ap-southeast.bytepluses.com/api/v3";
 const TASKS_URL = `${BASE_URL}/contents/generations/tasks`;
 
+/* Seedance 2.5 natively supports a single continuous 30s segment. The old
+   [5, 15] window was a tool-layer artifact of an earlier integration, not a
+   model limit, so this gateway honours the real [4, 30] range and defaults to
+   the maximum native capability. */
 const MIN_DURATION = 4;
 const MAX_DURATION = 30;
+const DEFAULT_DURATION = 30;
+/* If the upstream tool layer ever re-imposes the legacy cap we fall back to a
+   two-segment extension plan instead of silently shortening the video. */
+const LEGACY_CAP_SECONDS = 15;
+const DURATION_CAP_ERROR = /duration/i;
 const MAX_PROMPT_CHARS = 6000;
 const MAX_IMAGE_DATA_URL_CHARS = 2_800_000;
 const MAX_REFERENCES = 50;
@@ -120,6 +129,71 @@ function cleanPurpose(value) {
   return String(value || "").replace(/[\r\n]+/g, " ").trim().slice(0, 480);
 }
 
+/* Clamp instead of rejecting: a request for 60s is a request for "as long as
+   possible", and a request for 2s is a request for "as short as possible".
+   The caller is told exactly what was changed through `notes`. */
+function normalizeDuration(raw) {
+  const notes = [];
+
+  if (raw === undefined || raw === null || raw === "") {
+    return { duration: DEFAULT_DURATION, notes };
+  }
+
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    return { error: `المدة يجب أن تكون رقمًا بين ${MIN_DURATION} و${MAX_DURATION} ثانية.` };
+  }
+
+  let duration = Math.round(value);
+  if (duration !== value) {
+    notes.push({ code: "DURATION_ROUNDED", message: `تم تقريب المدة إلى ${duration} ثانية.` });
+  }
+  if (duration > MAX_DURATION) {
+    duration = MAX_DURATION;
+    notes.push({
+      code: "DURATION_CAPPED",
+      message: `الحد الأقصى الفعلي لنموذج Seedance 2.5 هو ${MAX_DURATION} ثانية، لذلك تم ضبط المدة على ${MAX_DURATION} ثانية.`
+    });
+  } else if (duration < MIN_DURATION) {
+    duration = MIN_DURATION;
+    notes.push({
+      code: "DURATION_RAISED",
+      message: `الحد الأدنى لنموذج Seedance 2.5 هو ${MIN_DURATION} ثوانٍ، لذلك تم رفع المدة إلى ${MIN_DURATION} ثوانٍ.`
+    });
+  }
+
+  return { duration, notes };
+}
+
+/* The addendum is explicit: attached references are authoritative inputs, not
+   mood boards. This directive travels with the prompt so the model is told so. */
+function referenceFidelityDirective(references, mode) {
+  if (!references.length) return "";
+
+  const lines = ["Reference fidelity (authoritative inputs — do not reinterpret):"];
+  const hasImages = references.some((reference) => reference.type === "image");
+  const hasVideos = references.some((reference) => reference.type === "video");
+
+  if (hasImages) {
+    lines.push(
+      "Use the attached image references as the exact visual source for the subjects and scenes they are mapped to. Preserve identity, proportions, colors, textures, clothing, accessories, environment and composition. Do not substitute a generic look-alike."
+    );
+  }
+  if (hasVideos) {
+    lines.push(
+      "Use the attached video references as the direct motion, choreography and camera reference. Follow their action order, timing, rhythm and camera movement closely. Do not invent a different choreography."
+    );
+  }
+  if (mode === "edit" || mode === "extend") {
+    lines.push(
+      "Preserve the source video's scene, framing and continuity. Apply only the changes explicitly requested."
+    );
+  }
+  lines.push("Apply only the changes explicitly requested in the prompt above.");
+
+  return lines.join("\n");
+}
+
 function validateReferences(rawReferences, mode) {
   const references = Array.isArray(rawReferences) ? rawReferences : [];
   if (references.length > MAX_REFERENCES) {
@@ -184,11 +258,12 @@ function buildContent(prompt, references, mode) {
     })
     .filter(Boolean);
 
-  const promptWithMapping = mapping.length
-    ? `${prompt.trim()}\n\nReference mapping:\n${mapping.join("\n")}`
-    : prompt.trim();
+  const sections = [prompt.trim()];
+  if (mapping.length) sections.push(`Reference mapping:\n${mapping.join("\n")}`);
+  const fidelity = referenceFidelityDirective(references, mode);
+  if (fidelity) sections.push(fidelity);
 
-  const content = [{ type: "text", text: promptWithMapping }];
+  const content = [{ type: "text", text: sections.join("\n\n") }];
 
   references.forEach((reference, index) => {
     let role = `reference_${reference.type}`;
@@ -210,7 +285,6 @@ function buildContent(prompt, references, mode) {
 function validateCreate(body) {
   const prompt = String(body.prompt || "").trim();
   const mode = normalizeMode(String(body.mode || "text"));
-  const requestedDuration = Number(body.duration);
   const requestedRatio = String(body.ratio || "16:9").trim();
   const resolution = String(body.resolution || "720p").trim();
 
@@ -223,14 +297,18 @@ function validateCreate(body) {
   if (referenceResult.error) return referenceResult;
 
   let ratio = requestedRatio;
-  let duration = requestedDuration;
   if (mode === "first-frame" || mode === "first-last" || mode === "edit" || mode === "extend") {
     ratio = "adaptive";
   }
-  if (mode === "edit") {
-    duration = -1;
-  } else if (!Number.isInteger(duration) || duration < MIN_DURATION || duration > MAX_DURATION) {
-    return { error: `المدة يجب أن تكون رقمًا صحيحًا بين ${MIN_DURATION} و${MAX_DURATION} ثانية.` };
+
+  /* Edit tasks always inherit the source video's duration (-1). */
+  let duration = -1;
+  let notes = [];
+  if (mode !== "edit") {
+    const normalized = normalizeDuration(body.duration);
+    if (normalized.error) return { error: normalized.error };
+    duration = normalized.duration;
+    notes = normalized.notes;
   }
 
   return {
@@ -238,6 +316,7 @@ function validateCreate(body) {
     mode,
     ratio,
     duration,
+    notes,
     resolution,
     references: referenceResult.references,
     generateAudio: body.generateAudio !== false,
@@ -318,17 +397,31 @@ async function createTask(req, res, body, apiKey) {
   const { response, data } = await callProvider("", apiKey, { method: "POST", body: payload });
   if (!response.ok || !data?.id) {
     const detail = providerError(data, "تعذر بدء مهمة الفيديو.");
-    return json(res, response.ok ? 502 : (response.status || 502), {
+    const body400 = {
       ok: false,
       code: "SEEDANCE_CREATE_FAILED",
       error: detail,
       retryable: TRANSIENT_ERROR.test(detail)
-    });
+    };
+
+    /* A legacy duration cap upstream must never silently shorten the result:
+       hand the caller a concrete two-segment extension plan instead. */
+    if (input.duration > LEGACY_CAP_SECONDS && DURATION_CAP_ERROR.test(detail)) {
+      body400.code = "SEEDANCE_DURATION_CAPPED";
+      body400.fallback = {
+        strategy: "extend",
+        reason: `رفضت طبقة الخدمة المدة ${input.duration} ثانية رغم أن النموذج يدعمها. يمكن إنتاجها على مقطعين متصلين.`,
+        segments: [LEGACY_CAP_SECONDS, Math.min(MAX_DURATION, input.duration) - LEGACY_CAP_SECONDS]
+      };
+    }
+
+    return json(res, response.ok ? 502 : (response.status || 502), body400);
   }
 
   return json(res, 202, {
     ok: true,
     task: toTask(data),
+    notes: input.notes,
     capabilities: {
       model: MODEL,
       duration: { min: MIN_DURATION, max: MAX_DURATION },
@@ -407,6 +500,7 @@ module.exports = async function handler(req, res) {
 module.exports._test = {
   MODEL,
   validateCreate,
+  normalizeDuration,
   buildContent,
   toTask,
   resetRateLimit() { requestWindows.clear(); }

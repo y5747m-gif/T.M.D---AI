@@ -227,6 +227,16 @@ SEEDANCE_MAX_REQUESTS_PER_HOUR=3
 - `action: "status"` — يعيد حالة مهمة موجودة و`videoUrl`/`lastFrameUrl` عند الإكمال.
 - `action: "cancel"` — يلغي مهمة في قائمة الانتظار فقط، وفق ما تسمح به ModelArk.
 
+### سياسة المدة والمراجع (Skill: `skills/seedane-2.5-30s`)
+
+ملف المهارة الكامل موجود في `skills/seedane-2.5-30s/SKILL.md`، ويطبّقه الخادم فعليًا:
+
+- **المدة الحقيقية `[4, 30]` ثانية** مع قيمة افتراضية **30 ثانية** عند عدم تحديد المدة. الحد القديم 15 ثانية مرفوض لأنه قيد طبقة أدوات وليس قيد نموذج.
+- طلب أطول من 30 ثانية يُضبط إلى 30، وأقصر من 4 ثوانٍ يُرفع إلى 4 — **دون رفض الطلب** — ويعود السبب في مصفوفة `notes` داخل رد `create` (`DURATION_CAPPED` / `DURATION_RAISED` / `DURATION_ROUNDED`).
+- إذا رفض المزوّد مدة طويلة، يعيد `/api/video` الرمز `SEEDANCE_DURATION_CAPPED` مع خطة `fallback.segments` (15 + 15) لإنتاج 30 ثانية متصلة عبر وضع «تمديد».
+- عند وجود مراجع، يُضاف إلى الطلب توجيه صريح بأن المراجع **مصادر مرجعية ملزِمة** (هوية وملابس وألوان وتكوين للصور، وحركة وإيقاع وكاميرا للفيديو) إلى جانب خريطة `@Image 1: …`.
+- `skills/seedane-2.5-30s/references/prompt_guide.md` دليل كتابة مشاهد 30 ثانية، و`skills/seedane-2.5-30s/scripts/pipeline_tracker.py` أداة متابعة الطابور (`init` / `enqueue` / `dispatch` / `mark` / `status` / `summary`).
+
 للمواصفات الرسمية المحدثة راجع: [دليل Seedance 2.5](https://docs.byteplus.com/en/docs/modelark/seedance-2-5)، [إنشاء مهمة فيديو](https://docs.byteplus.com/en/docs/modelark/create-video-generation-task-api)، و[استرجاع المهمة](https://docs.byteplus.com/en/docs/modelark/get-video-generation-task-api).
 
 ## 🫧 المساعد العائم فوق كل التطبيقات (الفقاعة)
