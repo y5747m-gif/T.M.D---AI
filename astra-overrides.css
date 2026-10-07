@@ -1,0 +1,70 @@
+/* Astra-inspired interface: calm, bright, content-first UI */
+:root {
+  --astra-bg: #ffffff;
+  --astra-sidebar: #f7f7f8;
+  --astra-border: #e5e5e5;
+  --astra-text: #202123;
+  --astra-muted: #6b6d70;
+  --astra-accent: #10a37f;
+}
+
+html, body { background: var(--astra-bg) !important; color: var(--astra-text) !important; }
+.user-bg-layer, .bg-dim-overlay, .stars-canvas, .cosmos-nebula, .mythic-space-layer { display: none !important; }
+.app { background: var(--astra-bg) !important; }
+.sidebar {
+  width: 270px !important; background: var(--astra-sidebar) !important;
+  border-left: 1px solid var(--astra-border) !important; box-shadow: none !important;
+}
+.sidebar-header { padding: 18px 16px !important; border-bottom: 0 !important; }
+.brand { gap: 10px !important; }
+.sparta-logo--sm { width: 30px !important; height: 30px !important; }
+.sparta-logo--sm img { width: 25px !important; height: 25px !important; }
+.brand-text { font-size: 15px !important; letter-spacing: .04em !important; color: var(--astra-text) !important; }
+.brand-badge-pro { background: transparent !important; color: var(--astra-muted) !important; border: 0 !important; }
+.brand-sub { color: var(--astra-muted) !important; font-size: 10px !important; }
+.new-chat-btn { margin: 5px 12px 22px !important; min-height: 44px !important; border: 1px solid #d9d9d9 !important; border-radius: 7px !important; background: #fff !important; color: var(--astra-text) !important; box-shadow: none !important; }
+.new-chat-btn:hover { background: #eeeeee !important; }
+.history-header { padding: 0 16px 8px !important; color: var(--astra-muted) !important; }
+.history-list { padding: 0 8px !important; }
+.history-item { border-radius: 7px !important; color: #353535 !important; }
+.history-item:hover, .history-item.active { background: #e9e9e9 !important; }
+.developer-card { margin: 12px !important; background: transparent !important; border: 1px solid var(--astra-border) !important; border-radius: 8px !important; }
+.sidebar-footer { border-top: 1px solid var(--astra-border) !important; padding: 10px 12px !important; }
+.footer-btn { color: #505050 !important; border-radius: 7px !important; }
+.footer-btn:hover { background: #e9e9e9 !important; }
+.main { background: #fff !important; }
+.topbar { height: 62px !important; background: rgba(255,255,255,.96) !important; border-bottom: 1px solid var(--astra-border) !important; box-shadow: none !important; }
+.model-selector-wrapper, .status-pill { background: #fff !important; border: 1px solid var(--astra-border) !important; box-shadow: none !important; color: var(--astra-text) !important; }
+.topbar-action-btn { color: #555 !important; background: transparent !important; border: 0 !important; }
+.topbar-action-btn:hover, .icon-button:hover { background: #f1f1f1 !important; }
+.chat { max-width: 900px !important; margin: 0 auto !important; }
+.welcome { padding-top: 10vh !important; }
+.sparta-logo--hero { transform: scale(.72); margin-bottom: -10px !important; }
+.mythic-kicker, .creator-badge, .daily-mission, .welcome-info { display: none !important; }
+.welcome-title { color: var(--astra-text) !important; font-size: clamp(1.8rem, 4vw, 2.6rem) !important; font-weight: 600 !important; }
+.brand-highlight { color: var(--astra-text) !important; }
+.welcome-sub { color: var(--astra-muted) !important; max-width: 540px !important; }
+.welcome-cards-grid { max-width: 760px !important; gap: 10px !important; }
+.welcome-card { background: #fff !important; border: 1px solid var(--astra-border) !important; border-radius: 10px !important; box-shadow: none !important; }
+.welcome-card:hover { background: #f7f7f7 !important; border-color: #c9c9c9 !important; transform: none !important; }
+.card-icon-wrap { background: #f0f0f0 !important; color: #555 !important; }
+.composer-wrap { background: linear-gradient(transparent, #fff 20%) !important; padding-top: 28px !important; }
+.composer-inner { max-width: 850px !important; }
+.input-shell { background: #fff !important; border: 1px solid #cfcfcf !important; border-radius: 14px !important; box-shadow: 0 2px 10px rgba(0,0,0,.06) !important; }
+.input-shell:focus-within { border-color: #9b9b9b !important; box-shadow: 0 2px 12px rgba(0,0,0,.1) !important; }
+.input-area { color: var(--astra-text) !important; }
+.input-area::placeholder { color: #8a8a8a !important; }
+.circle-button { color: #555 !important; }
+.send-button { background: #202123 !important; color: #fff !important; }
+.composer-note { color: #8a8a8a !important; }
+.mode-wheel { opacity: .75; }
+@media (max-width: 760px) {
+  .sidebar { width: min(300px, 88vw) !important; }
+  .topbar-left .topbar-action-btn { display: none !important; }
+  .welcome { padding: 7vh 16px 120px !important; }
+  .welcome-cards-grid { grid-template-columns: 1fr !important; }
+  .chat { width: 100% !important; }
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="dark"] .main, :root[data-theme="dark"] .topbar { background: #212121 !important; }
+}
