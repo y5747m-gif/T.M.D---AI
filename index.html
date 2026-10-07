@@ -46,6 +46,7 @@
   <link rel="stylesheet" href="/seedance-studio.css">
   <link rel="stylesheet" href="/floating-assistant.css">
   <link rel="stylesheet" href="/astra-overrides.css">
+  <link rel="stylesheet" href="/eraser-studio.css">
 
   <script>
     (function () {
@@ -221,6 +222,10 @@
             <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg></span>
             <span class="topbar-btn-text">تثبيت المساعد</span>
           </button>
+          <button class="topbar-action-btn eraser-open-btn" id="openEraserStudioBtn" data-open-eraser-studio type="button" title="فتح أداة الإزالة الذكية">
+            <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 6-6 6 6-3 3H8l-3-3Z"/><path d="m11 9 3-3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3l-3 3"/><path d="M9 20h11"/></svg></span>
+            <span class="topbar-btn-text">أداة الإزالة</span>
+          </button>
           <button class="topbar-action-btn seedance-open-btn" id="openSeedanceStudioBtn" data-open-seedance-studio type="button" title="فتح Seedance 2.5 Studio">
             <span class="topbar-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></span>
             <span class="topbar-btn-text">Seedance Studio</span>
@@ -292,6 +297,11 @@
               <div class="card-text"><strong>فهم وتحليل صورة</strong><span>وصف الصور واستخراج النصوص والبيانات.</span></div>
               <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
+            <button class="welcome-card card--eraser" type="button" data-open-eraser-studio>
+              <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 6-6 6 6-3 3H8l-3-3Z"/><path d="m11 9 3-3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3l-3 3"/><path d="M9 20h11"/></svg></div>
+              <div class="card-text"><strong>إزالة عنصر من صورة</strong><span>لوّن العنصر واختفِ — تعبئة فورية أو إزالة بالذكاء الاصطناعي.</span></div>
+              <span class="card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </button>
             <button class="welcome-card card--seedance" type="button" data-open-seedance-studio>
               <div class="card-icon-wrap" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></div>
               <div class="card-text"><strong>إنشاء فيديو Seedance 2.5</strong><span>حتى 30 ثانية، من النص أو الصور أو المراجع.</span></div>
@@ -351,6 +361,10 @@
                 <button class="plus-option" id="imageEditButton" type="button">
                   <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg></span>
                   <span class="plus-option-content"><span class="plus-option-title">تجهيز أو تعديل صورة</span><span class="plus-option-desc">إرسال صورة مع تعليمات مخصصة</span></span>
+                </button>
+                <button class="plus-option plus-option--eraser" id="openEraserFromPlus" data-open-eraser-studio type="button">
+                  <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 6-6 6 6-3 3H8l-3-3Z"/><path d="m11 9 3-3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3l-3 3"/><path d="M9 20h11"/></svg></span>
+                  <span class="plus-option-content"><span class="plus-option-title">إزالة عنصر من الصورة</span><span class="plus-option-desc">ممحاة ذكية بالقناع — فورية أو بالذكاء الاصطناعي</span></span>
                 </button>
                 <button class="plus-option plus-option--seedance" id="openSeedanceFromPlus" data-open-seedance-studio type="button">
                   <span class="plus-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/><path d="M7 4v16M17 4v16"/></svg></span>
@@ -561,6 +575,116 @@
     </section>
   </div>
 
+  <div class="modal-backdrop hidden" id="eraserStudioBackdrop">
+    <section class="modal modal--eraser" role="dialog" aria-modal="true" aria-labelledby="eraserStudioTitle">
+      <header class="modal-header eraser-header">
+        <div class="modal-title-group">
+          <span class="modal-title-icon eraser-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 6-6 6 6-3 3H8l-3-3Z"/><path d="m11 9 3-3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3l-3 3"/><path d="M9 20h11"/></svg></span>
+          <div>
+            <h2 class="modal-title" id="eraserStudioTitle">أداة الإزالة الذكية</h2>
+            <p class="modal-subtitle">لوّن فوق ما تريد إخفاءه: تعبئة فورية على جهازك، أو إعادة بناء المنطقة بالذكاء الاصطناعي عبر الخادم — والمفاتيح لا تغادره.</p>
+          </div>
+        </div>
+        <button class="icon-button" id="eraserStudioClose" type="button" aria-label="إغلاق أداة الإزالة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </header>
+
+      <div class="modal-body eraser-body">
+        <p class="eraser-status" id="eraserStudioStatus" role="status" aria-live="polite">اختر صورة للبدء.</p>
+
+        <div class="eraser-workspace" id="eraserWorkspace" hidden>
+          <div class="eraser-stage-wrap">
+            <div class="eraser-toolbar">
+              <div class="eraser-tool-group">
+                <button class="eraser-tool-btn is-active" type="button" data-eraser-mode="erase" aria-pressed="true" title="ممحاة (E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 6-6 6 6-3 3H8l-3-3Z"/><path d="m11 9 3-3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3l-3 3"/><path d="M9 20h11"/></svg><span>ممحاة</span></button>
+                <button class="eraser-tool-btn" type="button" data-eraser-mode="restore" aria-pressed="false" title="استرجاع التحديد (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>استرجاع</span></button>
+              </div>
+              <div class="eraser-tool-group eraser-slider-group">
+                <label class="eraser-slider" for="eraserBrush"><span>الحجم <strong id="eraserBrushValue">54px</strong></span><input id="eraserBrush" type="range" min="4" max="220" step="1" value="54" aria-label="حجم الفرشاة"></label>
+                <label class="eraser-slider" for="eraserHardness"><span>الصلابة <strong id="eraserHardnessValue">62%</strong></span><input id="eraserHardness" type="range" min="0" max="100" step="1" value="62" aria-label="صلابة حافة الفرشاة"></label>
+              </div>
+              <div class="eraser-tool-group">
+                <button class="eraser-tool-btn" id="eraserUndo" type="button" title="تراجع (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg><span>تراجع</span></button>
+                <button class="eraser-tool-btn" id="eraserRedo" type="button" title="إعادة (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg><span>إعادة</span></button>
+                <button class="eraser-tool-btn" id="eraserClear" type="button" title="مسح التحديد" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>مسح</span></button>
+                <button class="eraser-tool-btn" id="eraserReplace" type="button" title="تبديل الصورة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>تبديل</span></button>
+              </div>
+            </div>
+
+            <div class="eraser-stage" id="eraserStage" data-empty="true">
+              <div class="eraser-canvas-stack" id="eraserStack">
+                <canvas class="eraser-canvas" id="eraserBase" aria-hidden="true"></canvas>
+                <canvas class="eraser-canvas" id="eraserImage" aria-hidden="true"></canvas>
+                <canvas class="eraser-canvas" id="eraserAfter" aria-hidden="true"></canvas>
+                <canvas class="eraser-canvas eraser-canvas--mask" id="eraserMask" role="img" aria-label="مساحة الرسم: لوّن فوق العنصر المراد إزالته" tabindex="0"></canvas>
+              </div>
+              <span class="eraser-cursor" id="eraserCursor" aria-hidden="true"></span>
+              <div class="eraser-empty" id="eraserEmpty">
+                <div class="eraser-dropzone" id="eraserDropzone">
+                  <span class="eraser-dropzone-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+                  <strong>اسحب صورة هنا أو اخترها من جهازك</strong>
+                  <p>PNG أو JPG أو WebP — تُعالج على جهازك ولا تُرفع إلا عند طلب الإزالة بالذكاء الاصطناعي.</p>
+                  <button class="btn btn-primary eraser-pick-btn" id="eraserPick" type="button">اختيار صورة</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="eraser-compare" id="eraserCompare" hidden>
+              <div class="eraser-compare-frame">
+                <div class="eraser-canvas-stack">
+                  <canvas class="eraser-canvas" id="eraserCompareBefore" aria-hidden="true"></canvas>
+                  <div class="eraser-compare-after-wrap" id="eraserCompareAfterWrap"><canvas class="eraser-canvas" id="eraserCompareAfter" aria-hidden="true"></canvas></div>
+                </div>
+                <span class="eraser-compare-divider" id="eraserCompareDivider" aria-hidden="true"></span>
+              </div>
+              <label class="eraser-slider eraser-compare-slider" for="eraserCompareRange"><span>مقارنة قبل / بعد</span><input id="eraserCompareRange" type="range" min="0" max="100" step="1" value="50" aria-label="مقارنة قبل وبعد"></label>
+            </div>
+          </div>
+
+          <aside class="eraser-panel">
+            <p class="eraser-file-meta" id="eraserFileMeta"></p>
+
+            <section class="eraser-panel-block">
+              <h3>التحديد</h3>
+              <p class="eraser-hint" id="eraserCoverage">0% من الصورة محدّد</p>
+              <p class="eraser-hint">لوّن فوق العنصر كاملًا مع هامش بسيط حوله — النموذج يعيد بناء ما تغطيه فقط.</p>
+            </section>
+
+            <section class="eraser-panel-block">
+              <h3>طريقة الإزالة</h3>
+              <div class="eraser-actions">
+                <button class="btn btn-secondary" id="eraserFill" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>تعبئة فورية</button>
+                <button class="btn btn-primary eraser-ai-btn" id="eraserAi" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/><path d="m19 15-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15Z"/></svg>إزالة بالذكاء الاصطناعي</button>
+              </div>
+              <p class="eraser-hint">التعبئة الفورية تعمل داخل المتصفح خلال أجزاء من الثانية. الإزالة بالذكاء الاصطناعي تعيد بناء التفاصيل الحقيقية للمنطقة.</p>
+            </section>
+
+            <section class="eraser-panel-block">
+              <h3>خيارات المحرك</h3>
+              <label class="eraser-field" for="eraserEngine"><span>المحرك</span><select id="eraserEngine"><option value="auto">تلقائي (الأسرع المتاح)</option><option value="replicate">Replicate — LaMa</option><option value="openai">OpenAI — gpt-image-1</option><option value="huggingface">Hugging Face — Inference</option></select></label>
+              <label class="eraser-field" for="eraserPrompt"><span>ماذا يظهر مكان العنصر؟ <b>اختياري</b></span><textarea id="eraserPrompt" dir="ltr" rows="3" placeholder="Continue the wooden wall and its soft shadow, nothing else."></textarea><small>اتركه فارغًا ليكمل النموذج الخلفية تلقائيًا.</small></label>
+              <label class="eraser-slider" for="eraserEdge"><span>نعومة الحافة <strong id="eraserEdgeValue">2px</strong></span><input id="eraserEdge" type="range" min="0" max="24" step="1" value="2" aria-label="نعومة حافة المنطقة المعالجة"></label>
+              <label class="eraser-field" for="eraserAccessCode"><span>رمز الوصول <b>إن طُلب</b></span><input id="eraserAccessCode" type="password" autocomplete="off" placeholder="رمز يحدده مالك الموقع"></label>
+            </section>
+
+            <section class="eraser-panel-block eraser-result" id="eraserResult" hidden>
+              <div class="eraser-result-head"><h3>النتيجة</h3><span class="eraser-badge" id="eraserResultBadge"></span><button class="eraser-mini-btn" id="eraserResultClose" type="button" aria-label="إغلاق لوحة النتيجة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+              <div class="eraser-result-actions">
+                <button class="btn btn-primary btn-sm" id="eraserDownload" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>تنزيل</button>
+                <button class="btn btn-secondary btn-sm" id="eraserToChat" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>إرسال للمحادثة</button>
+                <button class="btn btn-secondary btn-sm" id="eraserReset" type="button">صورة جديدة</button>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <footer class="modal-footer eraser-footer">
+        <p>اختصارات: <kbd>[</kbd> <kbd>]</kbd> لحجم الفرشاة · <kbd>E</kbd> ممحاة · <kbd>R</kbd> استرجاع · <kbd>Ctrl+Enter</kbd> إزالة بالذكاء الاصطناعي · <kbd>Esc</kbd> إغلاق</p>
+        <button class="btn btn-secondary" id="eraserCloseFooter" type="button">إغلاق</button>
+      </footer>
+    </section>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <input type="file" id="imageInput" accept="image/*" hidden>
   <input type="file" id="documentInput" accept=".pdf,.docx,.txt,.md,.js,.json,.html,.htm,.css,.py,.csv,.xml,.yaml,.yml,.log" hidden>
@@ -579,6 +703,7 @@
   <script defer src="/pwa.js"></script>
   <script src="/app.js"></script>
   <script defer src="/video-studio.js"></script>
+  <script defer src="/eraser-studio.js"></script>
   <script defer src="/floating-assistant.js"></script>
 </body>
 </html>

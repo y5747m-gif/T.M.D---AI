@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vercel dev",
     "test": "node --test",
-    "check": "node --check api/chat.js && node --check api/image.js && node --check api/upload.js && node --check api/settings.js && node --check api/owner-login.js && node --check api/video.js && node --check app.js && node --check video-studio.js && node --check floating-assistant.js && node --check pwa.js && node --check public-theme.js && node --check service-worker.js && npm test"
+    "check": "node --check api/chat.js && node --check api/image.js && node --check api/upload.js && node --check api/settings.js && node --check api/owner-login.js && node --check api/video.js && node --check api/eraser.js && node --check app.js && node --check video-studio.js && node --check eraser-studio.js && node --check floating-assistant.js && node --check pwa.js && node --check public-theme.js && node --check service-worker.js && npm test",
+    "test:browser": "NODE_PATH=${NODE_PATH:-../node_modules} node tests/browser/eraser-studio.browser.mjs"
   }
 }
