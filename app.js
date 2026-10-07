@@ -297,7 +297,7 @@ function updateSpartaDailyMissionUI() {
 
 /* أيقونات SVG خطية موحّدة مستوحاة من Lucide. */
 const UI_ICONS = {
-  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-24 12 12)"><ellipse cx="12" cy="12" rx="9" ry="3.8"/><circle cx="4.9" cy="14.4" r="1.3" fill="currentColor" stroke="none"/></g><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none"/></svg>',
+  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-24 12 12)"><ellipse cx="12" cy="12" rx="9.2" ry="3.9"/></g><path fill="currentColor" stroke="none" d="M12 6.6c.45 2.6 1.9 4.05 4.5 4.5-2.6.45-4.05 1.9-4.5 4.5-.45-2.6-1.9-4.05-4.5-4.5 2.6-.45 4.05-1.9 4.5-4.5Z"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
   volume: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>',
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
@@ -306,7 +306,7 @@ const UI_ICONS = {
   alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/></svg>',
   square: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
-  send: '<svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+  send: '<svg class="send-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M3.4 20.6 22.7 12 3.4 3.4 3.4 10l13.7 2L3.4 14z"/></svg>',
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
   moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>'
 };
@@ -1748,13 +1748,45 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FAF6F1" : "#070812");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FFFFFF" : "#212121");
   const themeIcon = state.theme === "light" ? UI_ICONS.moon : UI_ICONS.sun;
   document.querySelectorAll(".theme-icon, .theme-icon-indicator").forEach((node) => {
     node.innerHTML = themeIcon;
   });
   document.getElementById("themeTopDesktop")?.setAttribute("aria-label", state.theme === "light" ? "تفعيل المظهر الداكن" : "تفعيل المظهر الفاتح");
   document.getElementById("themeTop")?.setAttribute("aria-label", state.theme === "light" ? "تفعيل المظهر الداكن" : "تفعيل المظهر الفاتح");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FFFFFF" : "#212121");
+  renderSidebarAccount();
+}
+
+/* Compact Astra-style account row injected at the bottom of the sidebar.
+   It reuses the existing developer card trigger so no behaviour is lost. */
+const ASTRA_ICONS = {
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 21a7.8 7.8 0 0 0-15 0"/><circle cx="12" cy="8.5" r="4"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
+};
+
+function renderSidebarAccount() {
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar || !document.getElementById("developerCardBtn")) return;
+
+  let row = document.getElementById("astraAccountRow");
+  if (!row) {
+    row = document.createElement("button");
+    row.type = "button";
+    row.id = "astraAccountRow";
+    row.className = "astra-account-row";
+    sidebar.appendChild(row);
+    row.addEventListener("click", openDeveloperModal);
+  }
+
+  const initials = state.theme === "light" ? "أ" : "أ";
+  row.innerHTML =
+    `<span class="astra-account__avatar" aria-hidden="true">${ASTRA_ICONS.user}</span>` +
+    `<span class="astra-account__meta"><span class="astra-account__name">ياسين عمرو عبد الرحيم</span>` +
+    `<span class="astra-account__role">مطوّع المنصة · SPARTA AI</span></span>` +
+    `<span class="astra-account__chevron" aria-hidden="true">${ASTRA_ICONS.chevron}</span>`;
+  row.setAttribute("aria-label", "عرض معلومات المطور");
 }
 
 function updateModelUI() {
@@ -2845,6 +2877,47 @@ function saveConversation() {
   }
 }
 
+const HISTORY_ICONS = {
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3v4l5-4h8a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+};
+
+function findConversationIndex(conv) {
+  return state.conversations.findIndex((c) => c.id === conv?.id);
+}
+
+function renameConversation(conv) {
+  const index = findConversationIndex(conv);
+  if (index < 0) return;
+  const current = String(state.conversations[index].title || "محادثة جديدة");
+  const next = window.prompt("اسم المحادثة الجديد:", current);
+  if (next === null) return;
+  const cleaned = next.trim().slice(0, 60);
+  if (!cleaned) return;
+  state.conversations[index].title = cleaned;
+  persistConversations();
+  renderHistory();
+  showToast("تم تحديث اسم المحادثة", "success");
+}
+
+function deleteConversation(conv) {
+  const index = findConversationIndex(conv);
+  if (index < 0) return;
+  if (!window.confirm("هل تريد حذف هذه المحادثة نهائيًا؟")) return;
+  const wasActive = Boolean(state.conversations[index].active);
+  state.conversations.splice(index, 1);
+  if (wasActive) {
+    state.messages = [];
+    resetAttachment();
+    renderMessages();
+    saveMessages();
+  }
+  persistConversations();
+  renderHistory();
+  showToast("تم حذف المحادثة");
+}
+
 function renderHistory() {
   if (!historyList) return;
   historyList.innerHTML = "";
@@ -2860,7 +2933,20 @@ function renderHistory() {
     const item = document.createElement("button");
     item.type = "button";
     item.className = `history-item ${conv.active ? "active" : ""}`;
-    item.innerHTML = UI_ICONS.message + `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(conv.title || "محادثة جديدة")}</span>`;
+    item.innerHTML = HISTORY_ICONS.chat +
+      `<span class="history-item__title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(conv.title || "محادثة جديدة")}</span>` +
+      `<span class="history-item__actions">` +
+        `<button class="history-item__btn" type="button" data-action="rename" aria-label="إعادة تسمية المحادثة" title="إعادة تسمية">${HISTORY_ICONS.edit}</button>` +
+        `<button class="history-item__btn" type="button" data-action="delete" aria-label="حذف المحادثة" title="حذف">${HISTORY_ICONS.trash}</button>` +
+      `</span>`;
+    item.querySelector('[data-action="rename"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      renameConversation(conv);
+    });
+    item.querySelector('[data-action="delete"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteConversation(conv);
+    });
     item.addEventListener("click", () => loadConversation(conv));
     historyList.appendChild(item);
   });

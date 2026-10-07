@@ -10,8 +10,8 @@
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#070812",
-  "theme_color": "#070812",
+  "background_color": "#212121",
+  "theme_color": "#212121",
   "categories": ["productivity", "utilities", "education"],
   "prefer_related_applications": false,
   "icons": [
