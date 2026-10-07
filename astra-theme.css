@@ -1,0 +1,1367 @@
+/* =========================================================
+   ASTRA THEME — "GBT Astra chat" visual system
+   A full appearance override layered on top of style.css.
+   Only colours, geometry and effects are changed; every
+   selector / id / class used by app.js stays intact.
+   ========================================================= */
+
+/* ---------- 1. Palette (dark = default) ---------- */
+:root,
+:root[data-theme="dark"] {
+  --color-bg: #212121;
+  --color-bg-secondary: #171717;
+  --color-surface: #2f2f2f;
+  --color-surface-hover: #383838;
+  --color-surface-soft: #235c3b00;
+  --color-input: #2f2f2f;
+  --color-primary: #ececec;
+  --color-primary-hover: #ffffff;
+  --color-secondary: #ababab;
+  --color-cyan: #ababab;
+  --color-text: #ececec;
+  --color-muted: #cdcdcd;
+  --color-subtle: #9b9b9b;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.22);
+  --color-success: #4aade4;
+  --color-warning: #e5c07b;
+  --color-error: #ef6f6c;
+  --color-overlay: rgba(0, 0, 0, 0.62);
+
+  --astra-panel: #171717;
+  --astra-panel-2: #212121;
+  --astra-hover: rgba(255, 255, 255, 0.07);
+  --astra-active: rgba(255, 255, 255, 0.12);
+  --astra-line: rgba(255, 255, 255, 0.10);
+  --astra-user-bubble: #2f2f2f;
+  --astra-code-bg: #2b2b2b;
+  --astra-accent: #ffffff;
+  --astra-accent-ink: #0d0d0d;
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-modal: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.36);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.48);
+  --shadow-focus: 0 0 0 2px rgba(255, 255, 255, 0.28);
+
+  /* neutralise the previous "legendary" glow system */
+  --legendary-glow: none;
+  --legendary-aura: none;
+  --legendary-line: var(--astra-line);
+  --accent-cyan: var(--astra-accent);
+  --accent-purple: var(--astra-accent);
+  --accent-magenta: var(--astra-accent);
+  --accent-gold: var(--astra-accent);
+  --accent-blue: var(--astra-accent);
+}
+
+:root[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f9f9f9;
+  --color-surface: #ffffff;
+  --color-surface-hover: #ececec;
+  --color-surface-soft: #f4f4f4;
+  --color-input: #ffffff;
+  --color-primary: #0d0d0d;
+  --color-primary-hover: #000000;
+  --color-secondary: #5d5d5d;
+  --color-cyan: #5d5d5d;
+  --color-text: #0d0d0d;
+  --color-muted: #5d5d5d;
+  --color-subtle: #8f8f8f;
+  --color-border: #e5e5e5;
+  --color-border-strong: #d3d3d3;
+  --color-success: #0f7b6c;
+  --color-warning: #b7791f;
+  --color-error: #d84f4f;
+  --color-overlay: rgba(0, 0, 0, 0.45);
+
+  --astra-panel: #f9f9f9;
+  --astra-panel-2: #ffffff;
+  --astra-hover: rgba(0, 0, 0, 0.05);
+  --astra-active: rgba(0, 0, 0, 0.08);
+  --astra-line: #e5e5e5;
+  --astra-user-bubble: #f4f4f4;
+  --astra-code-bg: #f9f9f9;
+  --astra-accent: #0d0d0d;
+  --astra-accent-ink: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.14);
+  --shadow-focus: 0 0 0 2px rgba(0, 0, 0, 0.22);
+
+  --legendary-glow: none;
+  --legendary-aura: none;
+  --legendary-line: var(--astra-line);
+  --bg-panel: #f9f9f9;
+  --bg-panel-solid: #f9f9f9;
+  --bg-card: #f4f4f4;
+  --bg-card-hover: #ececec;
+  --bg-input: #ffffff;
+}
+
+/* ---------- 2. Base typography ---------- */
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Cairo", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+::selection {
+  color: #fff;
+  background: rgba(0, 122, 255, 0.55);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--astra-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. Background layers: flat, no cosmos ---------- */
+.user-bg-layer:not(.has-custom-bg),
+.bg-dim-overlay,
+.stars-canvas,
+.cosmos-nebula,
+.mythic-space-layer {
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+/* ---------- 4. App shell ---------- */
+.app {
+  gap: 0;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--astra-panel);
+  border-inline-end: 1px solid transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 6px 4px 10px;
+}
+
+.brand {
+  gap: 10px;
+}
+
+.brand-name,
+.brand-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-text);
+}
+
+.brand-sub {
+  display: none;
+}
+
+.brand-badge-pro {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-subtle);
+  font-weight: 600;
+  box-shadow: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+/* logo: single clean mark, no orbits / beams / glow */
+.sparta-logo::before,
+.sparta-logo::after,
+.sparta-logo__beam,
+.sparta-logo__orbit {
+  display: none !important;
+  animation: none !important;
+}
+
+.sparta-logo {
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+  animation: none;
+}
+
+.sparta-logo img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  filter: none;
+}
+
+.sparta-logo--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.sparta-logo--hero {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 4px;
+}
+
+.sparta-logo--hero img {
+  width: 56px;
+  height: 56px;
+}
+
+/* new chat: compact ghost button */
+.new-chat-btn {
+  justify-content: flex-start;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background var(--transition-fast);
+}
+
+.new-chat-btn::before {
+  display: none !important;
+}
+
+.new-chat-btn:hover {
+  background: var(--astra-hover);
+  transform: none;
+  box-shadow: none;
+}
+
+.new-chat-btn > * {
+  transform: none !important;
+}
+
+.btn-icon svg,
+.footer-icon svg,
+.topbar-btn-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+}
+
+.kbd-badge {
+  background: transparent;
+  border: none;
+  color: var(--color-subtle);
+  font-weight: 500;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* history list */
+.history-header {
+  padding: 14px 12px 6px;
+}
+
+.history-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-subtle);
+}
+
+.clear-all-history-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: var(--color-subtle);
+}
+
+.clear-all-history-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+.history-item {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  gap: 8px;
+}
+
+.history-item > svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.55;
+}
+
+.history-item:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+.history-item.active {
+  background: var(--astra-active);
+  color: var(--color-text);
+}
+
+.empty-history {
+  color: var(--color-subtle);
+  border: none;
+  background: transparent;
+  padding: 20px 12px;
+}
+
+.empty-history-action {
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--astra-line);
+}
+
+.empty-history-action:hover {
+  background: var(--astra-hover);
+}
+
+/* developer card → plain footer row */
+.developer-card {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.developer-card:hover {
+  background: var(--astra-hover);
+  transform: none;
+  box-shadow: none;
+}
+
+.dev-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--astra-active);
+  color: var(--color-muted);
+}
+
+.dev-tag {
+  font-size: 10.5px;
+  color: var(--color-subtle);
+}
+
+.dev-name {
+  font-size: 12.5px;
+  color: var(--color-muted);
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--astra-line);
+  padding-top: 6px;
+}
+
+.footer-btn {
+  border-radius: 10px;
+  color: var(--color-muted);
+  font-weight: 500;
+  padding: 9px 10px;
+}
+
+.footer-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+.customizer-btn-sidebar .footer-icon {
+  color: var(--color-muted);
+}
+
+/* ---------- 5. Main column / topbar ---------- */
+.main {
+  background: var(--color-bg);
+}
+
+.topbar {
+  height: 52px;
+  padding: 0 14px;
+  background: var(--color-bg);
+  border-bottom: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.topbar::after {
+  display: none !important;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+}
+
+.icon-button:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+  transform: none;
+  box-shadow: none;
+}
+
+.model-selector-wrapper {
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.model-selector-wrapper:hover,
+.model-selector-wrapper:focus-within {
+  background: var(--astra-hover);
+  box-shadow: none;
+}
+
+.model-select {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.model-pulse-dot,
+.status-light {
+  display: none !important;
+}
+
+.status-pill {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0 6px;
+  color: var(--color-subtle);
+}
+
+.status-name {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.topbar-action-btn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.topbar-action-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+  transform: none;
+  box-shadow: none;
+}
+
+.topbar-btn-text {
+  display: none;
+}
+
+.topbar-btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-icon,
+.theme-icon-indicator {
+  color: var(--color-muted);
+}
+
+/* ---------- 6. Welcome screen ---------- */
+.chat {
+  padding: 0 16px;
+}
+
+.welcome {
+  max-width: 760px;
+  gap: 18px;
+  padding-block: 28px 8px;
+}
+
+.welcome::before,
+.welcome::after {
+  display: none !important;
+  animation: none !important;
+}
+
+.welcome > * {
+  transform: none !important;
+  animation: none !important;
+}
+
+.mythic-kicker {
+  display: none !important;
+}
+
+.welcome-title {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.brand-highlight {
+  background: none !important;
+  -webkit-text-fill-color: currentColor;
+  color: var(--color-text);
+  text-shadow: none;
+}
+
+.welcome-sub {
+  font-size: 15px;
+  color: var(--color-muted);
+  text-align: center;
+  max-width: 560px;
+}
+
+.creator-badge {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-subtle);
+  box-shadow: none;
+  border-radius: 999px;
+  font-size: 12.5px;
+}
+
+.creator-badge strong {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.creator-sparkle {
+  color: var(--color-subtle);
+}
+
+/* daily mission → quiet info strip */
+.daily-mission {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: 14px;
+  box-shadow: none;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.daily-mission::before {
+  display: none;
+}
+
+.daily-mission__light {
+  display: none !important;
+}
+
+.daily-mission__mark {
+  background: var(--astra-active);
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.daily-mission__eyebrow {
+  color: var(--color-subtle);
+  letter-spacing: 0.04em;
+}
+
+.daily-mission h2 {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.daily-mission p {
+  color: var(--color-muted);
+}
+
+.daily-mission__meta {
+  color: var(--color-subtle);
+}
+
+.daily-mission__lock {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-subtle);
+}
+
+.daily-mission__button,
+.btn-primary-link,
+.btn-primary,
+.upload-select-btn,
+.apply-url-btn {
+  background: var(--astra-accent);
+  color: var(--astra-accent-ink);
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: none;
+  border: none;
+}
+
+.daily-mission__button:hover,
+.btn-primary-link:hover,
+.btn-primary:hover,
+.upload-select-btn:hover,
+.apply-url-btn:hover {
+  background: var(--astra-accent);
+  opacity: 0.88;
+  transform: none;
+  box-shadow: none;
+}
+
+/* suggestion cards → flat list rows */
+.welcome-cards-grid {
+  gap: 8px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.welcome-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  box-shadow: none;
+  color: var(--color-muted);
+  gap: 12px;
+}
+
+.welcome-card::before,
+.welcome-card::after {
+  display: none !important;
+}
+
+.welcome-card > * {
+  transform: none !important;
+}
+
+.welcome-card:hover {
+  background: var(--astra-hover);
+  border-color: var(--astra-line);
+  transform: none;
+  box-shadow: none;
+}
+
+.card-icon-wrap,
+.plus-option-icon,
+.dev-avatar,
+.modal-title-icon,
+.notice-icon,
+.dropzone-icon,
+.dev-box-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-muted);
+  border-radius: 8px;
+}
+
+.card--doc .card-icon-wrap,
+.card--creator .card-icon-wrap,
+.card--vision .card-icon-wrap {
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.card-text strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.card-text span {
+  color: var(--color-subtle);
+  font-size: 12.5px;
+}
+
+.card-arrow {
+  color: var(--color-subtle);
+}
+
+/* SEO info block → plain, quiet */
+.welcome-info {
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--astra-line);
+  border-radius: 0;
+  padding: 22px 0 8px;
+  box-shadow: none;
+}
+
+.info-title {
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.info-lead {
+  color: var(--color-muted);
+}
+
+.info-card {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  border-radius: 12px;
+}
+
+.info-card:hover {
+  background: var(--astra-hover);
+  transform: none;
+}
+
+.info-card h3 {
+  color: var(--color-text);
+  font-size: 13.5px;
+}
+
+.info-card h3 svg {
+  color: var(--color-muted);
+}
+
+.info-card p {
+  color: var(--color-subtle);
+}
+
+.info-links a {
+  color: var(--color-muted);
+  border-bottom: none;
+}
+
+.info-links a:hover {
+  color: var(--color-text);
+}
+
+/* ---------- 7. Messages ---------- */
+.message {
+  max-width: 760px;
+  padding-block: 10px;
+  gap: 14px;
+}
+
+.message-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.message-avatar.is-bot {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.bot-spark-logo {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.6;
+}
+
+.message-content {
+  gap: 6px;
+}
+
+.message.user .message-content {
+  align-items: stretch;
+}
+
+.message.user .message-text,
+.message.assistant .message-text {
+  border-radius: 18px;
+  box-shadow: none;
+  border: none;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.message.assistant .message-text {
+  background: transparent;
+  color: var(--color-text);
+  padding: 2px 0;
+}
+
+.message.user .message-text {
+  background: var(--astra-user-bubble);
+  color: var(--color-text);
+  padding: 10px 16px;
+}
+
+.message-mode-badge {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-subtle);
+  box-shadow: none;
+}
+
+.message-text code:not(pre code) {
+  background: var(--astra-code-bg);
+  color: var(--color-text);
+  border: 1px solid var(--astra-line);
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.code-block-wrapper {
+  border: 1px solid var(--astra-line);
+  border-radius: 12px;
+  background: var(--astra-code-bg);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.code-header {
+  background: color-mix(in srgb, var(--astra-code-bg) 70%, var(--color-bg));
+  color: var(--color-subtle);
+  border-bottom: 1px solid var(--astra-line);
+}
+
+.copy-code-btn,
+.msg-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-subtle);
+  border-radius: 7px;
+  font-weight: 500;
+}
+
+.copy-code-btn:hover,
+.msg-action-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+.code-block-wrapper pre {
+  background: transparent;
+}
+
+.message-image {
+  border-radius: 12px;
+  border: 1px solid var(--astra-line);
+}
+
+.message-file {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: 10px;
+  color: var(--color-muted);
+}
+
+.message-actions {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 2px;
+}
+
+.message-notice {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-muted);
+  border-radius: 10px;
+}
+
+.typing-dots span {
+  background: var(--color-subtle);
+}
+
+.error-text {
+  color: var(--color-error);
+}
+
+/* ---------- 8. Composer ---------- */
+.composer-wrap {
+  padding: 8px 16px 14px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) 34%);
+}
+
+.composer-inner {
+  max-width: 760px;
+  gap: 8px;
+}
+
+.input-shell {
+  background: var(--color-input);
+  border: 1px solid var(--astra-line);
+  border-radius: 26px;
+  box-shadow: var(--shadow-sm);
+  padding: 8px 8px 8px 10px;
+}
+
+:root[data-theme="light"] .input-shell {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border);
+}
+
+.input-shell:focus-within {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.input-area {
+  font-size: 15px;
+  color: var(--color-text);
+  padding: 8px 6px;
+}
+
+.input-area::placeholder {
+  color: var(--color-subtle);
+}
+
+.circle-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+  border: none;
+}
+
+.circle-button:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+  transform: none;
+}
+
+.circle-button.active {
+  background: var(--astra-active);
+  color: var(--color-text);
+}
+
+.send-button {
+  background: var(--astra-accent);
+  color: var(--astra-accent-ink);
+}
+
+.send-button:hover {
+  background: var(--astra-accent);
+  opacity: 0.85;
+  transform: none;
+}
+
+.send-button:disabled,
+.circle-button:disabled {
+  background: var(--color-subtle);
+  color: var(--color-bg);
+  opacity: 0.5;
+}
+
+.send-button.stop {
+  background: var(--astra-accent);
+  color: var(--astra-accent-ink);
+}
+
+.plus-menu {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+}
+
+.plus-menu-title {
+  color: var(--color-subtle);
+  font-size: 11.5px;
+  padding: 8px 10px 6px;
+}
+
+.plus-option {
+  border-radius: 10px;
+  color: var(--color-text);
+  padding: 9px 10px;
+}
+
+.plus-option:hover {
+  background: var(--astra-hover);
+}
+
+.plus-option-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.plus-option-desc {
+  color: var(--color-subtle);
+  font-size: 12px;
+}
+
+/* mode wheel → pill chips */
+.mode-wheel {
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.mode-node {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  border-radius: 999px;
+  padding: 5px 12px 5px 8px;
+  color: var(--color-muted);
+  gap: 7px;
+}
+
+.mode-node__icon {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--color-muted);
+}
+
+.mode-node__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mode-node__label {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.mode-node:hover,
+.mode-node:focus-visible {
+  background: var(--astra-hover);
+  border-color: var(--astra-line);
+  transform: none;
+}
+
+.mode-node.is-active {
+  background: var(--astra-active);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.mode-node.is-active .mode-node__icon {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.mode-interface {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: 14px;
+  box-shadow: none;
+  color: var(--color-muted);
+}
+
+.mode-interface::before {
+  display: none;
+}
+
+.mode-interface__orb {
+  background: var(--astra-active);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.mode-interface__copy strong {
+  color: var(--color-text);
+}
+
+.mode-interface__copy p {
+  color: var(--color-subtle);
+}
+
+.mode-interface__clear,
+.mode-choice-btn {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-muted);
+  border-radius: 9px;
+}
+
+.mode-interface__clear:hover,
+.mode-choice-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+.composer-note {
+  color: var(--color-subtle);
+  font-size: 11.5px;
+}
+
+.bg-quick-hint {
+  color: var(--color-subtle);
+}
+
+.bg-quick-hint:hover {
+  color: var(--color-text);
+}
+
+.scroll-bottom-btn {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  color: var(--color-muted);
+  box-shadow: var(--shadow-sm);
+  width: 32px;
+  height: 32px;
+}
+
+.scroll-bottom-btn:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+/* attachment chip */
+.attachment {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.attachment-thumb {
+  background: var(--astra-active);
+  border-radius: 9px;
+}
+
+.attachment-name {
+  color: var(--color-text);
+}
+
+.attachment-mode,
+.attachment-size {
+  color: var(--color-subtle);
+}
+
+.attachment-remove {
+  background: transparent;
+  color: var(--color-subtle);
+}
+
+.attachment-remove:hover {
+  background: var(--astra-hover);
+  color: var(--color-text);
+}
+
+/* ---------- 9. Modals, toasts ---------- */
+.modal-backdrop,
+.pwa-install-sheet {
+  background: var(--color-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.modal,
+.pwa-install-card {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  border-radius: var(--radius-modal);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--astra-line);
+}
+
+.modal-title {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.modal-subtitle {
+  color: var(--color-subtle);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--astra-line);
+}
+
+.customizer-notice {
+  background: var(--astra-panel);
+  border: 1px solid var(--astra-line);
+  color: var(--color-muted);
+  border-radius: 10px;
+}
+
+.customizer-tabs {
+  background: var(--astra-panel);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.customizer-tab {
+  color: var(--color-muted);
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.customizer-tab.active {
+  background: var(--astra-active);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.preset-card {
+  border: 1px solid var(--astra-line);
+  border-radius: 12px;
+  background: transparent;
+}
+
+.preset-card.active {
+  border-color: var(--color-text);
+  box-shadow: none;
+}
+
+.preset-info strong {
+  color: var(--color-text);
+}
+
+.preset-info span {
+  color: var(--color-subtle);
+}
+
+.upload-dropzone {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 12px;
+  background: transparent;
+}
+
+.url-input-row input,
+.setting-select {
+  background: var(--astra-panel);
+  border: 1px solid var(--astra-line);
+  border-radius: 9px;
+  color: var(--color-text);
+}
+
+.control-label span,
+.setting-label {
+  color: var(--color-text);
+}
+
+.control-label strong {
+  color: var(--color-muted);
+}
+
+.control-sub,
+.input-hint,
+.setting-desc {
+  color: var(--color-subtle);
+}
+
+.custom-slider::-webkit-slider-thumb {
+  background: var(--astra-accent);
+  box-shadow: none;
+}
+
+.toggle-switch input:checked + .slider {
+  background: var(--astra-accent);
+}
+
+.toggle-switch .slider {
+  background: var(--astra-active);
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--astra-hover);
+  transform: none;
+}
+
+.developer-info-box,
+.dev-profile-body {
+  background: transparent;
+  border: none;
+}
+
+.dev-profile-avatar {
+  background: var(--astra-active);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.dev-role-badge,
+.badge-item {
+  background: transparent;
+  border: 1px solid var(--astra-line);
+  color: var(--color-muted);
+}
+
+.toast {
+  background: var(--astra-panel-2);
+  border: 1px solid var(--astra-line);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  border-radius: 12px;
+}
+
+.pwa-install-close {
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.pwa-install-icon {
+  background: var(--astra-active);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+/* ---------- 10. Kill decorative animations ---------- */
+*,
+*::before,
+*::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* keep functional keyframes usable but subtle */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-up { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scale-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

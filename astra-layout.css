@@ -1,0 +1,237 @@
+/* =========================================================
+   ASTRA THEME — layout refinements for "GBT Astra chat"
+   Loaded after style.css / seedance-studio.css /
+   floating-assistant.css so it wins the cascade.
+
+   It also neutralises the legacy cosmic background layers
+   (stars canvas + custom background layer) that app.js
+   toggles through inline styles, so the surface stays flat.
+   ========================================================= */
+
+/* ---------- 1. Flat surface: no starfield / nebula ---------- */
+.stars-canvas,
+.cosmos-nebula,
+.mythic-space-layer,
+.bg-dim-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+}
+
+/* keep user-chosen backgrounds usable, but never animated stars */
+.user-bg-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* ---------- 2. Sidebar geometry ---------- */
+.sidebar {
+  flex: 0 0 268px !important;
+  width: 268px !important;
+  padding: 10px 8px !important;
+  gap: 4px !important;
+  border-inline-end: 1px solid var(--astra-line) !important;
+}
+
+.sidebar-header {
+  min-height: 44px !important;
+  padding: 2px 6px 8px !important;
+  border-bottom: none !important;
+}
+
+.close-sidebar-btn {
+  width: 30px;
+  height: 30px;
+}
+
+.new-chat-btn {
+  margin: 0 0 4px !important;
+}
+
+.history-list {
+  padding-inline: 2px !important;
+}
+
+.developer-card {
+  display: none; /* replaced by the compact account row below */
+}
+
+.sidebar-footer {
+  gap: 2px !important;
+}
+
+.footer-btn-label {
+  font-size: 13px;
+}
+
+/* ---------- 3. Topbar geometry ---------- */
+.topbar {
+  min-height: 52px !important;
+  padding: 6px 12px !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ---------- 4. Chat column ---------- */
+.chat {
+  padding: 12px clamp(12px, 2.5vw, 24px) 232px !important;
+  gap: 6px !important;
+}
+
+.welcome,
+.message,
+.composer-inner {
+  width: min(100%, 760px) !important;
+  max-width: 760px !important;
+}
+
+.welcome {
+  margin: clamp(24px, 8vh, 90px) auto 0 !important;
+  padding: 0 0 28px !important;
+  gap: 16px !important;
+}
+
+.welcome-heading-wrap {
+  width: 100% !important;
+}
+
+.welcome-title {
+  font-size: clamp(22px, 3.4vw, 28px) !important;
+}
+
+.welcome-cards-grid,
+.welcome-info,
+.daily-mission {
+  width: min(100%, 700px) !important;
+}
+
+.welcome-cards-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.welcome-info {
+  text-align: start;
+}
+
+.info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+/* ---------- 5. Messages ---------- */
+.message {
+  padding-block: 6px !important;
+  gap: 12px !important;
+}
+
+.message-avatar {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 0.7rem !important;
+}
+
+.message-text {
+  font-size: 15px !important;
+  line-height: 1.8 !important;
+}
+
+.message.user .message-text {
+  max-width: min(84%, 640px) !important;
+  border-radius: 22px !important;
+}
+
+.message-actions {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.message:hover .message-actions,
+.message-actions:focus-within {
+  opacity: 1;
+}
+
+/* ---------- 6. Composer ---------- */
+.composer-wrap {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 10px clamp(12px, 2.5vw, 24px) max(14px, env(safe-area-inset-bottom)) !important;
+  background: linear-gradient(
+    to top,
+    var(--color-bg) 0%,
+    color-mix(in srgb, var(--color-bg) 88%, transparent) 55%,
+    transparent 100%
+  ) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.input-shell {
+  min-height: 58px !important;
+  padding: 6px 8px !important;
+  gap: 6px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.input-area {
+  min-height: 34px !important;
+  padding: 9px 6px 7px !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.circle-button {
+  width: 38px !important;
+  height: 38px !important;
+  border: none !important;
+}
+
+.mode-wheel {
+  justify-content: flex-start;
+}
+
+.composer-note {
+  justify-content: center;
+}
+
+/* ---------- 7. Modals ---------- */
+.modal {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.modal-body {
+  scrollbar-width: thin;
+}
+
+/* ---------- 8. Mobile drawer ---------- */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: min(86vw, 290px) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  .sidebar-backdrop.show {
+    background: rgba(0, 0, 0, 0.55) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .chat {
+    padding-bottom: 210px !important;
+  }
+
+  .welcome-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
