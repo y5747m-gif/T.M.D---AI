@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===========================================================================
-   SPARTA AI — Seedance 2.5 video gateway
+   Aso AI (آسو إي آي) — Seedance 2.5 video gateway
 
    This function keeps the licensed BytePlus / ModelArk key on the server.
    It intentionally pins every request to the current Seedance 2.5 model

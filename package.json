@@ -1,8 +1,8 @@
 {
-  "name": "sparta-ai",
+  "name": "aso-ai",
   "version": "3.0.0",
   "private": true,
-  "description": "SPARTA AI — Professional AI Chat Interface on Groq, MiniMax & Vercel",
+  "description": "Aso AI (آسو إي آي) — Cosmic Purple AI Platform on Groq, MiniMax & Vercel",
   "engines": {
     "node": ">=20"
   },

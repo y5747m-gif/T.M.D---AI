@@ -1,18 +1,26 @@
 {
-  "name": "SPARTA AI",
-  "short_name": "SPARTA AI",
-  "description": "SPARTA AI مساعد ذكاء اصطناعي عربي احترافي للمحادثة وتحليل الملفات والصور، قابل للتثبيت كتطبيق PWA على الهاتف والحاسوب.",
+  "name": "Aso AI — آسو إي آي",
+  "short_name": "Aso AI · آسو",
+  "description": "Aso AI (آسو إي آي) مساعد ذكاء اصطناعي عربي احترافي بتصميم الفضاء البنفسجي والنجوم للمحادثة وتحليل الملفات والصور والفيديو.",
   "id": "/",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#070812",
-  "theme_color": "#070812",
-  "categories": ["productivity", "utilities", "education"],
+  "background_color": "#060713",
+  "theme_color": "#060713",
+  "categories": [
+    "productivity",
+    "utilities",
+    "education"
+  ],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -50,9 +58,15 @@
     {
       "name": "فتح المساعد العائم",
       "short_name": "المساعد",
-      "description": "افتح مساعد SPARTA AI مباشرة.",
+      "description": "افتح مساعد Aso AI (آسو إي آي) العائم مباشرة.",
       "url": "/assistant.html?source=shortcut",
-      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [
+        {
+          "src": "/images/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

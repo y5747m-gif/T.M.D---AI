@@ -135,5 +135,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`SPARTA AI dev server running at http://0.0.0.0:${PORT}`);
+  console.log(`Aso AI (آسو إي آي) dev server running at http://0.0.0.0:${PORT}`);
 });
