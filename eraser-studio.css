@@ -1,9 +1,9 @@
 /* ===========================================================================
    Smart Eraser Studio — Astra / ChatGPT-flavoured interface
 
-   Loaded after astra-overrides.css, so this layer can restate the calm
-   surface treatment on its own elements without fighting the chat theme.
-   Every colour has a dark-mode counterpart: the modal follows the app theme.
+   This layer keeps the studio's calm surface treatment independent from the
+   cosmic chat theme. Every colour has a dark-mode counterpart: the modal
+   follows the app theme.
    =========================================================================== */
 
 .eraser-open-btn .topbar-btn-icon,
