@@ -3,11 +3,14 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, arena/01a0ec4b-t-m-d-ai]
+    branches:
+      - main
+      - 'arena/**'
     paths:
       - 'android-app/**'
       - 'floating-assistant.js'
       - 'floating-assistant.css'
+      - 'images/aura-bubble-logo.svg'
       - '.github/workflows/android-apk.yml'
 
 jobs:

@@ -3,20 +3,554 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#070812">
-  <meta name="description" content="SPARTA AI — المساعد العائم فوق التطبيقات: دردشة ذكية متصلة بمنصة SPARTA AI مع مشاركة الشاشة والرد الصوتي.">
+  <meta name="theme-color" content="#060916">
+  <meta name="description" content="تطبيق فقاعة AURA AI للهاتف — فقاعة عائمة شفافة على وجه النظام مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة مع الذكاء الاصطناعي.">
   <link rel="manifest" href="/assistant.webmanifest">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/aura-bubble-logo.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/floating-assistant.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem("tmd_theme")==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
-  <title>SPARTA AI — المساعد العائم</title>
+  <title>AURA AI — تطبيق الفقاعة الذكية على الهاتف</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    html, body {
+      min-height: 100dvh;
+      margin: 0;
+      font-family: "Cairo", Inter, sans-serif;
+    }
+
+    /* خلفية شفافة صافية عند التشغيل كنافذة عائمة أو وضع الشفافية النقية */
+    body.is-pure-transparent {
+      background: transparent !important;
+    }
+
+    body.is-pure-transparent .aura-showcase {
+      opacity: 0.14;
+      transition: opacity 240ms ease;
+    }
+
+    body.is-pure-transparent .aura-showcase:hover {
+      opacity: 0.92;
+    }
+
+    body.is-popup-mode .aura-showcase {
+      display: none !important;
+    }
+
+    .aura-stage-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(0, 242, 254, 0.16), transparent 42%),
+        radial-gradient(circle at 84% 22%, rgba(168, 85, 247, 0.18), transparent 44%),
+        radial-gradient(circle at 50% 86%, rgba(255, 79, 216, 0.14), transparent 48%),
+        linear-gradient(165deg, #060916 0%, #0b1126 52%, #070a18 100%);
+      transition: opacity 280ms ease;
+    }
+
+    body.is-pure-transparent .aura-stage-bg {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* خطوط شبكة نظام الهاتف الخلفية لإبراز شفافية البرنامج */
+    .aura-stage-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
+    }
+
+    .aura-showcase {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 18px 16px 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .aura-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(10, 15, 30, 0.56);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .aura-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .aura-brand img {
+      width: 38px;
+      height: 38px;
+      display: block;
+    }
+
+    .aura-brand__title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .aura-brand__sub {
+      display: block;
+      color: rgba(210, 226, 255, 0.68);
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+
+    .aura-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .aura-pill-btn {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      color: #eef6ff;
+      background: rgba(255, 255, 255, 0.06);
+      text-decoration: none;
+      font: 600 0.73rem/1 "Cairo", sans-serif;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .aura-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(0, 242, 254, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .aura-pill-btn.is-active {
+      color: #05131f;
+      border-color: transparent;
+      background: linear-gradient(135deg, #00f2fe, #7dd3fc);
+      font-weight: 700;
+    }
+
+    .aura-hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .aura-glass-panel {
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 26px;
+      background: rgba(11, 16, 34, 0.52);
+      backdrop-filter: blur(22px) saturate(175%);
+      -webkit-backdrop-filter: blur(22px) saturate(175%);
+      box-shadow: 0 20px 50px rgba(2, 6, 20, 0.35);
+    }
+
+    .aura-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 12px;
+      border: 1px solid rgba(0, 242, 254, 0.32);
+      border-radius: 999px;
+      color: #7ef9ff;
+      background: rgba(0, 242, 254, 0.10);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .aura-hero-title {
+      margin: 12px 0 8px;
+      font-size: clamp(1.35rem, 3.2vw, 1.95rem);
+      font-weight: 800;
+      line-height: 1.4;
+      background: linear-gradient(120deg, #ffffff 15%, #7ef9ff 55%, #e879f9 95%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .aura-hero-desc {
+      margin: 0 0 18px;
+      color: rgba(226, 236, 255, 0.82);
+      font-size: 0.86rem;
+      line-height: 1.8;
+    }
+
+    .aura-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .aura-btn-primary {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #00c6ff 0%, #6366f1 52%, #ec4899 100%);
+      box-shadow: 0 10px 28px rgba(99, 102, 241, 0.38);
+      text-decoration: none;
+      font: 700 0.82rem/1 "Cairo", sans-serif;
+      cursor: pointer;
+      transition: transform 170ms ease, box-shadow 170ms ease;
+    }
+
+    .aura-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(0, 198, 255, 0.45);
+    }
+
+    .aura-btn-secondary {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      color: #f4f8ff;
+      background: rgba(255, 255, 255, 0.07);
+      text-decoration: none;
+      font: 700 0.8rem/1 "Cairo", sans-serif;
+      cursor: pointer;
+      transition: background 170ms ease, border-color 170ms ease;
+    }
+
+    .aura-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(0, 242, 254, 0.45);
+    }
+
+    .aura-steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .aura-step {
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.035);
+      font-size: 0.73rem;
+      line-height: 1.6;
+      color: rgba(230, 240, 255, 0.85);
+    }
+
+    .aura-step strong {
+      display: block;
+      color: #fff;
+      font-size: 0.76rem;
+      margin-bottom: 2px;
+    }
+
+    /* محاكي شاشة الهاتف لإظهار الشفافية والفقاعة والبث المباشر */
+    .phone-mock {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.72);
+      font: 600 0.72rem/1 Inter, sans-serif;
+    }
+
+    .phone-apps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .phone-app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(235, 243, 255, 0.85);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: transform 150ms ease, border-color 150ms ease;
+    }
+
+    .phone-app-icon:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 242, 254, 0.4);
+    }
+
+    .phone-app-glyph {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      font-size: 1.05rem;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(168, 85, 247, 0.25));
+    }
+
+    .phone-live-card {
+      padding: 12px 14px;
+      border: 1px solid rgba(0, 242, 254, 0.24);
+      border-radius: 16px;
+      background: rgba(6, 12, 28, 0.55);
+      font-size: 0.74rem;
+      line-height: 1.65;
+      color: rgba(232, 242, 255, 0.9);
+    }
+
+    .phone-live-card code {
+      display: block;
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.38);
+      color: #7ef9ff;
+      font: 0.68rem/1.45 "Fira Code", monospace;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .apk-note {
+      margin-top: 8px;
+      color: rgba(195, 212, 242, 0.68);
+      font-size: 0.69rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 780px) {
+      .aura-hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .aura-steps {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body class="tmd-assistant-page">
+  <div class="aura-stage-bg" aria-hidden="true"></div>
+
+  <main class="aura-showcase" id="auraShowcase">
+    <header class="aura-topbar">
+      <a class="aura-brand" href="/">
+        <img src="/images/aura-bubble-logo.svg" alt="شعار فقاعة AURA AI">
+        <div>
+          <span class="aura-brand__title">AURA Bubble AI</span>
+          <span class="aura-brand__sub">فقاعة الذكاء الاصطناعي الشفافة على وجه النظام</span>
+        </div>
+      </a>
+      <div class="aura-top-actions">
+        <button type="button" class="aura-pill-btn" id="toggleTransparentModeBtn">وضع الشفافية الصافية</button>
+        <button type="button" class="aura-pill-btn" id="demoTapBubbleBtn">اضغط لتجربة الإضاءة والشات ✨</button>
+        <a class="aura-pill-btn" href="/">المنصة الكاملة</a>
+      </div>
+    </header>
+
+    <section class="aura-hero-grid">
+      <div class="aura-glass-panel">
+        <span class="aura-kicker">تطبيق الهاتف · الإصدار 2.0 بشعار وتصميم جديد</span>
+        <h1 class="aura-hero-title">فقاعة ذكية عائمة على وجه النظام بخلفية شفافة وبث مباشر للشاشة</h1>
+        <p class="aura-hero-desc">
+          بمجرد تثبيت التطبيق على هاتفك تستقر الفقاعة البلورية فوق كل التطبيقات. المس الفقاعة فتضيء حدود الشاشة بالكامل بألوان متدفقة، ثم يصعد شريط الكتابة الزجاجي في الأسفل مع إمكانية البث المباشر ليرى الذكاء الاصطناعي شاشتك لحظة بلحظة.
+        </p>
+
+        <div class="aura-cta-row">
+          <a class="aura-btn-primary" id="downloadApkBtn" href="/TMD-AI.apk" download="AURA-AI-Bubble.apk">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 20h14"/></svg>
+            <span id="downloadApkLabel">تنزيل تطبيق الهاتف (APK)</span>
+          </a>
+          <button type="button" class="aura-btn-secondary" id="startLiveDemoBtn">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="3"/><circle cx="12" cy="10.5" r="2.4" fill="currentColor"/><path d="M8 20h8"/></svg>
+            <span>بدء بث مباشر للشاشة</span>
+          </button>
+          <button type="button" class="aura-btn-secondary" id="installPwaDirectBtn">
+            <span>تثبيت سريع على الهاتف</span>
+          </button>
+        </div>
+
+        <div class="aura-steps">
+          <div class="aura-step">
+            <strong>1. فقاعة على وجه النظام</strong>
+            تنزل على الهاتف كفقاعة بلورية عائمة لا تحجب لمس التطبيقات الأخرى إطلاقًا.
+          </div>
+          <div class="aura-step">
+            <strong>2. إضاءة محيطة بحدود الشاشة</strong>
+            لمسة واحدة على الفقاعة تنير حواف الشاشة الأربع بطيف لوني متحرك.
+          </div>
+          <div class="aura-step">
+            <strong>3. شريط كتابة سفلي شفاف</strong>
+            يظهر مكان الكتابة في الأسفل بخلفية زجاجية شفافة لأن المساعد عائم فوق نظامك.
+          </div>
+          <div class="aura-step">
+            <strong>4. بث مباشر مع الشاشة</strong>
+            يشاهد الذكاء الاصطناعي شاشتك مباشرة ويتحدث معك صوتيًا حول ما أمامك.
+          </div>
+        </div>
+
+        <p class="apk-note" id="apkStatusNote">
+          يدعم هواتف Android 8.0 فأحدث عبر حزمة التثبيت الأصلية <code>TMD-AI.apk</code>، كما يدعم التثبيت الفوري كتطبيق ويب على جميع الهواتف.
+        </p>
+      </div>
+
+      <div class="aura-glass-panel phone-mock" aria-label="معاينة شاشة الهاتف الحية">
+        <div class="phone-status">
+          <span id="mockClock">09:41</span>
+          <span>5G · AURA OS</span>
+        </div>
+
+        <div class="phone-apps">
+          <div class="phone-app-icon" data-sample="اشرح لي الرسالة المفتوحة على شاشتي واقترح ردًا احترافيًا.">
+            <span class="phone-app-glyph">💬</span>
+            <span>الرسائل</span>
+          </div>
+          <div class="phone-app-icon" data-sample="لخّص المقالة المفتوحة أمامي في 3 نقاط سريعة.">
+            <span class="phone-app-glyph">🌐</span>
+            <span>المتصفح</span>
+          </div>
+          <div class="phone-app-icon" data-sample="راجع الكود الظاهر على الشاشة واكتشف سبب الخطأ.">
+            <span class="phone-app-glyph">⚡</span>
+            <span>الأكواد</span>
+          </div>
+          <div class="phone-app-icon" data-sample="ترجم النص الظاهر على شاشتي الآن إلى العربية.">
+            <span class="phone-app-glyph">📷</span>
+            <span>الكاميرا</span>
+          </div>
+        </div>
+
+        <div class="phone-live-card" id="sampleScreenCard">
+          <strong>محتوى تجريبي حي على الشاشة (للبث المباشر):</strong>
+          اضغط على الفقاعة العائمة أسفل الشاشة لتشاهد توهج حدود الشاشة بالألوان وظهور شريط الشات الشفاف بالأسفل!
+          <code>Status: Ready · Live Screen Vision 60fps</code>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <script defer src="/pwa.js"></script>
   <script defer src="/floating-assistant.js"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("popup") === "1") {
+        document.body.classList.add("is-popup-mode");
+      }
+      if (params.get("transparent") === "1") {
+        document.body.classList.add("is-pure-transparent");
+      }
+
+      const clockEl = document.getElementById("mockClock");
+      const updateClock = () => {
+        const now = new Date();
+        if (clockEl) {
+          clockEl.textContent = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        }
+      };
+      updateClock();
+      setInterval(updateClock, 30000);
+
+      const transBtn = document.getElementById("toggleTransparentModeBtn");
+      transBtn?.addEventListener("click", () => {
+        const active = document.body.classList.toggle("is-pure-transparent");
+        transBtn.classList.toggle("is-active", active);
+        transBtn.textContent = active ? "إظهار شاشة المعاينة" : "وضع الشفافية الصافية";
+      });
+
+      document.getElementById("demoTapBubbleBtn")?.addEventListener("click", () => {
+        window.__tmdFloatingAssistant?.toggle();
+      });
+
+      document.getElementById("startLiveDemoBtn")?.addEventListener("click", () => {
+        window.__tmdFloatingAssistant?.open();
+        window.__tmdFloatingAssistant?.startLiveBroadcast();
+      });
+
+      document.getElementById("installPwaDirectBtn")?.addEventListener("click", () => {
+        const pwaBtn = document.getElementById("installAppBtn");
+        if (pwaBtn) pwaBtn.click();
+        else alert("من قائمة المتصفح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية» لينزل التطبيق على هاتفك فورًا.");
+      });
+
+      document.querySelectorAll(".phone-app-icon[data-sample]").forEach((card) => {
+        card.addEventListener("click", () => {
+          const prompt = card.getAttribute("data-sample");
+          if (prompt && window.__tmdFloatingAssistant) {
+            window.__tmdFloatingAssistant.ask(prompt);
+          }
+        });
+      });
+
+      // التحقق من توفر ملف APK المحلي المباشر، وإلا التوجيه إلى صفحة التحميل المبنية تلقائيًا
+      const apkBtn = document.getElementById("downloadApkBtn");
+      const apkNote = document.getElementById("apkStatusNote");
+      const actionsUrl = "https://github.com/y5747m-gif/T.M.D---AI/actions/workflows/android-apk.yml";
+      fetch("/TMD-AI.apk", { method: "HEAD" })
+        .then((res) => {
+          const ctype = (res.headers.get("content-type") || "").toLowerCase();
+          if (!res.ok || ctype.includes("text/html")) {
+            if (apkBtn) {
+              apkBtn.href = actionsUrl;
+              apkBtn.removeAttribute("download");
+              apkBtn.target = "_blank";
+              apkBtn.rel = "noopener";
+            }
+            if (apkNote) {
+              apkNote.innerHTML = "يُبنى ملف <code>TMD-AI.apk</code> تلقائيًا عبر GitHub Actions (حزمة <strong>TMD-AI-Android-APK</strong>) جاهزًا للتثبيت على أندرويد.";
+            }
+          }
+        })
+        .catch(() => {});
+    })();
+  </script>
 </body>
 </html>

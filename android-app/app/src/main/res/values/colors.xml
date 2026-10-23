@@ -1,1 +1,9 @@
-<resources><color name="navy">#0F0A0B</color><color name="gold">#D9A45B</color></resources>
+<resources>
+    <color name="aura_cyan">#00F2FE</color>
+    <color name="aura_blue">#4F7BFF</color>
+    <color name="aura_violet">#A855F7</color>
+    <color name="aura_magenta">#FF4FD8</color>
+    <color name="aura_amber">#FFB84D</color>
+    <color name="glass_surface">#B80B1022</color>
+    <color name="transparent">#00000000</color>
+</resources>

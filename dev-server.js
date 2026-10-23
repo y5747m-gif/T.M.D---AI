@@ -21,6 +21,7 @@ const MIME_TYPES = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
   ".webp": "image/webp",
+  ".apk": "application/vnd.android.package-archive",
   ".woff2": "font/woff2",
   ".woff": "font/woff",
   ".ttf": "font/ttf"
@@ -111,10 +112,14 @@ const server = http.createServer(async (req, res) => {
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
-    res.writeHead(200, {
+    const headers = {
       "Content-Type": contentType,
       "Access-Control-Allow-Origin": "*"
-    });
+    };
+    if (ext === ".apk") {
+      headers["Content-Disposition"] = 'attachment; filename="AURA-AI-Bubble.apk"';
+    }
+    res.writeHead(200, headers);
     fs.createReadStream(filePath).pipe(res);
   } else {
     // صفحة 404 حقيقية بحالة 404 (بدل إرجاع الصفحة الرئيسية بحالة 200)

@@ -6,7 +6,7 @@
    - لا يخزّن /api ولا مفاتيح ولا ردود الذكاء الاصطناعي.
    ========================================================== */
 
-const CACHE_VERSION = "sparta-ai-cache-v2026-10-07-1";
+const CACHE_VERSION = "sparta-ai-cache-v2026-10-23-aura";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -30,6 +30,7 @@ const APP_SHELL = [
   "/assistant.webmanifest",
   "/manifest.json",
   "/favicon.svg",
+  "/images/aura-bubble-logo.svg",
   "/images/favicon-32.png",
   "/images/apple-touch-icon.png",
   "/images/icon-192.png",

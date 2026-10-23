@@ -1,73 +1,180 @@
 /* ==========================================================
-   SPARTA AI — Floating assistant, aligned with the premium UI.
+   AURA Floating Bubble AI — Transparent OS Overlay Experience
+   • فقاعة بلورية عائمة بشعار طيفي جديد كليًا
+   • إضاءة محيطة ملونة حول حدود الشاشة بالكامل عند الضغط
+   • شريط محادثة زجاجي شفاف في أسفل الشاشة دون حجب الخلفية
+   • شريط تحكم البث المباشر للشاشة (Live Screen AI)
 ========================================================== */
 
+.tmd-edge-aura,
 .tmd-fab,
 .tmd-mini,
 .tmd-assistant-page {
-  --tmd-bg: #070812;
-  --tmd-surface: #120d1d;
-  --tmd-card: #171123;
-  --tmd-card-hover: #251936;
-  --tmd-primary: #ff5f6d;
-  --tmd-primary-hover: #ff7f73;
-  --tmd-secondary: #f4c36a;
-  --tmd-cyan: #74e7ff;
-  --tmd-text: #fff8ef;
-  --tmd-muted: #d5c6bd;
-  --tmd-subtle: #9e8f9e;
-  --tmd-line: rgba(255, 255, 255, 0.11);
-  --tmd-line-strong: rgba(255, 255, 255, 0.2);
-  --tmd-success: #55c98a;
-  --tmd-error: #f27676;
-  --tmd-shadow: 0 22px 60px rgba(0, 0, 0, 0.38);
-  --tmd-fast: 160ms ease;
-  --tmd-normal: 220ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  --tmd-glass: rgba(10, 14, 28, 0.64);
+  --tmd-glass-strong: rgba(12, 17, 34, 0.78);
+  --tmd-glass-soft: rgba(16, 22, 44, 0.50);
+  --tmd-glass-user: linear-gradient(135deg, rgba(0, 210, 255, 0.24), rgba(142, 84, 233, 0.28));
+  --tmd-cyan: #00f2fe;
+  --tmd-blue: #4f7bff;
+  --tmd-violet: #a855f7;
+  --tmd-magenta: #ff4fd8;
+  --tmd-amber: #ffb84d;
+  --tmd-emerald: #10b981;
+  --tmd-primary: #38bdf8;
+  --tmd-text: #f8fbff;
+  --tmd-muted: rgba(232, 240, 255, 0.80);
+  --tmd-subtle: rgba(190, 205, 235, 0.62);
+  --tmd-line: rgba(255, 255, 255, 0.14);
+  --tmd-line-strong: rgba(130, 215, 255, 0.34);
+  --tmd-success: #22d3ee;
+  --tmd-live: #ff3b7f;
+  --tmd-error: #ff6b81;
+  --tmd-shadow: 0 18px 48px rgba(2, 6, 20, 0.42);
+  --tmd-fast: 170ms cubic-bezier(0.22, 1, 0.36, 1);
+  --tmd-normal: 280ms cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
   font-family: "Cairo", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 :root[data-theme="light"] .tmd-fab,
-:root[data-theme="light"] .tmd-mini,
-:root[data-theme="light"].tmd-assistant-page,
-:root[data-theme="light"] .tmd-assistant-page {
-  --tmd-bg: #faf6f1;
-  --tmd-surface: #ffffff;
-  --tmd-card: #ffffff;
-  --tmd-card-hover: #f4ece4;
-  --tmd-primary: #bb3a3f;
-  --tmd-primary-hover: #a02f34;
-  --tmd-secondary: #8f6a24;
-  --tmd-cyan: #946318;
-  --tmd-text: #2c2225;
-  --tmd-muted: #6f6166;
-  --tmd-subtle: #95867e;
-  --tmd-line: #ebe1d6;
-  --tmd-line-strong: #ddd0c2;
-  --tmd-success: #2f9e68;
-  --tmd-error: #d84f4f;
-  --tmd-shadow: 0 14px 36px rgba(44, 34, 37, 0.11);
+:root[data-theme="light"] .tmd-mini {
+  --tmd-glass: rgba(16, 22, 42, 0.70);
+  --tmd-glass-strong: rgba(14, 20, 38, 0.84);
+  --tmd-glass-soft: rgba(18, 25, 48, 0.56);
 }
 
+.tmd-edge-aura *,
 .tmd-fab *,
 .tmd-mini * {
   box-sizing: border-box;
 }
 
-.tmd-fab button:focus-visible,
+.tmd-fab:focus-visible,
 .tmd-mini button:focus-visible,
 .tmd-mini textarea:focus-visible,
 .tmd-mini a:focus-visible {
-  outline: 2px solid var(--tmd-primary);
+  outline: 2px solid var(--tmd-cyan);
   outline-offset: 2px;
 }
 
-/* ---------- Floating action ---------- */
+/* ==========================================================
+   1. الإضاءة المحيطة بحدود الشاشة (Screen-Edge Colorful Aura)
+========================================================== */
+.tmd-edge-aura {
+  position: fixed;
+  inset: 0;
+  z-index: 99996;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: opacity 340ms ease, visibility 340ms ease;
+}
+
+.tmd-edge-aura.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* إطار الحد الخارجي المتوهج حول حواف الشاشة الأربع */
+.tmd-edge-aura__rim,
+.tmd-edge-aura__bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tmd-edge-aura__rim {
+  padding: 4px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.tmd-edge-aura__bloom {
+  padding: 28px;
+  filter: blur(20px);
+  opacity: 0.72;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: opacity 280ms ease, padding 280ms ease;
+}
+
+.tmd-edge-aura__rim::before,
+.tmd-edge-aura__bloom::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    #00f2fe 0deg,
+    #4f7bff 55deg,
+    #a855f7 115deg,
+    #ff4fd8 175deg,
+    #ff7a59 230deg,
+    #fbbf24 280deg,
+    #10b981 325deg,
+    #00f2fe 360deg
+  );
+  animation: tmd-aura-spin 5.2s linear infinite;
+}
+
+/* نبضة اشتعال ساطعة لحظة الضغط على الفقاعة */
+.tmd-edge-aura.is-burst .tmd-edge-aura__bloom {
+  opacity: 0.98;
+  padding: 40px;
+}
+
+.tmd-edge-aura.is-burst .tmd-edge-aura__rim {
+  padding: 5.5px;
+}
+
+/* تفاعل الإضاءة مع الاستماع الصوتي والمعالجة والبث المباشر */
+.tmd-edge-aura.is-listening .tmd-edge-aura__rim::before,
+.tmd-edge-aura.is-listening .tmd-edge-aura__bloom::before {
+  animation-duration: 2.3s;
+}
+
+.tmd-edge-aura.is-listening .tmd-edge-aura__bloom {
+  opacity: 0.92;
+  animation: tmd-aura-breathe 1.1s ease-in-out infinite;
+}
+
+.tmd-edge-aura.is-thinking .tmd-edge-aura__rim::before,
+.tmd-edge-aura.is-thinking .tmd-edge-aura__bloom::before {
+  animation-duration: 1.65s;
+}
+
+.tmd-edge-aura.is-live .tmd-edge-aura__rim::before,
+.tmd-edge-aura.is-live .tmd-edge-aura__bloom::before {
+  background: conic-gradient(
+    from 0deg,
+    #00f2fe 0deg,
+    #10b981 72deg,
+    #4f7bff 144deg,
+    #a855f7 216deg,
+    #ff3b7f 288deg,
+    #00f2fe 360deg
+  );
+  animation-duration: 3.4s;
+}
+
+/* داخل تطبيق أندرويد الأصلي تتولى AmbientEdgeGlowView إضاءة حواف شاشة الهاتف الفعلية بالكامل */
+.tmd-assistant-page.tmd-android-overlay .tmd-edge-aura {
+  display: none !important;
+}
+
+/* ==========================================================
+   2. الفقاعة البلورية العائمة (Floating System Bubble)
+========================================================== */
 .tmd-fab {
-  --fab-size: 58px;
+  --fab-size: 62px;
   position: fixed;
   z-index: 99998;
-  inset-inline-end: 22px;
+  inset-inline-end: 18px;
   inset-block-end: 22px;
   width: var(--fab-size);
   height: var(--fab-size);
@@ -75,33 +182,111 @@
   place-items: center;
   padding: 0;
   isolation: isolate;
-  border: 1px solid rgba(224, 85, 78, 0.32);
-  border-radius: 18px;
+  border: 0;
+  border-radius: 50%;
   color: #fff;
-  background: var(--tmd-primary);
-  box-shadow: 0 6px 18px rgba(13, 7, 8, 0.24);
+  background: transparent;
   cursor: grab;
   touch-action: none;
-  transition: transform var(--tmd-fast), background var(--tmd-fast), box-shadow var(--tmd-normal), opacity var(--tmd-normal);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--tmd-normal), opacity var(--tmd-normal);
+}
+
+/* هالة لونية ناعمة خلف الفقاعة */
+.tmd-fab__halo {
+  position: absolute;
+  inset: -6px;
+  z-index: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(0, 242, 254, 0.65),
+    rgba(79, 123, 255, 0.65),
+    rgba(168, 85, 247, 0.65),
+    rgba(255, 79, 216, 0.65),
+    rgba(255, 184, 77, 0.55),
+    rgba(0, 242, 254, 0.65)
+  );
+  filter: blur(10px);
+  opacity: 0.72;
+  pointer-events: none;
+  animation: tmd-aura-spin 6s linear infinite;
+  transition: opacity var(--tmd-normal), transform var(--tmd-normal);
+}
+
+/* طوق ضوئي دوّار حول الفقاعة */
+.tmd-fab__ring {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 2.2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #00f2fe,
+    #4f7bff,
+    #a855f7,
+    #ff4fd8,
+    #ffb84d,
+    #00f2fe
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: tmd-aura-spin 5s linear infinite;
+}
+
+/* جسم الفقاعة الزجاجي الشفاف */
+.tmd-fab__core {
+  position: absolute;
+  inset: 2.2px;
+  z-index: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(24, 34, 68, 0.62) 38%,
+    rgba(8, 12, 26, 0.76) 100%
+  );
+  backdrop-filter: blur(18px) saturate(185%);
+  -webkit-backdrop-filter: blur(18px) saturate(185%);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.42),
+    inset 0 -3px 8px rgba(0, 242, 254, 0.18),
+    0 10px 28px rgba(3, 7, 20, 0.45);
+  pointer-events: none;
 }
 
 .tmd-fab:hover {
-  background: var(--tmd-primary-hover);
-  box-shadow: 0 8px 20px rgba(13, 7, 8, 0.26);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.tmd-fab:hover .tmd-fab__halo {
+  opacity: 0.96;
+  transform: scale(1.08);
 }
 
 .tmd-fab:active {
   cursor: grabbing;
-  transform: scale(0.96);
+  transform: scale(0.93);
 }
 
 .tmd-fab[hidden] {
   display: none !important;
 }
 
+/* عند فتح شريط المحادثة السفلي تتحول الفقاعة بسلاسة إلى أيقونة الشريط */
+.tmd-fab.is-open-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.55) translateY(18px);
+}
+
 .tmd-fab.is-pinned {
-  opacity: 0.62;
+  opacity: 0.72;
 }
 
 .tmd-fab.is-dragging,
@@ -109,83 +294,71 @@
   transition: none;
 }
 
+.tmd-fab.is-snapping {
+  transition: left 260ms cubic-bezier(0.22, 1, 0.36, 1), top 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .tmd-fab__icon {
   position: relative;
   z-index: 2;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   pointer-events: none;
+  animation: tmd-orb-float 3.4s ease-in-out infinite;
 }
 
 .tmd-fab__icon svg,
-.tmd-spark {
+.tmd-aura-logo {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-.tmd-fab__ring {
-  position: absolute;
-  inset: -5px;
-  border: 1px solid rgba(224, 85, 78, 0.26);
-  border-radius: 21px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.tmd-fab:hover .tmd-fab__ring {
-  opacity: 1;
-}
-
-.tmd-fab__ring--gold {
-  display: none;
-}
-
+/* شارة البث المباشر فوق الفقاعة */
 .tmd-fab__badge {
   position: absolute;
-  inset-inline-start: -4px;
-  inset-block-start: -4px;
-  min-width: 18px;
-  height: 18px;
+  inset-inline-start: -2px;
+  inset-block-start: -2px;
+  z-index: 3;
+  min-width: 20px;
+  height: 20px;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  border: 2px solid var(--tmd-surface);
+  padding: 0 5px;
+  border: 2px solid rgba(8, 12, 26, 0.9);
   border-radius: 999px;
   color: #fff;
-  background: var(--tmd-success);
-  font-size: 0;
+  background: linear-gradient(135deg, #ff3b7f, #ff6b4a);
+  box-shadow: 0 0 12px rgba(255, 59, 127, 0.75);
+  font: 700 0.52rem/1 Inter, sans-serif;
+  letter-spacing: 0.04em;
   pointer-events: none;
 }
 
-.tmd-fab__badge::after {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
 .tmd-fab__badge.is-on {
-  display: flex;
+  display: inline-flex;
+  animation: tmd-live-pulse 1.3s ease-in-out infinite;
 }
 
 .tmd-fab__tag {
   position: absolute;
   inset-inline-end: 0;
   inset-block-end: calc(100% + 10px);
+  z-index: 3;
   width: max-content;
-  max-width: 250px;
-  padding: 7px 10px;
+  max-width: 240px;
+  padding: 6px 11px;
   border: 1px solid var(--tmd-line-strong);
-  border-radius: 10px;
+  border-radius: 999px;
   color: var(--tmd-text);
-  background: var(--tmd-surface);
+  background: var(--tmd-glass-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--tmd-shadow);
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   font-weight: 600;
   opacity: 0;
   pointer-events: none;
@@ -198,91 +371,224 @@
   transform: translateY(0);
 }
 
-/* ---------- Assistant window ---------- */
+/* ==========================================================
+   3. الحاوية السفلية الشفافة تمامًا (Transparent Bottom Dock)
+========================================================== */
 .tmd-mini {
   position: fixed;
   z-index: 99999;
-  inset-inline-end: 22px;
-  inset-block-end: 92px;
-  width: min(394px, calc(100vw - 24px));
-  max-height: min(660px, calc(100dvh - 112px));
+  inset-inline: 0;
+  inset-block-end: 0;
+  margin-inline: auto;
+  width: min(560px, 100vw);
+  max-height: calc(100dvh - 16px);
   display: none;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--tmd-line-strong);
-  border-radius: 20px;
-  color: var(--tmd-text);
-  background: var(--tmd-bg);
-  box-shadow: var(--tmd-shadow);
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px max(14px, env(safe-area-inset-bottom));
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
   direction: rtl;
 }
 
 .tmd-mini.is-open {
   display: flex;
-  animation: tmd-window-in var(--tmd-normal) both;
 }
 
-.tmd-mini__head {
-  min-height: 62px;
-  display: flex;
+/* العناصر التفاعلية فقط تستقبل اللمس، ويبقى باقي الفضاء شفافًا وقابلًا للمس */
+.tmd-live-bar,
+.tmd-plan-sheet,
+.tmd-stream-wrap,
+.tmd-attachment,
+.tmd-quick-strip,
+.tmd-composer-dock {
+  pointer-events: auto;
+}
+
+/* ==========================================================
+   4. شريط البث المباشر للشاشة (Live Screen Broadcast HUD)
+========================================================== */
+.tmd-live-bar {
+  display: none;
   align-items: center;
   gap: 8px;
-  padding: 10px 11px;
-  border-bottom: 1px solid var(--tmd-line);
-  background: var(--tmd-surface);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
+  padding: 7px 10px;
+  border: 1px solid rgba(0, 242, 254, 0.36);
+  border-radius: 999px;
+  color: var(--tmd-text);
+  background: var(--tmd-glass-strong);
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.34), 0 0 22px rgba(0, 242, 254, 0.16);
+  animation: tmd-dock-rise 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.tmd-mini__head:active {
-  cursor: grabbing;
+.tmd-live-bar.is-on {
+  display: flex;
 }
 
-.tmd-mini__avatar {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
+.tmd-live-bar__preview {
+  position: relative;
+  width: 42px;
+  height: 26px;
   flex: 0 0 auto;
-  padding: 8px;
-  border: 1px solid rgba(224, 85, 78, 0.24);
-  border-radius: 11px;
-  color: var(--tmd-primary);
-  background: rgba(224, 85, 78, 0.09);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 7px;
+  background: rgba(5, 9, 20, 0.85);
 }
 
-.tmd-mini__titles {
+.tmd-live-bar__preview video,
+.tmd-live-bar__preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.tmd-live-bar__preview img[hidden],
+.tmd-live-bar__preview video[hidden] {
+  display: none !important;
+}
+
+.tmd-live-bar__status {
   min-width: 0;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.tmd-mini__title {
-  overflow: hidden;
-  font-size: 0.78rem;
+.tmd-live-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--tmd-live);
+  box-shadow: 0 0 10px var(--tmd-live);
+  animation: tmd-live-pulse 1.2s ease-in-out infinite;
+}
+
+.tmd-live-pill {
+  min-height: 28px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 999px;
+  color: var(--tmd-muted);
+  background: rgba(255, 255, 255, 0.06);
+  font: 600 0.61rem/1 "Cairo", sans-serif;
+  cursor: pointer;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast);
+}
+
+.tmd-live-pill:hover {
+  color: #fff;
+  border-color: var(--tmd-line-strong);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tmd-live-pill.is-active {
+  color: #06131f;
+  border-color: transparent;
+  background: linear-gradient(135deg, #00f2fe, #67e8f9);
   font-weight: 700;
-  line-height: 1.4;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+}
+
+.tmd-live-pill--stop {
+  color: #ffd5df;
+  border-color: rgba(255, 59, 127, 0.38);
+  background: rgba(255, 59, 127, 0.18);
+}
+
+.tmd-live-pill--stop:hover {
+  color: #fff;
+  background: rgba(255, 59, 127, 0.34);
+}
+
+/* ==========================================================
+   5. البطاقات العائمة للردود (Translucent Floating Stream)
+========================================================== */
+.tmd-stream-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: tmd-dock-rise 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tmd-stream-wrap[hidden] {
+  display: none !important;
+}
+
+.tmd-stream-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 10px;
+  align-self: stretch;
+  border: 1px solid var(--tmd-line);
+  border-radius: 999px;
+  color: var(--tmd-muted);
+  background: var(--tmd-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  font-size: 0.63rem;
+}
+
+.tmd-stream-bar__info {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.tmd-stream-bar__dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--tmd-cyan);
+  box-shadow: 0 0 8px var(--tmd-cyan);
 }
 
 .tmd-mini__status {
   overflow: hidden;
-  color: var(--tmd-subtle);
+  color: var(--tmd-muted);
   font-size: 0.64rem;
+  font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
+.tmd-stream-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .tmd-mini__head-btn {
-  width: 32px;
-  height: 32px;
+  width: 27px;
+  height: 27px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 50%;
   color: var(--tmd-muted);
   background: transparent;
   cursor: pointer;
@@ -290,257 +596,59 @@
 }
 
 .tmd-mini__head-btn:hover {
-  color: var(--tmd-text);
+  color: #fff;
   border-color: var(--tmd-line);
-  background: var(--tmd-card);
+  background: rgba(255, 255, 255, 0.10);
 }
 
 .tmd-mini__head-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.93);
 }
 
 .tmd-mini__head-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 
-.tmd-pin-btn {
-  color: var(--tmd-primary);
-}
-
-.tmd-pin-btn.is-active {
-  color: #fff;
-  border-color: transparent;
-  background: var(--tmd-primary);
-}
-
-/* ---------- Plan controls ---------- */
-.tmd-plan-chip {
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
-  padding: 4px 7px;
-  border: 1px solid var(--tmd-line);
-  border-radius: 9px;
-  color: var(--tmd-muted);
-  background: var(--tmd-card);
-  font-size: 0.6rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color var(--tmd-fast), border-color var(--tmd-fast), background var(--tmd-fast);
-}
-
-.tmd-plan-chip:hover {
-  color: var(--tmd-text);
-  border-color: var(--tmd-line-strong);
-}
-
-.tmd-plan-chip__credits {
-  padding: 1px 5px;
-  border-radius: 5px;
-  color: var(--tmd-primary);
-  background: rgba(224, 85, 78, 0.1);
-  font: 600 0.56rem/1.4 Inter, sans-serif;
-}
-
-.tmd-plan-chip.is-pro {
-  color: var(--tmd-primary);
-  border-color: rgba(224, 85, 78, 0.24);
-  background: rgba(224, 85, 78, 0.08);
-}
-
-.tmd-plan-chip.is-empty .tmd-plan-chip__credits {
-  color: var(--tmd-error);
-  background: rgba(242, 118, 118, 0.08);
-}
-
-.tmd-plan-sheet {
-  padding: 10px;
-  border-bottom: 1px solid var(--tmd-line);
-  background: var(--tmd-surface);
-  animation: tmd-slide-down var(--tmd-normal) both;
-}
-
-.tmd-plan-sheet[hidden] {
-  display: none;
-}
-
-.tmd-plan-sheet__inner {
-  display: grid;
-  gap: 8px;
-}
-
-.tmd-plan-sheet__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--tmd-text);
-  font-size: 0.72rem;
-}
-
-.tmd-plan-card {
-  padding: 10px 11px;
-  border: 1px solid var(--tmd-line);
-  border-radius: 13px;
-  background: var(--tmd-card);
-}
-
-.tmd-plan-card--pro {
-  border-color: rgba(224, 85, 78, 0.22);
-  background: rgba(224, 85, 78, 0.07);
-}
-
-.tmd-plan-card__title {
-  margin-bottom: 3px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.tmd-plan-card__tag {
-  margin-inline-start: 4px;
-  padding: 1px 5px;
-  border-radius: 5px;
-  color: var(--tmd-primary);
-  background: rgba(224, 85, 78, 0.1);
-  font: 700 0.52rem/1.5 Inter, sans-serif;
-}
-
-.tmd-plan-card__desc {
-  color: var(--tmd-muted);
-  font-size: 0.64rem;
-  line-height: 1.65;
-}
-
-.tmd-plan-card__meter {
-  height: 4px;
-  margin: 7px 0;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--tmd-line);
-}
-
-.tmd-plan-card__meter span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--tmd-primary);
-}
-
-.tmd-plan-card__btn {
-  width: 100%;
-  min-height: 36px;
-  margin-top: 7px;
-  padding: 6px 9px;
-  border: 1px solid var(--tmd-line);
-  border-radius: 10px;
-  color: var(--tmd-muted);
-  background: transparent;
-  font: 600 0.68rem/1 "Cairo", sans-serif;
-  cursor: pointer;
-  transition: color var(--tmd-fast), background var(--tmd-fast), transform var(--tmd-fast);
-}
-
-.tmd-plan-card__btn:hover:not(:disabled) {
-  color: var(--tmd-text);
-  background: var(--tmd-card-hover);
-}
-
-.tmd-plan-card__btn--pro {
-  color: #fff;
-  border-color: transparent;
-  background: var(--tmd-primary);
-}
-
-.tmd-plan-card__btn--pro:hover:not(:disabled) {
-  color: #fff;
-  background: var(--tmd-primary-hover);
-}
-
-.tmd-plan-card__btn:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.tmd-plan-card__btn:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-/* ---------- Screen sharing ---------- */
-.tmd-mini__screen {
-  position: relative;
-  display: none;
-  border-bottom: 1px solid var(--tmd-line);
-  background: #070b14;
-}
-
-.tmd-mini__screen.is-on {
-  display: block;
-}
-
-.tmd-mini__screen video {
-  width: 100%;
-  max-height: 170px;
-  display: block;
-  object-fit: contain;
-}
-
-.tmd-mini__screen-tag {
-  position: absolute;
-  inset-inline-start: 8px;
-  inset-block-start: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 7px;
-  color: #fff;
-  background: rgba(13, 7, 8, 0.82);
-  font-size: 0.62rem;
-  font-weight: 600;
-}
-
-.tmd-mini__screen-tag::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--tmd-error);
-}
-
-/* ---------- Messages ---------- */
 .tmd-mini__body {
-  min-height: 190px;
-  flex: 1;
+  max-height: min(38dvh, 270px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 13px 11px;
+  gap: 8px;
+  padding: 4px 2px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
 
+.tmd-stream-wrap.is-minimized .tmd-mini__body {
+  display: none;
+}
+
 .tmd-msg {
-  max-width: 88%;
-  padding: 8px 10px;
-  border-radius: 14px;
+  max-width: 92%;
+  padding: 9px 12px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 18px;
   color: var(--tmd-text);
-  font-size: 0.75rem;
-  line-height: 1.75;
+  background: var(--tmd-glass);
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  box-shadow: 0 10px 28px rgba(2, 6, 20, 0.30);
+  font-size: 0.76rem;
+  line-height: 1.72;
   white-space: pre-wrap;
   word-break: break-word;
-  animation: tmd-message-in 180ms ease both;
+  animation: tmd-message-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .tmd-msg--ai {
   align-self: flex-start;
   display: flex;
   align-items: flex-start;
-  gap: 7px;
-  max-width: 94%;
-  padding-inline: 1px;
-  background: transparent;
+  gap: 8px;
+  max-width: 96%;
+  border-color: rgba(0, 242, 254, 0.22);
+  border-start-start-radius: 6px;
 }
 
 .tmd-msg--ai > div {
@@ -549,17 +657,12 @@
 }
 
 .tmd-msg__spark {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   margin-top: 2px;
-  padding: 4px;
-  border: 1px solid rgba(224, 85, 78, 0.18);
-  border-radius: 7px;
-  color: var(--tmd-primary);
-  background: rgba(224, 85, 78, 0.08);
 }
 
 .tmd-msg__spark svg {
@@ -569,43 +672,45 @@
 
 .tmd-msg--user {
   align-self: flex-end;
-  border: 1px solid rgba(224, 85, 78, 0.16);
-  border-start-end-radius: 5px;
-  background: rgba(224, 85, 78, 0.11);
+  border-color: rgba(168, 85, 247, 0.34);
+  border-start-end-radius: 6px;
+  background: var(--tmd-glass-user);
 }
 
 .tmd-msg--err {
   align-self: center;
-  border: 1px solid rgba(242, 118, 118, 0.22);
-  color: var(--tmd-error);
-  background: rgba(242, 118, 118, 0.07);
+  border-color: rgba(255, 107, 129, 0.38);
+  color: #ffd6de;
+  background: rgba(65, 14, 28, 0.72);
   font-size: 0.7rem;
 }
 
 .tmd-msg img {
   max-width: 100%;
+  max-height: 130px;
   display: block;
   margin-bottom: 6px;
+  object-fit: cover;
   border: 1px solid var(--tmd-line);
-  border-radius: 10px;
+  border-radius: 11px;
 }
 
 .tmd-msg code {
-  padding: 1px 4px;
+  padding: 1px 5px;
   border: 1px solid var(--tmd-line);
   border-radius: 5px;
   color: var(--tmd-cyan);
-  background: var(--tmd-card);
+  background: rgba(4, 8, 20, 0.55);
   font: 0.68rem/1.5 "Fira Code", monospace;
 }
 
 .tmd-msg pre {
   margin: 6px 0 0;
-  padding: 8px;
+  padding: 8px 10px;
   overflow-x: auto;
   border: 1px solid var(--tmd-line);
-  border-radius: 9px;
-  background: #0b0708;
+  border-radius: 10px;
+  background: rgba(4, 8, 20, 0.78);
   direction: ltr;
   text-align: left;
 }
@@ -617,117 +722,157 @@
 }
 
 .tmd-typing {
-  min-height: 21px;
+  min-height: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .tmd-typing span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--tmd-primary);
-  animation: tmd-dot 1.1s ease-in-out infinite;
+  background: linear-gradient(135deg, var(--tmd-cyan), var(--tmd-magenta));
+  animation: tmd-dot 1.05s ease-in-out infinite;
 }
 
-.tmd-typing span:nth-child(2) { animation-delay: 120ms; }
-.tmd-typing span:nth-child(3) { animation-delay: 240ms; }
+.tmd-typing span:nth-child(2) { animation-delay: 130ms; }
+.tmd-typing span:nth-child(3) { animation-delay: 260ms; }
 
-/* ---------- Chips and tools ---------- */
-.tmd-mini__chips {
-  display: flex;
-  gap: 5px;
-  padding: 0 11px 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.tmd-mini__chips::-webkit-scrollbar {
-  display: none;
-}
-
-.tmd-chip {
-  min-height: 32px;
+/* ==========================================================
+   6. الباقات والمرفقات (Translucent Sheets & Attachments)
+========================================================== */
+.tmd-plan-chip {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex: 0 0 auto;
-  padding: 5px 9px;
+  padding: 3px 8px;
   border: 1px solid var(--tmd-line);
-  border-radius: 9px;
+  border-radius: 999px;
   color: var(--tmd-muted);
-  background: var(--tmd-card);
-  font: 500 0.64rem/1 "Cairo", sans-serif;
+  background: rgba(255, 255, 255, 0.06);
+  font: 600 0.58rem/1 "Cairo", sans-serif;
   cursor: pointer;
-  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast);
+  transition: color var(--tmd-fast), border-color var(--tmd-fast), background var(--tmd-fast);
 }
 
-.tmd-chip:hover {
-  color: var(--tmd-text);
+.tmd-plan-chip:hover {
+  color: #fff;
   border-color: var(--tmd-line-strong);
-  background: var(--tmd-card-hover);
 }
 
-.tmd-mini__tools {
-  display: flex;
-  gap: 5px;
-  padding: 8px 11px 0;
-  border-top: 1px solid var(--tmd-line);
+.tmd-plan-chip__credits {
+  padding: 1px 5px;
+  border-radius: 999px;
+  color: var(--tmd-cyan);
+  background: rgba(0, 242, 254, 0.14);
+  font: 700 0.52rem/1.3 Inter, sans-serif;
 }
 
-.tmd-tool {
-  min-width: 0;
-  min-height: 36px;
-  flex: 1;
+.tmd-plan-chip.is-pro {
+  color: var(--tmd-cyan);
+  border-color: rgba(0, 242, 254, 0.34);
+  background: rgba(0, 242, 254, 0.12);
+}
+
+.tmd-plan-sheet {
+  padding: 12px;
+  border: 1px solid var(--tmd-line-strong);
+  border-radius: 20px;
+  color: var(--tmd-text);
+  background: var(--tmd-glass-strong);
+  backdrop-filter: blur(26px) saturate(185%);
+  -webkit-backdrop-filter: blur(26px) saturate(185%);
+  box-shadow: var(--tmd-shadow);
+  animation: tmd-dock-rise 220ms ease both;
+}
+
+.tmd-plan-sheet[hidden] {
+  display: none !important;
+}
+
+.tmd-plan-sheet__inner {
+  display: grid;
+  gap: 8px;
+}
+
+.tmd-plan-sheet__head {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 5px;
+  justify-content: space-between;
+  font-size: 0.74rem;
+}
+
+.tmd-plan-card {
+  padding: 10px 12px;
   border: 1px solid var(--tmd-line);
-  border-radius: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tmd-plan-card--pro {
+  border-color: rgba(0, 242, 254, 0.28);
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.09), rgba(168, 85, 247, 0.11));
+}
+
+.tmd-plan-card__title {
+  margin-bottom: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tmd-plan-card__tag {
+  margin-inline-start: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: #06131f;
+  background: linear-gradient(135deg, #00f2fe, #a855f7);
+  font: 700 0.52rem/1.5 Inter, sans-serif;
+}
+
+.tmd-plan-card__desc {
   color: var(--tmd-muted);
-  background: transparent;
-  font: 500 0.62rem/1.35 "Cairo", sans-serif;
-  cursor: pointer;
-  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast);
+  font-size: 0.64rem;
+  line-height: 1.6;
 }
 
-.tmd-tool svg {
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-}
-
-.tmd-tool:hover {
+.tmd-plan-card__btn {
+  width: 100%;
+  min-height: 34px;
+  margin-top: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 999px;
   color: var(--tmd-text);
-  background: var(--tmd-card);
+  background: rgba(255, 255, 255, 0.06);
+  font: 600 0.67rem/1 "Cairo", sans-serif;
+  cursor: pointer;
 }
 
-.tmd-tool:active {
-  transform: scale(0.97);
+.tmd-plan-card__btn--pro {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #00c6ff, #7c3aed, #ec4899);
 }
 
-.tmd-tool.is-active {
-  color: var(--tmd-primary);
-  border-color: rgba(224, 85, 78, 0.26);
-  background: rgba(224, 85, 78, 0.08);
+.tmd-plan-card__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
-.tmd-tool.is-rec {
-  color: var(--tmd-error);
-  border-color: rgba(242, 118, 118, 0.24);
-  background: rgba(242, 118, 118, 0.07);
-}
-
-/* ---------- Attachments ---------- */
 .tmd-attachment {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 8px 11px 0;
-  padding: 7px;
-  border: 1px solid var(--tmd-line);
-  border-radius: 12px;
-  background: var(--tmd-card);
+  padding: 6px 10px;
+  border: 1px solid var(--tmd-line-strong);
+  border-radius: 16px;
+  color: var(--tmd-text);
+  background: var(--tmd-glass);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 
 .tmd-attachment[hidden] {
@@ -735,12 +880,11 @@
 }
 
 .tmd-attachment img {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   flex: 0 0 auto;
   object-fit: cover;
-  border-radius: 9px;
-  background: var(--tmd-surface);
+  border-radius: 10px;
 }
 
 .tmd-attachment__info {
@@ -766,145 +910,273 @@
   font-size: 0.58rem;
 }
 
-/* ---------- Input ---------- */
-.tmd-mini__foot {
+/* ==========================================================
+   7. شريط الاختصارات الزجاجي العائم + شريط الكتابة السفلي
+========================================================== */
+.tmd-quick-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tmd-quick-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.tmd-mini.is-open .tmd-quick-strip {
+  animation: tmd-dock-rise 280ms 90ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tmd-chip,
+.tmd-mini-util {
+  min-height: 31px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 999px;
+  color: var(--tmd-muted);
+  background: var(--tmd-glass-soft);
+  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(175%);
+  font: 600 0.63rem/1 "Cairo", sans-serif;
+  cursor: pointer;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast);
+}
+
+.tmd-chip:hover,
+.tmd-mini-util:hover {
+  color: #fff;
+  border-color: var(--tmd-line-strong);
+  background: var(--tmd-glass);
+  transform: translateY(-1px);
+}
+
+.tmd-mini-util svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}
+
+.tmd-mini-util.is-active {
+  color: var(--tmd-cyan);
+  border-color: rgba(0, 242, 254, 0.38);
+  background: rgba(0, 242, 254, 0.14);
+}
+
+/* ---------- شريط الكتابة السفلي الرئيسي (علامة الشات تحت) ---------- */
+.tmd-composer-dock {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 7px;
-  padding: 8px 11px 11px;
-  background: var(--tmd-bg);
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
+  background: var(--tmd-glass-strong);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow:
+    0 16px 42px rgba(2, 6, 20, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 26px rgba(79, 123, 255, 0.18);
+}
+
+/* يظهر شريط الكتابة السفلي مباشرة بعد اشتعال إضاءة حدود الشاشة */
+.tmd-mini.is-open .tmd-composer-dock {
+  animation: tmd-dock-rise 320ms 135ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* طوق ضوئي ناعم حول كبسولة الكتابة */
+.tmd-composer-dock::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  padding: 1.3px;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    rgba(0, 242, 254, 0.65),
+    rgba(79, 123, 255, 0.45),
+    rgba(168, 85, 247, 0.55),
+    rgba(255, 79, 216, 0.60),
+    rgba(255, 184, 77, 0.45)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.tmd-dock-orb {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: transform var(--tmd-fast), background var(--tmd-fast);
+}
+
+.tmd-dock-orb:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.06);
+}
+
+.tmd-dock-orb:active {
+  transform: scale(0.94);
+}
+
+.tmd-dock-orb svg {
+  width: 100%;
+  height: 100%;
 }
 
 .tmd-mini__input {
-  min-height: 44px;
-  max-height: 98px;
+  min-height: 40px;
+  max-height: 96px;
   flex: 1;
-  padding: 10px 11px;
+  padding: 9px 6px;
   resize: none;
-  border: 1px solid var(--tmd-line);
-  border-radius: 13px;
+  border: 0;
   outline: 0;
   color: var(--tmd-text);
-  background: var(--tmd-card);
-  font-size: 0.76rem;
-  line-height: 1.55;
-  transition: border-color var(--tmd-fast), box-shadow var(--tmd-fast);
+  background: transparent;
+  font: 500 0.8rem/1.55 "Cairo", sans-serif;
 }
 
-.tmd-mini__input:focus {
-  border-color: var(--tmd-primary);
-  box-shadow: 0 0 0 3px rgba(224, 85, 78, 0.1);
+.tmd-mini__input:focus-visible {
+  outline: none;
 }
 
 .tmd-mini__input::placeholder {
   color: var(--tmd-subtle);
 }
 
+/* أزرار التحكم المباشرة داخل كبسولة الشات (البث المباشر + الميكروفون + الإرسال) */
+.tmd-dock-btn {
+  height: 40px;
+  min-width: 40px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid var(--tmd-line);
+  border-radius: 999px;
+  color: var(--tmd-muted);
+  background: rgba(255, 255, 255, 0.06);
+  font: 600 0.65rem/1 "Cairo", sans-serif;
+  cursor: pointer;
+  transition: color var(--tmd-fast), background var(--tmd-fast), border-color var(--tmd-fast), transform var(--tmd-fast), box-shadow var(--tmd-fast);
+}
+
+.tmd-dock-btn--icon {
+  width: 40px;
+  padding: 0;
+}
+
+.tmd-dock-btn svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.tmd-dock-btn:hover {
+  color: #fff;
+  border-color: var(--tmd-line-strong);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tmd-dock-btn:active {
+  transform: scale(0.95);
+}
+
+.tmd-dock-btn--live.is-active {
+  color: #fff;
+  border-color: rgba(255, 59, 127, 0.55);
+  background: linear-gradient(135deg, rgba(255, 59, 127, 0.34), rgba(0, 242, 254, 0.26));
+  box-shadow: 0 0 16px rgba(255, 59, 127, 0.36);
+}
+
+.tmd-dock-btn.is-rec {
+  color: #fff;
+  border-color: rgba(255, 59, 127, 0.6);
+  background: rgba(255, 59, 127, 0.32);
+  box-shadow: 0 0 16px rgba(255, 59, 127, 0.45);
+  animation: tmd-live-pulse 1s ease-in-out infinite;
+}
+
 .tmd-mini__send {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   padding: 0;
   border: 0;
-  border-radius: 13px;
+  border-radius: 50%;
   color: #fff;
-  background: var(--tmd-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  background: linear-gradient(135deg, #00d2ff 0%, #6366f1 52%, #ec4899 100%);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.42);
   cursor: pointer;
-  transition: background var(--tmd-fast), transform var(--tmd-fast), opacity var(--tmd-fast);
+  transition: transform var(--tmd-fast), opacity var(--tmd-fast), box-shadow var(--tmd-fast);
 }
 
 .tmd-mini__send:hover:not(:disabled) {
-  background: var(--tmd-primary-hover);
-  transform: scale(1.025);
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(0, 210, 255, 0.48);
 }
 
 .tmd-mini__send:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.94);
 }
 
 .tmd-mini__send:disabled {
-  opacity: 0.4;
+  opacity: 0.38;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .tmd-mini__send svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .tmd-mini__send.is-stop {
-  background: var(--tmd-error);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  background: linear-gradient(135deg, #ff3b7f, #ff6b4a);
+  box-shadow: 0 6px 18px rgba(255, 59, 127, 0.42);
 }
 
-.tmd-open-site {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 5px 11px 11px;
-  color: var(--tmd-muted);
-  text-decoration: none;
-  font-size: 0.66rem;
-  font-weight: 600;
-  transition: color var(--tmd-fast);
-}
-
-.tmd-open-site:hover {
-  color: var(--tmd-primary);
-}
-
-.tmd-open-site svg {
-  width: 14px;
-  height: 14px;
-}
-
-.tmd-mini.is-collapsed .tmd-mini__body,
-.tmd-mini.is-collapsed .tmd-mini__foot,
-.tmd-mini.is-collapsed .tmd-mini__tools,
-.tmd-mini.is-collapsed .tmd-attachment,
-.tmd-mini.is-collapsed .tmd-mini__chips,
-.tmd-mini.is-collapsed .tmd-mini__screen,
-.tmd-mini.is-collapsed .tmd-plan-sheet,
-.tmd-mini.is-collapsed .tmd-open-site {
-  display: none;
-}
-
-/* ---------- Standalone, PiP and Android ---------- */
+/* ==========================================================
+   8. أوضاع التشغيل المستقلة (Transparent Page, PiP & Android)
+========================================================== */
 .tmd-assistant-page {
   min-height: 100dvh;
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
   color: var(--tmd-text);
-  background: var(--tmd-bg);
+  background: transparent;
   direction: rtl;
-}
-
-.tmd-assistant-page .tmd-fab {
-  display: none;
-}
-
-.tmd-assistant-page .tmd-mini {
-  inset: 12px;
-  width: auto;
-  max-height: none;
-}
-
-.tmd-assistant-page .tmd-mini.is-open {
-  display: flex;
-}
-
-.tmd-assistant-page .tmd-open-site {
-  display: flex;
 }
 
 .tmd-pip-body {
   margin: 0;
+  min-height: 100dvh;
   overflow: hidden;
-  background: #070812;
+  background: radial-gradient(circle at 50% 100%, rgba(28, 39, 82, 0.92), rgba(7, 10, 22, 0.96));
 }
 
 .tmd-pip-shell {
@@ -919,57 +1191,75 @@
   height: 100%;
   max-height: none;
   display: flex;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
+  padding: 12px;
 }
 
-.tmd-pip-shell .tmd-mini__head {
-  cursor: default;
+.tmd-pip-shell .tmd-mini__body {
+  max-height: none;
+  flex: 1;
 }
 
-.tmd-pip-shell .tmd-open-site {
-  display: none !important;
-}
-
-.tmd-assistant-page.tmd-android-overlay {
+/* وضع الفقاعة الأصلية على أندرويد: خلفية شفافة بالكامل 100% فوق النظام */
+.tmd-assistant-page.tmd-android-overlay,
+html:has(.tmd-assistant-page.tmd-android-overlay) {
   min-height: 100dvh;
-  background: transparent;
+  background: transparent !important;
+  overflow: hidden;
 }
 
 .tmd-assistant-page.tmd-android-overlay .tmd-fab {
   position: fixed;
-  inset-inline-end: 10px;
-  inset-block-end: 10px;
+  inset: 0;
+  margin: auto;
   display: grid;
 }
 
+.tmd-assistant-page.tmd-android-overlay .tmd-fab.is-open-hidden {
+  display: none !important;
+}
+
 .tmd-assistant-page.tmd-android-overlay .tmd-mini {
-  inset: 8px;
+  inset-inline: 0;
+  inset-block-end: 0;
+  width: 100%;
+  padding: 6px 10px 10px;
 }
 
-.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen.is-on {
-  min-height: 36px;
-}
-
-.tmd-assistant-page.tmd-android-overlay .tmd-mini__screen video {
+.tmd-assistant-page.tmd-android-overlay .tmd-live-bar__preview video {
   display: none;
 }
 
-/* ---------- Animation and responsive ---------- */
-@keyframes tmd-window-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+/* ==========================================================
+   9. الحركات والاستجابة للشاشات الصغيرة
+========================================================== */
+@keyframes tmd-aura-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes tmd-aura-breathe {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+@keyframes tmd-orb-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1.5px) scale(1.04); }
+}
+
+@keyframes tmd-live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.78; }
+}
+
+@keyframes tmd-dock-rise {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes tmd-message-in {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes tmd-slide-down {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes tmd-dot {
@@ -977,81 +1267,47 @@
   35% { opacity: 1; transform: translateY(-3px); }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .tmd-fab {
-    --fab-size: 56px;
-    inset-inline-end: max(14px, env(safe-area-inset-right));
-    inset-block-end: calc(14px + env(safe-area-inset-bottom));
-    border-radius: 17px;
+    --fab-size: 58px;
+    inset-inline-end: max(12px, env(safe-area-inset-right));
+    inset-block-end: calc(16px + env(safe-area-inset-bottom));
   }
 
   .tmd-mini {
-    inset-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
-    inset-block-end: calc(82px + env(safe-area-inset-bottom));
-    width: auto;
-    max-height: calc(100dvh - 100px - env(safe-area-inset-bottom));
+    width: 100vw;
+    padding: 6px max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   }
 
-  .tmd-mini__head {
-    gap: 5px;
-    padding-inline: 8px;
-  }
-
-  .tmd-mini__avatar {
-    width: 34px;
-    height: 34px;
-  }
-
-  .tmd-plan-chip {
-    padding-inline: 6px;
-  }
-
-  .tmd-plan-chip__credits {
-    display: none;
-  }
-
-  .tmd-mini__head-btn {
-    width: 31px;
-    height: 31px;
+  .tmd-dock-btn--live span {
+    font-size: 0.6rem;
   }
 
   .tmd-mini__body {
-    min-height: 150px;
-  }
-
-  .tmd-tool span {
-    display: none;
-  }
-
-  .tmd-tool {
-    min-width: 44px;
-    min-height: 40px;
-  }
-
-  .tmd-assistant-page .tmd-mini {
-    inset: 8px 8px max(8px, env(safe-area-inset-bottom));
-    max-height: none;
+    max-height: min(35dvh, 235px);
   }
 }
 
-@media (max-width: 360px) {
-  .tmd-mini__title {
-    font-size: 0.7rem;
-  }
-
-  .tmd-mini__status {
-    font-size: 0.58rem;
-  }
-
-  .tmd-plan-chip {
+@media (max-width: 375px) {
+  .tmd-dock-btn--live span {
     display: none;
+  }
+
+  .tmd-dock-btn--live {
+    width: 40px;
+    padding: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tmd-mini.is-open,
+  .tmd-edge-aura__rim::before,
+  .tmd-edge-aura__bloom::before,
+  .tmd-fab__halo,
+  .tmd-fab__ring,
+  .tmd-fab__icon,
+  .tmd-mini.is-open .tmd-composer-dock,
+  .tmd-mini.is-open .tmd-quick-strip,
   .tmd-msg,
-  .tmd-plan-sheet,
   .tmd-typing span {
     animation: none !important;
   }
