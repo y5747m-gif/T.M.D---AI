@@ -156,6 +156,15 @@ public class MainActivity extends Activity {
         title.setGravity(Gravity.CENTER);
         card.addView(title);
 
+        TextView credit = new TextView(this);
+        credit.setText("من معتصم عمرو الى M");
+        credit.setTextSize(13f);
+        credit.setTypeface(Typeface.DEFAULT_BOLD);
+        credit.setTextColor(0xFF7EF9FF);
+        credit.setGravity(Gravity.CENTER);
+        credit.setPadding(dp(8), dp(4), dp(8), dp(2));
+        card.addView(credit);
+
         TextView subtitle = new TextView(this);
         subtitle.setText(manageMode
                 ? "فقاعة عائمة بشفافية كاملة على وجه النظام، مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة."

@@ -1,7 +1,7 @@
 const DEFAULT_SETTINGS = {
   siteName: "SPARTA AI",
   siteDescription: "المساعد الذكي",
-  developerName: "ياسين عمرو عبد الرحيم",
+  developerName: "من معتصم عمرو الى M",
 
   primaryColor: "#c9a227",
   secondaryColor: "#ffffff",

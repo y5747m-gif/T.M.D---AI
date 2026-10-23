@@ -335,4 +335,17 @@ test("CSS and Android native sources enforce 100% transparent background, edge a
   assert.match(overlayJava, /setDockHeightDp/);
   assert.match(overlayJava, /speakText/);
   assert.match(overlayJava, /getFrameChangePercent/);
+
+  const expectedCredit = "من معتصم عمرو الى M";
+  for (const rel of [
+    "floating-assistant.js",
+    "assistant.html",
+    "index.html",
+    "api/chat.js",
+    "app.js",
+    "android-app/app/src/main/java/ai/tmd/assistant/MainActivity.java"
+  ]) {
+    const content = fs.readFileSync(path.join(ROOT, rel), "utf8");
+    assert.ok(content.includes(expectedCredit), `${rel} must contain designer signature "${expectedCredit}"`);
+  }
 });
