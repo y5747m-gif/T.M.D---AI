@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===========================================================================
-   SPARTA AI — Smart Eraser Studio (أداة الإزالة الذكية)
+   Aso AI (آسو إي آي) — Smart Eraser Studio (أداة الإزالة الذكية)
 
    A ChatGPT/Astra-styled object-removal workspace:
      • paint the area to remove with a soft brush (pointer + stylus pressure)
@@ -635,7 +635,7 @@
     }
     const link = document.createElement("a");
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    link.download = `sparta-eraser-${stamp}.png`;
+    link.download = `aso-ai-eraser-${stamp}.png`;
     link.href = el.after.toDataURL("image/png");
     link.click();
     toast("تم تنزيل الصورة بعد الإزالة.");
@@ -655,7 +655,7 @@
         toast("تعذر تجهيز النتيجة.", "error");
         return;
       }
-      const file = new File([blob], "sparta-eraser-result.png", { type: "image/png" });
+      const file = new File([blob], "aso-ai-eraser-result.png", { type: "image/png" });
       const transfer = new DataTransfer();
       transfer.items.add(file);
       input.files = transfer.files;

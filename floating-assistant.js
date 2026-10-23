@@ -35,7 +35,7 @@
   const LIVE_STABLE_MAX_DELTA = 7;
 
   const SYSTEM_PROMPT =
-    "أنت المساعد الذكي العائم فوق شاشة الهاتف والنظام (AURA · SPARTA AI). " +
+    "أنت المساعد الذكي العائم فوق شاشة الهاتف والنظام (Aso AI · آسو إي آي). " +
     "أجب بإيجاز شديد وبأسلوب طبيعي واضح ومباشر مناسب للقراءة الصوتية السريعة (2-4 جمل غالبًا) ما لم يطلب المستخدم التفصيل. " +
     "تجنّب الحشو والرموز الزائدة. " +
     "إذا أُرسلت لك لقطة من شاشة المستخدم فركّز على محتوى التطبيق أو الصفحة الظاهرة للمستخدم وتجاهل شريط الدردشة الزجاجي الصغير في أسفل الشاشة، وساعده عمليًا فيما يراه أمامه. " +
@@ -310,7 +310,7 @@
     '<button type="button" class="tmd-plan-card__btn" data-el="planFree">الخطة الحالية</button>' +
     "</div>" +
     '<div class="tmd-plan-card tmd-plan-card--pro" data-plan="minimax">' +
-    '<div class="tmd-plan-card__title">SPARTA Max <span class="tmd-plan-card__tag">PRO</span></div>' +
+    '<div class="tmd-plan-card__title">Aso Max <span class="tmd-plan-card__tag">PRO</span></div>' +
     '<div class="tmd-plan-card__desc">MiniMax M3 ومهمة Pro يومية داخل الأداة الكاملة. لا تشمل الخطة أرصدة يومية تلقائية.</div>' +
     '<button type="button" class="tmd-plan-card__btn tmd-plan-card__btn--pro" data-el="planPro">يتطلب اشتراكًا مدفوعًا</button>' +
     "</div>" +
@@ -474,7 +474,7 @@
     if (el.planBtn) {
       el.planBtn.classList.toggle("is-pro", pro);
     }
-    if (el.planPro) el.planPro.textContent = pro ? "SPARTA Max Pro مفعّلة" : "يتطلب اشتراكًا مدفوعًا";
+    if (el.planPro) el.planPro.textContent = pro ? "Aso Max Pro مفعّلة" : "يتطلب اشتراكًا مدفوعًا";
     if (el.planPro) el.planPro.disabled = pro;
     if (el.planFree) el.planFree.textContent = pro ? "التحويل إلى المجانية" : "الخطة الحالية";
     if (el.planFree) el.planFree.disabled = !pro;
@@ -1673,11 +1673,11 @@
   el.planBtn.addEventListener("click", () => togglePlanSheet());
   el.planClose.addEventListener("click", () => togglePlanSheet(false));
   el.planPro.addEventListener("click", () => {
-    setStatus("SPARTA Max Pro يتطلب اشتراكًا مدفوعًا");
+    setStatus("Aso Max Pro يتطلب اشتراكًا مدفوعًا");
     state.streamMinimized = false;
     state.messages.push({
       role: "assistant",
-      content: "SPARTA Max Pro يتطلب اشتراكًا مدفوعًا ومؤكدًا. بعد التفعيل ستحصل على MiniMax M3 ومهمة Pro يومية داخل الأداة الكاملة."
+      content: "Aso Max Pro يتطلب اشتراكًا مدفوعًا ومؤكدًا. بعد التفعيل ستحصل على MiniMax M3 ومهمة Pro يومية داخل الأداة الكاملة."
     });
     renderAll();
   });
@@ -1833,7 +1833,7 @@
     isEnabled() { return state.enabled; },
     setPaidPlan(active) {
       plan.setPro(Boolean(active));
-      if (active) setStatus("SPARTA Max Pro مفعّلة — MiniMax جاهز");
+      if (active) setStatus("Aso Max Pro مفعّلة — MiniMax جاهز");
     },
     isProPlan() { return plan.isPro(); },
     speak,

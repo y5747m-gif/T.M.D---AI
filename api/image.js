@@ -2,10 +2,10 @@
 
 /*
  * ============================================================
- * SPARTA AI
+ * Aso AI (آسو إي آي)
  * Groq Vision API
  *
- * SPARTA AI -> /api/image -> Groq Vision
+ * Aso AI (آسو إي آي) -> /api/image -> Groq Vision
  *
  * لا يوجد OpenAI API Key
  * ============================================================
@@ -252,7 +252,7 @@ module.exports = async function handler(req, res) {
 
         content:
           `
-أنت SPARTA AI Vision، مساعد متخصص في تحليل الصور.
+أنت Aso AI Vision (آسو إي آي)، مساعد متخصص في تحليل الصور.
 
 تعليماتك:
 
@@ -478,7 +478,7 @@ module.exports = async function handler(req, res) {
      */
 
     console.error(
-      "SPARTA AI Vision Error:",
+      "Aso AI Vision (آسو إي آي) Error:",
       error
     );
 

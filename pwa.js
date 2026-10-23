@@ -1,7 +1,7 @@
 "use strict";
 
 /* ==========================================================
-   SPARTA AI — PWA installer + Service Worker registration
+   Aso AI (آسو إي آي) — PWA installer + Service Worker registration
    - لا يتعامل مع مفاتيح API أو بيانات حساسة.
    - زر التثبيت يظهر فقط عند توفر التثبيت المباشر أو تعليمات iOS.
    ========================================================== */
@@ -79,8 +79,8 @@
     const show = !installed && mode !== "hidden";
     const label = mode === "ios" ? "إضافة للشاشة" : "تثبيت التطبيق";
     const title = mode === "prompt"
-      ? "تثبيت SPARTA AI كتطبيق"
-      : "عرض تعليمات تثبيت SPARTA AI على هذا الجهاز";
+      ? "تثبيت Aso AI (آسو إي آي) كتطبيق"
+      : "عرض تعليمات تثبيت Aso AI (آسو إي آي) على هذا الجهاز";
 
     installButtons().forEach((button) => {
       button.hidden = !show;
@@ -97,7 +97,7 @@
     if (desc) {
       desc.textContent = mode === "ios"
         ? "على iPhone/iPad يتم التثبيت من زر المشاركة ثم إضافة إلى الشاشة الرئيسية."
-        : "ثبّت SPARTA AI كتطبيق مستقل يعمل بواجهة PWA سريعة.";
+        : "ثبّت Aso AI (آسو إي آي) كتطبيق مستقل يعمل بواجهة PWA سريعة.";
     }
   }
 
@@ -107,7 +107,7 @@
         "افتح الموقع من Safari على iPhone أو iPad.",
         "اضغط زر المشاركة في شريط Safari.",
         "اختر: إضافة إلى الشاشة الرئيسية.",
-        "اضغط إضافة، ثم افتح SPARTA AI من أيقونة الشاشة الرئيسية."
+        "اضغط إضافة، ثم افتح Aso AI (آسو إي آي) من أيقونة الشاشة الرئيسية."
       ];
     }
 
@@ -115,7 +115,7 @@
       return [
         "افتح الموقع من Chrome أو متصفح Android حديث.",
         "من قائمة المتصفح اختر: تثبيت التطبيق أو إضافة إلى الشاشة الرئيسية.",
-        "إذا ظهر زر التثبيت داخل SPARTA AI فاضغطه مباشرة.",
+        "إذا ظهر زر التثبيت داخل Aso AI (آسو إي آي) فاضغطه مباشرة.",
         "بعد التثبيت افتح التطبيق لتظهر الفقاعة العائمة داخل تجربة التطبيق."
       ];
     }
@@ -123,7 +123,7 @@
     return [
       "استخدم Chrome أو Edge للحصول على زر تثبيت مباشر.",
       "أو افتح قائمة المتصفح وابحث عن Install app / تثبيت التطبيق.",
-      "بعد التثبيت سيعمل SPARTA AI في نافذة مستقلة بدون واجهة المتصفح قدر الإمكان."
+      "بعد التثبيت سيعمل Aso AI (آسو إي آي) في نافذة مستقلة بدون واجهة المتصفح قدر الإمكان."
     ];
   }
 
@@ -137,8 +137,8 @@
         <div class="pwa-install-card" role="dialog" aria-modal="true" aria-labelledby="pwaInstallTitle">
           <button class="pwa-install-close" type="button" aria-label="إغلاق">${ICONS.close}</button>
           <div class="pwa-install-icon" aria-hidden="true">${ICONS.download}</div>
-          <h2 id="pwaInstallTitle">تثبيت SPARTA AI</h2>
-          <p class="pwa-install-lead">يمكنك إضافة SPARTA AI إلى الشاشة الرئيسية كتطبيق ويب سريع. لا يتم تخزين أي مفاتيح API داخل التطبيق.</p>
+          <h2 id="pwaInstallTitle">تثبيت Aso AI (آسو إي آي)</h2>
+          <p class="pwa-install-lead">يمكنك إضافة Aso AI (آسو إي آي) إلى الشاشة الرئيسية كتطبيق ويب سريع. لا يتم تخزين أي مفاتيح API داخل التطبيق.</p>
           <ol class="pwa-install-steps"></ol>
           <button class="btn btn-primary pwa-install-ok" type="button">تم</button>
         </div>
@@ -161,7 +161,7 @@
   async function runInstallPrompt() {
     if (isStandalone()) {
       setInstallUI("hidden");
-      toast("SPARTA AI مثبت بالفعل كتطبيق.");
+      toast("Aso AI (آسو إي آي) مثبت بالفعل كتطبيق.");
       return;
     }
 
@@ -179,7 +179,7 @@
       if (choice && choice.outcome === "accepted") {
         safeSet(INSTALL_FLAG, "1");
         setInstallUI("hidden");
-        toast("تم تثبيت SPARTA AI بنجاح.");
+        toast("تم تثبيت Aso AI (آسو إي آي) بنجاح.");
       } else {
         setInstallUI("prompt");
       }
@@ -210,7 +210,7 @@
           if (!worker) return;
           worker.addEventListener("statechange", () => {
             if (worker.state === "installed" && navigator.serviceWorker.controller) {
-              toast("تم تجهيز تحديث جديد لـ SPARTA AI وسيُطبق عند إعادة فتح التطبيق.");
+              toast("تم تجهيز تحديث جديد لـ Aso AI (آسو إي آي) وسيُطبق عند إعادة فتح التطبيق.");
             }
           });
         });
@@ -231,7 +231,7 @@
     safeSet(INSTALL_FLAG, "1");
     deferredPrompt = null;
     setInstallUI("hidden");
-    toast("تم تثبيت SPARTA AI كتطبيق بنجاح.");
+    toast("تم تثبيت Aso AI (آسو إي آي) كتطبيق بنجاح.");
   });
 
   document.addEventListener("DOMContentLoaded", () => {

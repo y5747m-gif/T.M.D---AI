@@ -1,5 +1,5 @@
 const DEFAULT_SETTINGS = {
-  siteName: "SPARTA AI",
+  siteName: "Aso AI (آسو إي آي)",
   siteDescription: "المساعد الذكي",
   developerName: "من معتصم عمرو الى M",
 

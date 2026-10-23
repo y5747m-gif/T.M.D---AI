@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===========================================================================
-   SPARTA AI — Complete Application Script
+   Aso AI (آسو إي آي) — Complete Application Script
    Architect, Developer & Designer: من معتصم عمرو الى M
    =========================================================================== */
 
@@ -55,8 +55,8 @@ const AI_MODES = {
     description: "يشغّل مسارين مستقلين للموضوع نفسه، ثم يعرض نتيجتين واضحتين لتختار النتيجة المرضية.",
     steps: ["محرك أول", "محرك ثانٍ", "اختيار النتيجة"],
     directive: "أنت في وضع المنافسة. عالج طلب المستخدم عبر نتيجتين مستقلتين بأسلوبين مختلفين، ثم اختم بملخص يساعد المستخدم على اختيار النتيجة الأنسب. لا تخلط النتيجتين، واجعل كل نتيجة كاملة ومنظمة.",
-    engineA: "أنت المحرك الأول في وضع المنافسة داخل SPARTA AI. قدّم نتيجة دقيقة ومنظمة ومحافظة على الموثوقية، مع نقاط واضحة وخلاصة عملية.",
-    engineB: "أنت المحرك الثاني في وضع المنافسة داخل SPARTA AI. قدّم نتيجة مستقلة من زاوية مختلفة وأكثر إبداعًا، مع ترتيب واضح وخلاصة قابلة للتنفيذ."
+    engineA: "أنت المحرك الأول في وضع المنافسة داخل Aso AI (آسو إي آي). قدّم نتيجة دقيقة ومنظمة ومحافظة على الموثوقية، مع نقاط واضحة وخلاصة عملية.",
+    engineB: "أنت المحرك الثاني في وضع المنافسة داخل Aso AI (آسو إي آي). قدّم نتيجة مستقلة من زاوية مختلفة وأكثر إبداعًا، مع ترتيب واضح وخلاصة قابلة للتنفيذ."
   },
   comparison: {
     title: "وضع المقارنة",
@@ -200,62 +200,62 @@ const VALID_MODELS = new Set([
 
 const REQUEST_TIMEOUT_MS = 45000;
 
-/* اشتراك SPARTA Pro هو المصدر الوحيد للوصول إلى MiniMax ومهمة اليوم.
+/* اشتراك Aso Pro هو المصدر الوحيد للوصول إلى MiniMax ومهمة اليوم.
    المفتاح متوافق مع الفقاعة العائمة حتى تتطابق الحالة في الواجهتين. */
-const SPARTA_PLAN_KEY = "tmd_float_plan";
-const SPARTA_DAILY_MISSION_KEY = "sparta_pro_daily_mission";
-const SPARTA_DAILY_MISSIONS = [
+const TMD_PLAN_KEY = "tmd_float_plan";
+const TMD_DAILY_MISSION_KEY = "tmd_pro_daily_mission";
+const TMD_DAILY_MISSIONS = [
   {
     title: "حلّل قرارًا واحدًا بوضوح",
     description: "حوّل قرارًا مهنيًا أو شخصيًا إلى خيارات، معايير، وخطوة تالية عملية خلال خمس دقائق.",
-    prompt: "هذه مهمة SPARTA اليومية: ساعدني في تحليل قرار واحد. اسألني أولًا عن القرار، ثم رتّب الخيارات والمعايير، واقترح خطوة تالية عملية ومختصرة."
+    prompt: "هذه مهمة Aso AI (آسو إي آي) اليومية: ساعدني في تحليل قرار واحد. اسألني أولًا عن القرار، ثم رتّب الخيارات والمعايير، واقترح خطوة تالية عملية ومختصرة."
   },
   {
     title: "حوّل فكرة إلى خطة تنفيذ",
     description: "قسّم فكرة واحدة إلى أول ثلاث خطوات قابلة للإنجاز اليوم، مع ترتيب الأولويات.",
-    prompt: "هذه مهمة SPARTA اليومية: حوّل فكرتي إلى خطة تنفيذ قصيرة. اسألني عن الفكرة، ثم أعطني أول ثلاث خطوات واقعية بترتيب الأولوية."
+    prompt: "هذه مهمة Aso AI (آسو إي آي) اليومية: حوّل فكرتي إلى خطة تنفيذ قصيرة. اسألني عن الفكرة، ثم أعطني أول ثلاث خطوات واقعية بترتيب الأولوية."
   },
   {
     title: "ابنِ ملخصًا يحسم الأولويات",
     description: "اجمع المعلومات المتفرقة في ملخص واضح يبين ما يجب فعله الآن وما يمكن تأجيله.",
-    prompt: "هذه مهمة SPARTA اليومية: ساعدني على ترتيب أولوياتي. اسألني عن مهامي، ثم أنشئ ملخصًا قصيرًا يحدد ما أنجزه الآن وما أؤجله ولماذا."
+    prompt: "هذه مهمة Aso AI (آسو إي آي) اليومية: ساعدني على ترتيب أولوياتي. اسألني عن مهامي، ثم أنشئ ملخصًا قصيرًا يحدد ما أنجزه الآن وما أؤجله ولماذا."
   }
 ];
 
-function spartaTodayKey() {
+function tmdTodayKey() {
   const now = new Date();
   return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
 }
 
-function hasSpartaPro() {
-  return safeReadJSON(SPARTA_PLAN_KEY, "free") === "minimax";
+function hasTmdPro() {
+  return safeReadJSON(TMD_PLAN_KEY, "free") === "minimax";
 }
 
-function getSpartaDailyMission() {
-  const day = spartaTodayKey();
+function getTmdDailyMission() {
+  const day = tmdTodayKey();
   const seed = Number(day.replace(/-/g, ""));
-  const index = Number.isFinite(seed) ? seed % SPARTA_DAILY_MISSIONS.length : 0;
-  return { ...SPARTA_DAILY_MISSIONS[index], day, index };
+  const index = Number.isFinite(seed) ? seed % TMD_DAILY_MISSIONS.length : 0;
+  return { ...TMD_DAILY_MISSIONS[index], day, index };
 }
 
-function readSpartaDailyMissionState() {
-  const stored = safeReadJSON(SPARTA_DAILY_MISSION_KEY, null);
-  const mission = getSpartaDailyMission();
+function readTmdDailyMissionState() {
+  const stored = safeReadJSON(TMD_DAILY_MISSION_KEY, null);
+  const mission = getTmdDailyMission();
   return stored && stored.day === mission.day ? stored : { day: mission.day, completed: false };
 }
 
-function completeSpartaDailyMission() {
-  const mission = getSpartaDailyMission();
-  safeSetItem(SPARTA_DAILY_MISSION_KEY, JSON.stringify({
+function completeTmdDailyMission() {
+  const mission = getTmdDailyMission();
+  safeSetItem(TMD_DAILY_MISSION_KEY, JSON.stringify({
     day: mission.day,
     mission: mission.index,
     completed: true,
     completedAt: Date.now()
   }));
-  updateSpartaDailyMissionUI();
+  updateTmdDailyMissionUI();
 }
 
-function updateSpartaDailyMissionUI() {
+function updateTmdDailyMissionUI() {
   const card = document.getElementById("dailyMission");
   const title = document.getElementById("dailyMissionTitle");
   const description = document.getElementById("dailyMissionDescription");
@@ -264,9 +264,9 @@ function updateSpartaDailyMissionUI() {
   const button = document.getElementById("dailyMissionButton");
   if (!card || !title || !description || !meta || !lock || !button) return;
 
-  const mission = getSpartaDailyMission();
-  const progress = readSpartaDailyMissionState();
-  const pro = hasSpartaPro();
+  const mission = getTmdDailyMission();
+  const progress = readTmdDailyMissionState();
+  const pro = hasTmdPro();
   const completed = pro && progress.completed === true;
 
   title.textContent = mission.title;
@@ -276,9 +276,9 @@ function updateSpartaDailyMissionUI() {
 
   if (!pro) {
     lock.textContent = "PRO";
-    meta.textContent = "متاحة باشتراك SPARTA Pro المدفوع فقط · لا تشمل الخطط أرصدة يومية تلقائية";
+    meta.textContent = "متاحة باشتراك Aso Pro المدفوع فقط · لا تشمل الخطط أرصدة يومية تلقائية";
     button.textContent = "تتطلب Pro";
-    button.setAttribute("aria-label", "مهمة اليوم متاحة في اشتراك SPARTA Pro المدفوع فقط");
+    button.setAttribute("aria-label", "مهمة اليوم متاحة في اشتراك Aso Pro المدفوع فقط");
     return;
   }
 
@@ -289,9 +289,9 @@ function updateSpartaDailyMissionUI() {
     button.setAttribute("aria-label", "مهمة اليوم مكتملة");
   } else {
     lock.textContent = "PRO";
-    meta.textContent = "تحدٍّ واحد كل يوم لنسخة SPARTA Pro · المهمة لا تمنح رصيدًا أو نقاطًا";
+    meta.textContent = "تحدٍّ واحد كل يوم لنسخة Aso Pro · المهمة لا تمنح رصيدًا أو نقاطًا";
     button.textContent = "ابدأ المهمة";
-    button.setAttribute("aria-label", "ابدأ مهمة SPARTA Pro اليومية");
+    button.setAttribute("aria-label", "ابدأ مهمة Aso Pro اليومية");
   }
 }
 
@@ -325,13 +325,13 @@ if (!VALID_MODELS.has(state.model)) {
    2. CREATOR & IDENTITY RESPONSES LIBRARY (من معتصم عمرو الى M)
    ========================================================= */
 const CREATOR_RESPONSES = [
-  `أنا **SPARTA AI**، مساعد ذكاء اصطناعي فائق التطور. تم تصميمي وتطويري وبرمجتي بالكامل بتوقيع **من معتصم عمرو الى M**، لتقديم تجربة ذكية وسريعة واحترافية.`,
+  `أنا **Aso AI (آسو إي آي)**، مساعد ذكاء اصطناعي فائق التطور. تم تصميمي وتطويري وبرمجتي بالكامل بتوقيع **من معتصم عمرو الى M**، لتقديم تجربة ذكية وسريعة واحترافية.`,
 
   `الفضل في وجودي وابتكاري يعود لمصمم ومطور الأداة **معتصم عمرو** — بتوقيع **من معتصم عمرو الى M**؛ حيث صُمم كل جزء في هذا النظام بأحدث تقنيات الذكاء الاصطناعي.`,
 
   `صممني وطوّرني المبدع **معتصم عمرو** (**من معتصم عمرو الى M**). قام ببرمجة نظامي وهندسة الواجهة التفاعلية ونظام المحادثة الذكي ليضمن تجربة استثنائية وسلسة.`,
 
-  `أنا ثمرة رؤية وإبداع **من معتصم عمرو الى M**، حيث اجتمع التصميم العصري الفاخر مع الذكاء الاصطناعي فائق السرعة في منصة **SPARTA AI**.`,
+  `أنا ثمرة رؤية وإبداع **من معتصم عمرو الى M**، حيث اجتمع التصميم العصري الفاخر مع الذكاء الاصطناعي فائق السرعة في منصة **Aso AI (آسو إي آي)**.`,
 
   `مصمم ومطور هذه الأداة هو **معتصم عمرو**، وتحمل الأداة توقيع **من معتصم عمرو الى M** في تصميم الواجهات وبرمجة خوارزميات المحادثة وتحليل المستندات والصور.`,
 
@@ -345,7 +345,7 @@ const CREATOR_RESPONSES = [
 
   `تمت برمجتي وصياغة واجهتي بواسطة **معتصم عمرو** (**من معتصم عمرو الى M**)، بواجهة متجاوبة وفقاعة شفافة ذكية فوق النظام.`,
 
-  `أنا **SPARTA AI**، وتوقيع تصميمي وتطويري هو **من معتصم عمرو الى M**. إذا كان لديك أي استفسار أو مهمة، فأنا جاهز تماماً لمساعدتك.`
+  `أنا **Aso AI (آسو إي آي)**، وتوقيع تصميمي وتطويري هو **من معتصم عمرو الى M**. إذا كان لديك أي استفسار أو مهمة، فأنا جاهز تماماً لمساعدتك.`
 ];
 
 function getDynamicCreatorResponse() {
@@ -382,10 +382,9 @@ function isCreatorOrIdentityQuestion(text) {
 
 
 /* =========================================================
-   3. DEEP-SPACE STARFIELD ENGINE (خلفية الفضاء العميق)
-   Layered parallax stars, warm nebula glow, twinkle,
-   and occasional shooting stars — rebuilt for the
-   Spartan crimson & gold identity.
+   3. DEEP-SPACE COSMIC STARFIELD ENGINE (فضاء Aso AI (آسو إي آي) النجمي البنفسجي)
+   Layered parallax stars, cosmic purple/cyan/violet nebula glow,
+   4-point star flares, and shooting meteors.
    ========================================================= */
 class StarfieldEngine {
   constructor(canvasId) {
@@ -396,7 +395,6 @@ class StarfieldEngine {
     this.layers = [];
     this.meteors = [];
     this.nebulae = [];
-    this.mythicSigils = [];
     this.running = false;
     this.densityMultiplier = 2; // 1: calm, 2: balanced, 3: dense
     this.width = window.innerWidth;
@@ -413,7 +411,7 @@ class StarfieldEngine {
     this.reducedMotion = typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.nextMeteorTime = Date.now() + 7000;
+    this.nextMeteorTime = Date.now() + 5500;
     this.frameHandle = null;
 
     this.init();
@@ -440,7 +438,6 @@ class StarfieldEngine {
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     this.canvas.width = Math.round(this.width * this.dpr);
     this.canvas.height = Math.round(this.height * this.dpr);
-    // setTransform (instead of scale) keeps repeated resizes from compounding.
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.paintNebulaLayer();
   }
@@ -450,17 +447,17 @@ class StarfieldEngine {
   createScene() {
     this.createNebulae();
     this.createStars();
-    this.createMythicSigils();
     this.paintNebulaLayer();
   }
 
   createNebulae() {
     const base = Math.max(this.width, this.height);
-    // Warm, very low intensity glows: ember crimson, aged gold, deep wine.
+    // Original Aso AI (آسو إي آي) cosmic purple, cyan, indigo & magenta nebula clouds.
     this.nebulae = [
-      { fx: 0.16, fy: 0.24, radius: base * 0.52, color: "rgba(224, 85, 78, 0.085)", driftA: 0.00021, driftR: 0.05 },
-      { fx: 0.82, fy: 0.7, radius: base * 0.46, color: "rgba(217, 164, 91, 0.06)", driftA: 0.00016, driftR: 0.045 },
-      { fx: 0.62, fy: 0.12, radius: base * 0.34, color: "rgba(150, 60, 82, 0.07)", driftA: 0.00027, driftR: 0.035 }
+      { fx: 0.18, fy: 0.22, radius: base * 0.56, color: "rgba(138, 43, 226, 0.16)", driftA: 0.00021, driftR: 0.05 },
+      { fx: 0.84, fy: 0.72, radius: base * 0.48, color: "rgba(0, 242, 254, 0.095)", driftA: 0.00016, driftR: 0.045 },
+      { fx: 0.68, fy: 0.16, radius: base * 0.38, color: "rgba(255, 0, 127, 0.08)", driftA: 0.00027, driftR: 0.035 },
+      { fx: 0.34, fy: 0.8, radius: base * 0.44, color: "rgba(93, 63, 211, 0.14)", driftA: 0.00019, driftR: 0.04 }
     ];
   }
 
@@ -488,15 +485,17 @@ class StarfieldEngine {
 
   createStars() {
     const area = this.width * this.height;
-    const base = Math.floor(area / 4200);
-    const total = Math.min(220, Math.max(50, Math.floor(base * (this.densityMultiplier * 0.4))));
+    const base = Math.floor(area / 3600);
+    const total = Math.min(340, Math.max(85, Math.floor(base * (this.densityMultiplier * 0.55))));
 
-    // Warm constellation palette matching the crimson & gold identity.
+    // Cosmic starlight palette: pure white, lavender-purple, cosmic cyan, violet, rose-magenta & star-gold.
     const palette = [
-      { color: "246, 241, 236", weight: 0.44 }, // warm white
-      { color: "242, 212, 155", weight: 0.26 }, // champagne
-      { color: "232, 178, 92", weight: 0.16 },  // gold
-      { color: "236, 122, 104", weight: 0.14 }  // ember
+      { color: "255, 255, 255", weight: 0.36 },
+      { color: "216, 180, 254", weight: 0.24 },
+      { color: "0, 242, 254", weight: 0.16 },
+      { color: "168, 85, 247", weight: 0.12 },
+      { color: "255, 126, 179", weight: 0.06 },
+      { color: "255, 209, 102", weight: 0.06 }
     ];
 
     const pickColor = () => {
@@ -508,15 +507,15 @@ class StarfieldEngine {
       return palette[0].color;
     };
 
-    // Three depth layers: far dust, mid field, near sparks.
+    // Three depth layers: far cosmic dust, mid stars, bright foreground flares.
     const layerSpecs = [
-      { share: 0.52, depth: 0.22, size: [0.3, 0.75], alpha: [0.1, 0.32], glintChance: 0 },
-      { share: 0.33, depth: 0.55, size: [0.55, 1.1], alpha: [0.16, 0.42], glintChance: 0.06 },
-      { share: 0.15, depth: 1, size: [0.9, 1.8], alpha: [0.26, 0.6], glintChance: 0.3 }
+      { share: 0.5, depth: 0.22, size: [0.4, 0.9], alpha: [0.16, 0.46], glintChance: 0 },
+      { share: 0.34, depth: 0.55, size: [0.7, 1.35], alpha: [0.24, 0.62], glintChance: 0.1 },
+      { share: 0.16, depth: 1, size: [1.1, 2.2], alpha: [0.38, 0.85], glintChance: 0.42 }
     ];
 
     this.layers = layerSpecs.map((spec) => {
-      const count = Math.max(6, Math.round(total * spec.share));
+      const count = Math.max(8, Math.round(total * spec.share));
       const stars = [];
       for (let i = 0; i < count; i++) {
         stars.push({
@@ -525,118 +524,15 @@ class StarfieldEngine {
           size: spec.size[0] + Math.random() * (spec.size[1] - spec.size[0]),
           color: pickColor(),
           baseAlpha: spec.alpha[0] + Math.random() * (spec.alpha[1] - spec.alpha[0]),
-          twinkleSpeed: Math.random() * 0.9 + 0.35,
+          twinkleSpeed: Math.random() * 1.1 + 0.4,
           twinkleOffset: Math.random() * Math.PI * 2,
-          driftX: (Math.random() - 0.5) * 0.05 * (0.4 + spec.depth),
-          driftY: (Math.random() - 0.5) * 0.05 * (0.4 + spec.depth),
+          driftX: (Math.random() - 0.5) * 0.06 * (0.4 + spec.depth),
+          driftY: (Math.random() - 0.5) * 0.06 * (0.4 + spec.depth),
           glint: Math.random() < spec.glintChance
         });
       }
       return { depth: spec.depth, stars };
     });
-  }
-
-
-  createMythicSigils() {
-    const side = Math.max(1, Math.min(this.width, this.height));
-    const large = Math.max(this.width, this.height);
-    this.mythicSigils = [
-      {
-        x: this.width * 0.18,
-        y: this.height * 0.72,
-        radius: Math.max(78, side * 0.16),
-        points: 3,
-        rotation: -0.22,
-        spin: -0.000018,
-        color: "244, 195, 106",
-        accent: "255, 95, 109",
-        alpha: 0.16,
-        depth: 0.55
-      },
-      {
-        x: this.width * 0.78,
-        y: this.height * 0.28,
-        radius: Math.max(72, side * 0.13),
-        points: 6,
-        rotation: 0.18,
-        spin: 0.000016,
-        color: "116, 231, 255",
-        accent: "244, 195, 106",
-        alpha: 0.13,
-        depth: 0.78
-      },
-      {
-        x: this.width * 0.55,
-        y: this.height * 0.86,
-        radius: Math.max(110, large * 0.13),
-        points: 8,
-        rotation: Math.PI / 8,
-        spin: -0.00001,
-        color: "255, 95, 109",
-        accent: "244, 195, 106",
-        alpha: 0.1,
-        depth: 0.35
-      }
-    ];
-  }
-
-  drawMythicSigils(now) {
-    if (!this.mythicSigils.length) return;
-
-    const ctx = this.ctx;
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    for (const sigil of this.mythicSigils) {
-      const pulse = this.reducedMotion ? 0 : Math.sin(now * 0.0011 + sigil.radius) * 0.035;
-      const parX = this.pointerEased.x * -30 * sigil.depth;
-      const parY = this.pointerEased.y * -22 * sigil.depth;
-      const rotation = sigil.rotation + (this.reducedMotion ? 0 : now * sigil.spin);
-      const r = sigil.radius * (1 + pulse * 0.18);
-
-      ctx.save();
-      ctx.translate(sigil.x + parX, sigil.y + parY);
-      ctx.rotate(rotation);
-      ctx.globalAlpha = Math.max(0.03, sigil.alpha + pulse);
-      ctx.strokeStyle = `rgba(${sigil.color}, 1)`;
-      ctx.lineWidth = 1.05;
-      ctx.setLineDash([Math.max(8, r * 0.08), Math.max(8, r * 0.06)]);
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.setLineDash([]);
-      ctx.lineWidth = 0.85;
-      ctx.strokeStyle = `rgba(${sigil.color}, 0.8)`;
-      ctx.beginPath();
-      for (let i = 0; i <= sigil.points; i++) {
-        const angle = (Math.PI * 2 * i) / sigil.points - Math.PI / 2;
-        const px = Math.cos(angle) * r * 0.68;
-        const py = Math.sin(angle) * r * 0.68;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-
-      ctx.strokeStyle = `rgba(${sigil.accent}, 0.5)`;
-      ctx.lineWidth = 0.65;
-      for (let i = 0; i < sigil.points; i++) {
-        const angle = (Math.PI * 2 * i) / sigil.points - Math.PI / 2;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(angle) * r * 0.54, Math.sin(angle) * r * 0.54);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = `rgba(${sigil.accent}, 0.72)`;
-      ctx.beginPath();
-      ctx.arc(0, 0, 2.1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    ctx.restore();
   }
 
   /* ---------- Meteors ---------- */
@@ -647,20 +543,21 @@ class StarfieldEngine {
       ? Math.random() * this.width * 0.35
       : this.width * 0.45 + Math.random() * this.width * 0.55;
     const startY = Math.random() * this.height * 0.35;
-    const speed = Math.random() * 5 + 8;
+    const speed = Math.random() * 5.5 + 8.5;
     const angle = (Math.PI / 4) + (Math.random() * 0.35 - 0.175);
     const direction = fromLeft ? 1 : -1;
+    const hues = ["0, 242, 254", "192, 132, 252", "255, 255, 255"];
 
     this.meteors.push({
       x: startX,
       y: startY,
-      length: Math.random() * 110 + 80,
+      length: Math.random() * 125 + 85,
       speed,
       dx: Math.cos(angle) * speed * direction,
       dy: Math.sin(angle) * speed,
       life: 0,
-      maxLife: Math.random() * 40 + 38,
-      hue: Math.random() < 0.35 ? "232, 178, 92" : "246, 236, 226"
+      maxLife: Math.random() * 42 + 38,
+      hue: hues[Math.floor(Math.random() * hues.length)]
     });
   }
 
@@ -697,7 +594,6 @@ class StarfieldEngine {
   start() {
     if (this.running) return;
     if (this.reducedMotion) {
-      // Static, calm render — no animation loop for reduced-motion users.
       this.renderFrame(Date.now());
       return;
     }
@@ -716,21 +612,29 @@ class StarfieldEngine {
   /* ---------- Rendering ---------- */
 
   drawStar(star, time, offsetX, offsetY) {
-    const twinkle = this.reducedMotion ? 0 : Math.sin(time * 0.0018 * star.twinkleSpeed + star.twinkleOffset) * 0.4;
-    const alpha = Math.max(0.05, Math.min(0.9, star.baseAlpha + twinkle));
+    const twinkle = this.reducedMotion ? 0 : Math.sin(time * 0.002 * star.twinkleSpeed + star.twinkleOffset) * 0.42;
+    const alpha = Math.max(0.08, Math.min(0.98, star.baseAlpha + twinkle));
     const x = star.x + offsetX;
     const y = star.y + offsetY;
+
+    // Soft halo around brighter cosmic stars
+    if (star.size > 1.25 && alpha > 0.35) {
+      this.ctx.fillStyle = "rgba(" + star.color + ", " + (alpha * 0.16).toFixed(3) + ")";
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, star.size * 3.1, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
 
     this.ctx.fillStyle = "rgba(" + star.color + ", " + alpha.toFixed(3) + ")";
     this.ctx.beginPath();
     this.ctx.arc(x, y, star.size, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Bright foreground stars get a soft four-point glint.
+    // Bright foreground stars get a crisp four-point starlight cross flare.
     if (star.glint && alpha > 0.34) {
-      const reach = star.size * 5.2 * alpha;
-      this.ctx.strokeStyle = "rgba(" + star.color + ", " + (alpha * 0.32).toFixed(3) + ")";
-      this.ctx.lineWidth = 0.7;
+      const reach = star.size * 5.8 * alpha;
+      this.ctx.strokeStyle = "rgba(" + star.color + ", " + (alpha * 0.42).toFixed(3) + ")";
+      this.ctx.lineWidth = 0.8;
       this.ctx.beginPath();
       this.ctx.moveTo(x - reach, y);
       this.ctx.lineTo(x + reach, y);
@@ -753,11 +657,11 @@ class StarfieldEngine {
       const tailY = m.y - m.dy * (m.length / m.speed);
 
       const trail = this.ctx.createLinearGradient(m.x, m.y, tailX, tailY);
-      trail.addColorStop(0, "rgba(" + m.hue + ", " + (alpha * 0.75).toFixed(3) + ")");
+      trail.addColorStop(0, "rgba(" + m.hue + ", " + (alpha * 0.85).toFixed(3) + ")");
       trail.addColorStop(1, "rgba(" + m.hue + ", 0)");
 
       this.ctx.strokeStyle = trail;
-      this.ctx.lineWidth = 1.6;
+      this.ctx.lineWidth = 1.75;
       this.ctx.lineCap = "round";
       this.ctx.beginPath();
       this.ctx.moveTo(m.x, m.y);
@@ -767,7 +671,7 @@ class StarfieldEngine {
       // Bright head.
       this.ctx.fillStyle = "rgba(" + m.hue + ", " + alpha.toFixed(3) + ")";
       this.ctx.beginPath();
-      this.ctx.arc(m.x, m.y, 1.4, 0, Math.PI * 2);
+      this.ctx.arc(m.x, m.y, 1.6, 0, Math.PI * 2);
       this.ctx.fill();
 
       if (m.life >= m.maxLife || m.x < -m.length || m.x > this.width + m.length || m.y > this.height + m.length) {
@@ -784,7 +688,7 @@ class StarfieldEngine {
     this.pointerEased.x += (this.pointerTarget.x - this.pointerEased.x) * 0.035;
     this.pointerEased.y += (this.pointerTarget.y - this.pointerEased.y) * 0.035;
 
-    // Nebula glow: pre-rendered layer, drifting almost imperceptibly.
+    // Nebula glow: pre-rendered cosmic purple/cyan layer, drifting smoothly.
     if (this.nebulaCanvas.width > 1) {
       const driftX = this.reducedMotion ? 0 : Math.sin(now * 0.00003) * 24;
       const driftY = this.reducedMotion ? 0 : Math.cos(now * 0.000024) * 18;
@@ -798,9 +702,6 @@ class StarfieldEngine {
         this.height + 80
       );
     }
-
-    // Mythic geometry sits in the far background so the interface feels carved into space.
-    this.drawMythicSigils(now);
 
     // Star layers, far to near, each with its own parallax strength.
     for (const layer of this.layers) {
@@ -824,7 +725,7 @@ class StarfieldEngine {
     if (!this.reducedMotion) {
       if (now > this.nextMeteorTime) {
         this.addMeteor();
-        this.nextMeteorTime = now + Math.random() * 11000 + 9000;
+        this.nextMeteorTime = now + Math.random() * 9000 + 7000;
       }
       this.drawMeteors();
     }
@@ -844,7 +745,7 @@ class StarfieldEngine {
 class UserBackgroundManager {
   constructor(starfield) {
     this.starfield = starfield;
-    this.storageKey = "tmd_user_bg_settings_v4";
+    this.storageKey = "tmd_user_bg_settings_v5";
     this.settings = this.loadSettings();
 
     this.layer = document.getElementById("userBgLayer");
@@ -864,7 +765,7 @@ class UserBackgroundManager {
       customUrl: "",
       dim: 24,
       blur: 0,
-      starsOverlay: false,
+      starsOverlay: true,
       starsDensity: 2
     };
 
@@ -872,6 +773,21 @@ class UserBackgroundManager {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         return { ...defaults, ...JSON.parse(saved) };
+      }
+      // Preserve custom uploaded/URL background from v4 if user had set one
+      const legacyRaw = localStorage.getItem("tmd_user_bg_settings_v4");
+      if (legacyRaw) {
+        const legacy = JSON.parse(legacyRaw);
+        if ((legacy?.type === "upload" && legacy.customDataUrl) || (legacy?.type === "url" && legacy.customUrl)) {
+          return {
+            ...defaults,
+            type: legacy.type,
+            customDataUrl: legacy.customDataUrl || "",
+            customUrl: legacy.customUrl || "",
+            dim: Number.isFinite(legacy.dim) ? legacy.dim : defaults.dim,
+            blur: Number.isFinite(legacy.blur) ? legacy.blur : defaults.blur
+          };
+        }
       }
     } catch (e) {
       console.warn("Could not load background settings:", e);
@@ -882,7 +798,7 @@ class UserBackgroundManager {
   saveSettings() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.settings));
-      showToast("تم حفظ وتطبيق تخصيص الخلفية الخاص بك بنجاح!");
+      showToast("تم حفظ وتطبيق تخصيص الخلفية الكونية بنجاح!");
     } catch (e) {
       console.warn("Failed to persist background settings in localStorage:", e);
       showToast("تم تطبيق الخلفية، ولكن حجم الصورة قد يكون كبيراً للحفظ الدائم.");
@@ -902,7 +818,7 @@ class UserBackgroundManager {
     if (this.starsCanvas) {
       const showStars = (type === "preset" && preset === "animated-stars") || Boolean(starsOverlay);
       this.starsCanvas.style.display = showStars ? "block" : "none";
-      this.starsCanvas.style.opacity = showStars ? "0.75" : "0";
+      this.starsCanvas.style.opacity = showStars ? "1" : "0";
       if (showStars) this.starfield?.start();
       else this.starfield?.stop();
     }
@@ -936,19 +852,24 @@ class UserBackgroundManager {
 
     const presets = {
       "animated-stars": "",
-      "nebula": "#1d1430",
-      "cyberpunk": "#211d35",
-      "aurora": "#10252c",
-      "obsidian": "#070812",
-      "galaxy-gold": "#241a10"
+      "nebula": "radial-gradient(ellipse at 25% 25%, rgba(138, 43, 226, 0.45), transparent 60%), radial-gradient(ellipse at 80% 75%, rgba(0, 242, 254, 0.28), transparent 55%), #08051a",
+      "cyberpunk": "linear-gradient(135deg, #1b063b 0%, #310a5d 48%, #071b34 100%)",
+      "aurora": "linear-gradient(160deg, #04142c 0%, #052e4a 48%, #093832 100%)",
+      "obsidian": "#060713",
+      "galaxy-gold": "radial-gradient(ellipse at 65% 25%, rgba(255, 209, 102, 0.24), rgba(127, 0, 255, 0.24) 52%, #070614 85%)"
     };
 
-    this.layer.style.backgroundImage = "none";
     if (preset === "animated-stars" || !presets[preset]) {
+      this.layer.style.backgroundImage = "none";
       this.layer.style.backgroundColor = "transparent";
       this.layer.style.opacity = "0";
-    } else {
+    } else if (presets[preset].startsWith("#")) {
+      this.layer.style.backgroundImage = "none";
       this.layer.style.backgroundColor = presets[preset];
+      this.layer.style.opacity = "1";
+    } else {
+      this.layer.style.backgroundColor = "#060713";
+      this.layer.style.backgroundImage = presets[preset];
       this.layer.style.opacity = "1";
     }
   }
@@ -1140,7 +1061,7 @@ class UserBackgroundManager {
         customUrl: "",
         dim: 24,
         blur: 0,
-        starsOverlay: false,
+        starsOverlay: true,
         starsDensity: 2
       };
       this.saveSettings();
@@ -1255,13 +1176,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const bgManager = new UserBackgroundManager(starfield);
   window.TMD_BgManager = bgManager;
 
-  if (state.model === MODELS.minimax && !hasSpartaPro()) {
+  if (state.model === MODELS.minimax && !hasTmdPro()) {
     state.model = MODELS.smart;
     safeSetItem(STORAGE_KEYS.model, state.model);
   }
   applyTheme();
   updateModelUI();
-  updateSpartaDailyMissionUI();
+  updateTmdDailyMissionUI();
   bindEvents();
   setupDedicationLetter();
   renderHistory();
@@ -1433,7 +1354,7 @@ function bindEvents() {
   // تثبيت المساعد العائم فوق كل التطبيقات (زر الشريط العلوي + الإعدادات + التلميح السريع)
   const pinFloatingAssistant = () => {
     if (state.floatingBubbleEnabled === false) {
-      showToast("فعّل خيار «إظهار فقاعة SPARTA AI» من الإعدادات أولًا.");
+      showToast("فعّل خيار «إظهار فقاعة Aso AI (آسو إي آي)» من الإعدادات أولًا.");
       return;
     }
     const api = window.__tmdFloatingAssistant;
@@ -1523,14 +1444,14 @@ function bindEvents() {
   document.getElementById("themeTop")?.addEventListener("click", toggleTheme);
   document.getElementById("themeTopDesktop")?.addEventListener("click", toggleTheme);
 
-  // Model Selector — MiniMax/M3 هو جزء من اشتراك SPARTA Pro المدفوع فقط.
+  // Model Selector — MiniMax/M3 هو جزء من اشتراك Aso Pro المدفوع فقط.
   const selectModel = (value) => {
     const candidate = VALID_MODELS.has(value) ? value : MODELS.smart;
-    if (candidate === MODELS.minimax && !hasSpartaPro()) {
+    if (candidate === MODELS.minimax && !hasTmdPro()) {
       state.model = MODELS.smart;
       safeSetItem(STORAGE_KEYS.model, state.model);
       updateModelUI();
-      showToast("SPARTA Max مع MiniMax M3 متاحان ضمن اشتراك SPARTA Pro المدفوع فقط.");
+      showToast("Aso Max مع MiniMax M3 متاحان ضمن اشتراك Aso Pro المدفوع فقط.");
       return false;
     }
     state.model = candidate;
@@ -1546,13 +1467,13 @@ function bindEvents() {
 
   // مهمة اليوم ليست رصيدًا مجانيًا: هي تحدٍّ مستقل للنسخة المدفوعة فقط.
   document.getElementById("dailyMissionButton")?.addEventListener("click", () => {
-    if (!hasSpartaPro()) {
-      showToast("مهمة اليوم وSPARTA Max متاحان في اشتراك SPARTA Pro المدفوع فقط.");
-      updateSpartaDailyMissionUI();
+    if (!hasTmdPro()) {
+      showToast("مهمة اليوم وAso Max متاحان في اشتراك Aso Pro المدفوع فقط.");
+      updateTmdDailyMissionUI();
       return;
     }
-    const mission = getSpartaDailyMission();
-    const progress = readSpartaDailyMissionState();
+    const mission = getTmdDailyMission();
+    const progress = readTmdDailyMissionState();
     if (progress.completed) {
       showToast("أكملت مهمة اليوم بالفعل. يعود تحدٍّ جديد غدًا.");
       return;
@@ -1564,16 +1485,16 @@ function bindEvents() {
     input.value = mission.prompt;
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 180) + "px";
-    input.dataset.spartaDailyMission = mission.day;
+    input.dataset.tmdDailyMission = mission.day;
     input.focus();
     updateComposerState();
-    showToast("تم تجهيز مهمة اليوم في SPARTA Max. أرسلها للبدء.");
+    showToast("تم تجهيز مهمة اليوم في Aso Max. أرسلها للبدء.");
   });
 
   window.addEventListener("storage", (event) => {
-    if (event.key === SPARTA_PLAN_KEY || event.key === SPARTA_DAILY_MISSION_KEY) {
-      updateSpartaDailyMissionUI();
-      if (!hasSpartaPro() && state.model === MODELS.minimax) {
+    if (event.key === TMD_PLAN_KEY || event.key === TMD_DAILY_MISSION_KEY) {
+      updateTmdDailyMissionUI();
+      if (!hasTmdPro() && state.model === MODELS.minimax) {
         state.model = MODELS.smart;
         safeSetItem(STORAGE_KEYS.model, state.model);
         updateModelUI();
@@ -1747,8 +1668,8 @@ function setFloatingBubbleEnabled(enabled) {
   }
 
   showToast(state.floatingBubbleEnabled
-    ? "تم إظهار فقاعة SPARTA AI."
-    : "تم إخفاء فقاعة SPARTA AI. يمكنك إعادتها من الإعدادات.");
+    ? "تم إظهار فقاعة Aso AI (آسو إي آي)."
+    : "تم إخفاء فقاعة Aso AI (آسو إي آي). يمكنك إعادتها من الإعدادات.");
 }
 
 
@@ -1761,7 +1682,7 @@ function applyTheme() {
   document.body.dataset.theme = state.theme;
   if (themeSelect) themeSelect.value = state.theme;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#FAF6F1" : "#070812");
+  if (themeMeta) themeMeta.setAttribute("content", state.theme === "light" ? "#F3F1FC" : "#060713");
   const themeIcon = state.theme === "light" ? UI_ICONS.moon : UI_ICONS.sun;
   document.querySelectorAll(".theme-icon, .theme-icon-indicator").forEach((node) => {
     node.innerHTML = themeIcon;
@@ -1777,15 +1698,15 @@ function updateModelUI() {
   if (!modelName) return;
 
   if (state.model === MODELS.vision) {
-    modelName.textContent = "SPARTA Vision 27B";
+    modelName.textContent = "Aso Vision 27B · آسو";
   } else if (state.model === MODELS.minimax) {
     modelName.textContent = state.minimaxBillingBlocked
-      ? "SPARTA Max Pro — MiniMax M3 (الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
-      : "SPARTA Max Pro — MiniMax M3";
+      ? "Aso Max Pro — MiniMax M3 (الرصيد منتهٍ — تحويل تلقائي إلى Groq)"
+      : "Aso Max Pro — MiniMax M3";
   } else if (state.model === MODELS.fast) {
-    modelName.textContent = "SPARTA Fast 20B";
+    modelName.textContent = "Aso Fast 20B · آسو";
   } else {
-    modelName.textContent = "SPARTA Core 120B";
+    modelName.textContent = "Aso Core 120B · آسو";
   }
 }
 
@@ -2193,15 +2114,15 @@ async function runCompetitionMode(apiMessages, signal) {
   const reply = [
     "## ⚔ وضع المنافسة — نتيجتان مستقلتان",
     "قمت بتشغيل مسارين مختلفين للطلب نفسه. راجع النتيجتين واختر الأنسب لك من أزرار الاعتماد أسفل الرد.",
-    renderResult(first, "النتيجة الأولى", "SPARTA Core"),
-    renderResult(second, "النتيجة الثانية", "SPARTA Fast"),
+    renderResult(first, "النتيجة الأولى", "Aso Core"),
+    renderResult(second, "النتيجة الثانية", "Aso Fast"),
     "### طريقة الاختيار",
     "- اختر **اعتماد النتيجة الأولى** إذا أردت الدقة والتنظيم المحافظ.\n- اختر **اعتماد النتيجة الثانية** إذا أردت زاوية مختلفة أو أسلوبًا أكثر سرعة.\n- أو اطلب **دمج الأفضل** للحصول على نسخة نهائية تجمع أقوى النقاط."
   ].join("\n\n");
 
   return {
     reply,
-    model: "SPARTA Competition",
+    model: "Aso Competition",
     provider: "groq"
   };
 }
@@ -2217,7 +2138,7 @@ async function sendMessage() {
   if (!text && !state.selectedImage && !state.selectedDocument) {
     return;
   }
-  const isDailyMissionRequest = input?.dataset.spartaDailyMission === spartaTodayKey();
+  const isDailyMissionRequest = input?.dataset.tmdDailyMission === tmdTodayKey();
 
   state.busy = true;
   state.controller = new AbortController();
@@ -2254,7 +2175,7 @@ async function sendMessage() {
   if (input) {
     input.value = "";
     input.style.height = "auto";
-    delete input.dataset.spartaDailyMission;
+    delete input.dataset.tmdDailyMission;
   }
 
   const attachedImage = state.selectedImage;
@@ -2315,7 +2236,7 @@ async function sendMessage() {
       : selectedModel;
 
     if (!hasImage && activeAiMode === "comparison") {
-      model = hasSpartaPro() ? MODELS.minimax : MODELS.smart;
+      model = hasTmdPro() ? MODELS.minimax : MODELS.smart;
     } else if (!hasImage && activeAiMode === "deep-search") {
       model = MODELS.smart;
     }
@@ -2360,9 +2281,9 @@ async function sendMessage() {
     }
 
     // لا توجد مكافأة رصيد هنا: نعلّم المهمة مكتملة فقط بعد رد ناجح من Pro.
-    if (isDailyMissionRequest && hasSpartaPro()) {
-      completeSpartaDailyMission();
-      showToast("أُنجزت مهمة SPARTA Pro اليومية. يعود تحدٍّ جديد غدًا.");
+    if (isDailyMissionRequest && hasTmdPro()) {
+      completeTmdDailyMission();
+      showToast("أُنجزت مهمة Aso Pro اليومية. يعود تحدٍّ جديد غدًا.");
     }
 
     saveMessages();
@@ -2380,7 +2301,7 @@ async function sendMessage() {
         showToast("تم إيقاف المعالجة.");
       }
     } else {
-      console.warn("SPARTA AI Message Error:", error?.message || error);
+      console.warn("Aso AI (آسو إي آي) Message Error:", error?.message || error);
       const message = error?.message || "تعذر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.";
       showToast(message);
       addErrorMessage(
@@ -2947,13 +2868,13 @@ function exportCurrentChat() {
     return;
   }
 
-  let text = `# سجل محادثة SPARTA AI\n`;
+  let text = `# سجل محادثة Aso AI (آسو إي آي)\n`;
   text += `تاريخ التصدير: ${new Date().toLocaleString("ar-EG")}\n`;
   text += `تصميم الأداة: من معتصم عمرو الى M\n`;
   text += `---------------------------------------------------\n\n`;
 
   state.messages.forEach(m => {
-    const role = m.role === "user" ? "المستخدم" : "SPARTA AI";
+    const role = m.role === "user" ? "المستخدم" : "Aso AI (آسو إي آي)";
     text += `${role}:\n${m.content || ""}\n\n`;
   });
 
@@ -3162,5 +3083,5 @@ window.TMDAI = {
   showToast
 };
 
-console.log("SPARTA AI loaded — من معتصم عمرو الى M");
+console.log("Aso AI (آسو إي آي) loaded — من معتصم عمرو الى M");
 

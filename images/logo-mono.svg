@@ -1,11 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-label="SPARTA AI minimal mark">
-  <circle cx="80" cy="80" r="70" fill="#181113" stroke="#F6F1EC" stroke-opacity=".25" stroke-width="2.5"/>
-  <g transform="rotate(-24 80 80)">
-    <path d="M28 80a52 21 0 0 1 104 0" stroke="#F6F1EC" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
-  </g>
-  <circle cx="80" cy="80" r="17.5" fill="#F6F1EC"/>
-  <g transform="rotate(-24 80 80)">
-    <path d="M132 80a52 21 0 0 1-104 0" stroke="#F6F1EC" stroke-opacity=".85" stroke-width="3.5" stroke-linecap="round"/>
-    <circle cx="37.4" cy="92" r="5" fill="#BFB2AB"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="tmdMonoGrad" x1="12" y1="12" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="50%" stop-color="#8a2be2"/>
+      <stop offset="100%" stop-color="#ff007f"/>
+    </linearGradient>
+    <radialGradient id="tmdMonoCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1d1238"/>
+      <stop offset="100%" stop-color="#070815"/>
+    </radialGradient>
+  </defs>
+  <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#tmdMonoCore)" stroke="url(#tmdMonoGrad)" stroke-width="2.5"/>
+  <ellipse cx="60" cy="60" rx="44" ry="18" transform="rotate(-28 60 60)" stroke="url(#tmdMonoGrad)" stroke-width="2" stroke-dasharray="8 4" opacity="0.85"/>
+  <ellipse cx="60" cy="60" rx="44" ry="18" transform="rotate(32 60 60)" stroke="url(#tmdMonoGrad)" stroke-width="1.6" stroke-dasharray="6 4" opacity="0.65"/>
+  <polygon points="60,26 88,43 88,77 60,94 32,77 32,43" fill="#0d0b21" stroke="url(#tmdMonoGrad)" stroke-width="2.4"/>
+  <text x="60" y="62" font-family="'Space Grotesk', 'Cairo', sans-serif" font-size="19" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">ASO</text>
+  <text x="60" y="77" font-family="'Cairo', sans-serif" font-size="9" font-weight="800" fill="#00f2fe" text-anchor="middle">آسو إي آي</text>
+  <path d="M60 18 Q60 25 67 25 Q60 25 60 32 Q60 25 53 25 Q60 25 60 18 Z" fill="#ffffff"/>
 </svg>

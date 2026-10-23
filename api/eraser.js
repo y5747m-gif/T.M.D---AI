@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===========================================================================
-   SPARTA AI — Smart Eraser gateway (object removal / inpainting)
+   Aso AI (آسو إي آي) — Smart Eraser gateway (object removal / inpainting)
 
    The browser paints a mask over the area that must disappear and posts the
    image + mask here. This function keeps every provider key on the server and

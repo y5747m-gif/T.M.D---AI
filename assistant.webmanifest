@@ -1,23 +1,51 @@
 {
-  "name": "AURA AI — الفقاعة الذكية",
-  "short_name": "AURA AI",
-  "description": "فقاعة ذكاء اصطناعي شفافة على شاشة الهاتف مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة.",
+  "name": "Aso AI — آسو إي آي (الفقاعة الذكية)",
+  "short_name": "آسو إي آي",
+  "description": "فقاعة Aso AI (آسو إي آي) الشفافة على شاشة الهاتف مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة.",
   "id": "/assistant.html",
   "start_url": "/assistant.html?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
   "background_color": "#060916",
   "theme_color": "#060916",
-  "categories": ["productivity", "utilities", "education"],
+  "categories": [
+    "productivity",
+    "utilities",
+    "education"
+  ],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "/images/aura-bubble-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/images/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/images/aura-bubble-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
