@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">SPARTA AI</string>
-    <string name="channel_name">المساعد العائم ومشاركة الشاشة</string>
-    <string name="notification_title">SPARTA AI يعمل فوق التطبيقات</string>
-    <string name="stop_assistant">إيقاف المساعد</string>
+    <string name="app_name">AURA AI</string>
+    <string name="channel_name">الفقاعة العائمة والبث المباشر للشاشة</string>
+    <string name="notification_title">فقاعة AURA الذكية عائمة على الشاشة</string>
+    <string name="stop_assistant">إيقاف الفقاعة</string>
+    <string name="open_dock">فتح الشات</string>
 </resources>

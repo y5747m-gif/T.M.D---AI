@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-labelledby="auraTitle auraDesc">
+  <title id="auraTitle">AURA Bubble AI</title>
+  <desc id="auraDesc">أيقونة الفقاعة الذكية المتوهجة بطيف لوني محيطي ونواة بلورية رباعية الأشعة.</desc>
+  <defs>
+    <linearGradient id="auraRing" x1="16" y1="16" x2="144" y2="144" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="28%" stop-color="#4F7BFF"/>
+      <stop offset="56%" stop-color="#A855F7"/>
+      <stop offset="80%" stop-color="#FF4FD8"/>
+      <stop offset="100%" stop-color="#FFB84D"/>
+    </linearGradient>
+    <radialGradient id="auraSphere" cx="38%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#1E2952" stop-opacity="0.72"/>
+      <stop offset="55%" stop-color="#0D1226" stop-opacity="0.82"/>
+      <stop offset="100%" stop-color="#070914" stop-opacity="0.92"/>
+    </radialGradient>
+    <radialGradient id="auraBloom" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.58"/>
+      <stop offset="48%" stop-color="#00F2FE" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FF4FD8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="auraStar" x1="44" y1="36" x2="118" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="32%" stop-color="#8BF6FF"/>
+      <stop offset="68%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#FF6FD8"/>
+    </linearGradient>
+    <linearGradient id="auraGloss" x1="50" y1="22" x2="90" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer soft spectral halo -->
+  <circle cx="80" cy="80" r="74" fill="url(#auraBloom)"/>
+
+  <!-- Translucent glass bubble body -->
+  <circle cx="80" cy="80" r="64" fill="url(#auraSphere)" stroke="url(#auraRing)" stroke-width="4.5"/>
+  <circle cx="80" cy="80" r="56" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.2"/>
+
+  <!-- Top-left liquid glass highlight -->
+  <ellipse cx="63" cy="44" rx="28" ry="13" transform="rotate(-22 63 44)" fill="url(#auraGloss)"/>
+
+  <!-- Intersecting neural light orbits -->
+  <ellipse cx="80" cy="80" rx="46" ry="19" transform="rotate(-28 80 80)" stroke="url(#auraRing)" stroke-opacity="0.65" stroke-width="2.2"/>
+  <ellipse cx="80" cy="80" rx="46" ry="19" transform="rotate(32 80 80)" stroke="#74E7FF" stroke-opacity="0.38" stroke-width="1.6" stroke-dasharray="6 5"/>
+
+  <!-- Sculpted 4-point Prism AI Star Core -->
+  <path d="M80 36C83.8 60.5 99.5 76.2 124 80C99.5 83.8 83.8 99.5 80 124C76.2 99.5 60.5 83.8 36 80C60.5 76.2 76.2 60.5 80 36Z" fill="url(#auraStar)"/>
+  <circle cx="80" cy="80" r="8.5" fill="#FFFFFF" fill-opacity="0.92"/>
+
+  <!-- Secondary satellite spark -->
+  <path d="M116 40C117.3 46.7 121.3 50.7 128 52C121.3 53.3 117.3 57.3 116 64C114.7 57.3 110.7 53.3 104 52C110.7 50.7 114.7 46.7 116 40Z" fill="#00F2FE"/>
+  <circle cx="43" cy="108" r="3.5" fill="#FF6FD8"/>
+</svg>

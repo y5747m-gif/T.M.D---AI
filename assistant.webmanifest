@@ -1,7 +1,7 @@
 {
-  "name": "SPARTA AI",
-  "short_name": "SPARTA AI",
-  "description": "مساعد SPARTA AI العائم: دردشة ذكية سريعة متصلة بمنصة SPARTA AI مع مشاركة الشاشة والرد الصوتي ضمن تجربة PWA.",
+  "name": "AURA AI — الفقاعة الذكية",
+  "short_name": "AURA AI",
+  "description": "فقاعة ذكاء اصطناعي شفافة على شاشة الهاتف مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة.",
   "id": "/assistant.html",
   "start_url": "/assistant.html?source=pwa",
   "scope": "/",
@@ -10,13 +10,12 @@
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#070812",
-  "theme_color": "#070812",
+  "background_color": "#060916",
+  "theme_color": "#060916",
   "categories": ["productivity", "utilities", "education"],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "/images/favicon-32.png", "sizes": "32x32", "type": "image/png", "purpose": "any" },
-    { "src": "/images/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/images/aura-bubble-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/images/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }

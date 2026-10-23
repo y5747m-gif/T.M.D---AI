@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -12,20 +14,27 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 /**
- * شاشة إدارة صغيرة للفقاعة. كل صلاحية حساسة يطلبها Android في وقت الاستخدام
- * فقط؛ لا يحاول التطبيق تجاوز موافقة المستخدم أو قراءة محتوى لم يختره بنفسه.
+ * نقطة تشغيل شفافة تمامًا (100% Transparent Activity).
+ * - إذا كانت صلاحية الظهور فوق النظام مفعّلة عند فتح الأيقونة: تُطلق الفقاعة فورًا
+ *   فوق النظام دون إظهار شاشة سوداء معتمة.
+ * - عند أول تثبيت (لطلب الإذن) أو عند فتح لوحة الإدارة من الإشعار: تعرض بطاقة
+ *   زجاجية شفافة طافية أسفل الشاشة مع بقاء خلفية الهاتف مرئية بالكامل.
  */
 public class MainActivity extends Activity {
     public static final String ACTION_SHARE = "ai.tmd.assistant.SHARE_SCREEN";
     public static final String ACTION_PICK_IMAGE = "ai.tmd.assistant.PICK_IMAGE";
     public static final String ACTION_VOICE = "ai.tmd.assistant.VOICE_INPUT";
+    public static final String ACTION_MANAGE = "ai.tmd.assistant.MANAGE";
 
     private static final int OVERLAY_REQUEST = 100;
     private static final int CAPTURE_REQUEST = 101;
@@ -36,13 +45,15 @@ public class MainActivity extends Activity {
 
     private String pendingAction;
 
-    @Override public void onCreate(Bundle state) {
+    @Override
+    public void onCreate(Bundle state) {
         super.onCreate(state);
-        showHome();
+        getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
         handleIntent(getIntent());
     }
 
-    @Override protected void onNewIntent(Intent intent) {
+    @Override
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
         handleIntent(intent);
@@ -51,6 +62,7 @@ public class MainActivity extends Activity {
     private void handleIntent(Intent intent) {
         pendingAction = intent == null ? null : intent.getAction();
         if (needsNotificationPermission()) {
+            showGlassSheet(false);
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATIONS_REQUEST);
             return;
         }
@@ -65,22 +77,36 @@ public class MainActivity extends Activity {
             requestImage();
         } else if (ACTION_VOICE.equals(action)) {
             requestVoice();
+        } else if (ACTION_MANAGE.equals(action)) {
+            showGlassSheet(true);
         } else {
-            launchOverlay();
+            // التشغيل الفوري: إن كانت الصلاحية ممنوحة تنزل الفقاعة مباشرة فوق النظام بلا نافذة معتمة
+            if (hasOverlayPermission()) {
+                startAssistantService(OverlayService.ACTION_SHOW, RESULT_CANCELED, null);
+                dismissSilently();
+            } else {
+                showGlassSheet(false);
+            }
         }
     }
 
-    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+    @SuppressWarnings("deprecation")
+    private void dismissSilently() {
+        finish();
+        overridePendingTransition(0, 0);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (requestCode == NOTIFICATIONS_REQUEST) {
-            // رفض الإشعارات لا يمنع الأداة، لكن Android قد يخفي إشعار خدمتها.
             continuePendingAction();
         } else if (requestCode == MICROPHONE_REQUEST) {
             if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
                 launchVoiceRecognizer();
             } else {
-                OverlayService.notifyVoiceError("تم رفض إذن الميكروفون. فعّله من إعدادات التطبيق لاستخدام التحدث.");
-                moveTaskToBack(true);
+                OverlayService.notifyVoiceError("تم رفض إذن الميكروفون. فعّله لاستخدام التحدث الصوتي.");
+                dismissSilently();
             }
         }
     }
@@ -90,51 +116,131 @@ public class MainActivity extends Activity {
                 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED;
     }
 
-    private TextView text(String value, int sp, int color) {
-        TextView view = new TextView(this);
-        view.setText(value);
-        view.setTextSize(sp);
-        view.setTextColor(color);
-        view.setGravity(Gravity.CENTER);
-        view.setPadding(24, 20, 24, 20);
-        return view;
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    private void showHome() {
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(Gravity.CENTER);
-        root.setPadding(42, 60, 42, 60);
-        root.setBackgroundColor(Color.rgb(5, 9, 18));
+    private void showGlassSheet(boolean manageMode) {
+        FrameLayout backdrop = new FrameLayout(this);
+        backdrop.setBackgroundColor(Color.TRANSPARENT);
+        backdrop.setOnClickListener(v -> {
+            if (hasOverlayPermission() && OverlayService.isRunning()) {
+                dismissSilently();
+            }
+        });
 
-        root.addView(text("ϟ", 64, Color.WHITE));
-        root.addView(text("SPARTA AI", 30, Color.WHITE));
-        root.addView(text("فقاعة دردشة مصغرة فوق تطبيقات هاتفك\nمع الصور والصوت ومشاركة الشاشة", 18, Color.LTGRAY));
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER_HORIZONTAL);
+        card.setClickable(true);
+        card.setPadding(dp(22), dp(22), dp(22), dp(20));
 
-        Button launch = new Button(this);
-        launch.setText("تشغيل الفقاعة العائمة");
-        launch.setOnClickListener(v -> { pendingAction = null; launchOverlay(); });
-        root.addView(launch, fullWidth());
+        GradientDrawable glassBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{0xD80D142B, 0xE2080B1A});
+        glassBg.setCornerRadius(dp(28));
+        glassBg.setStroke(dp(1), 0x6600F2FE);
+        card.setBackground(glassBg);
 
-        Button share = new Button(this);
-        share.setText("مشاركة الشاشة مع المساعد");
-        share.setOnClickListener(v -> { pendingAction = ACTION_SHARE; requestCapture(); });
-        root.addView(share, fullWidth());
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(R.drawable.ic_app_logo);
+        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(dp(64), dp(64));
+        logoParams.bottomMargin = dp(10);
+        card.addView(logo, logoParams);
 
-        Button stop = new Button(this);
-        stop.setText("إيقاف المساعد");
-        stop.setOnClickListener(v -> stopService(new Intent(this, OverlayService.class)));
-        root.addView(stop, fullWidth());
+        TextView title = new TextView(this);
+        title.setText("فقاعة AURA الذكية");
+        title.setTextSize(21);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setTextColor(Color.WHITE);
+        title.setGravity(Gravity.CENTER);
+        card.addView(title);
 
-        root.addView(text(
-                "يطلب التطبيق صلاحية الظهور فوق التطبيقات. الميكروفون والصورة ومشاركة الشاشة لا تُستخدم إلا بعد ضغطك على الأداة وموافقتك الصريحة.",
-                14, Color.GRAY));
-        setContentView(root);
+        TextView credit = new TextView(this);
+        credit.setText("من معتصم عمرو الى M");
+        credit.setTextSize(13f);
+        credit.setTypeface(Typeface.DEFAULT_BOLD);
+        credit.setTextColor(0xFF7EF9FF);
+        credit.setGravity(Gravity.CENTER);
+        credit.setPadding(dp(8), dp(4), dp(8), dp(2));
+        card.addView(credit);
+
+        TextView subtitle = new TextView(this);
+        subtitle.setText(manageMode
+                ? "فقاعة عائمة بشفافية كاملة على وجه النظام، مع إضاءة ملونة لحدود الشاشة وبث مباشر للشاشة."
+                : "امنح إذن «الظهور فوق التطبيقات» مرة واحدة فقط لتستقر الفقاعة الذكية على شاشة هاتفك فوراً.");
+        subtitle.setTextSize(13.5f);
+        subtitle.setTextColor(0xFFD2E0FF);
+        subtitle.setGravity(Gravity.CENTER);
+        subtitle.setPadding(dp(6), dp(8), dp(6), dp(16));
+        card.addView(subtitle);
+
+        Button primaryBtn = styledButton(
+                hasOverlayPermission() ? "فتح شريط الشات والإضاءة الآن" : "تفعيل الفقاعة فوق النظام",
+                new int[]{0xFF00D2FF, 0xFF6366F1, 0xFFEC4899},
+                Color.WHITE);
+        primaryBtn.setOnClickListener(v -> {
+            if (!hasOverlayPermission()) {
+                openOverlayPermissionScreen();
+            } else {
+                startAssistantService(OverlayService.ACTION_OPEN_DOCK, RESULT_CANCELED, null);
+                dismissSilently();
+            }
+        });
+        card.addView(primaryBtn, buttonLayout());
+
+        Button liveBtn = styledButton(
+                "بدء بث مباشر للشاشة مع الذكاء الاصطناعي",
+                new int[]{0x4400F2FE, 0x44A855F7},
+                0xFFEAF6FF);
+        liveBtn.setOnClickListener(v -> {
+            pendingAction = ACTION_SHARE;
+            requestCapture();
+        });
+        card.addView(liveBtn, buttonLayout());
+
+        if (manageMode || OverlayService.isRunning()) {
+            Button stopBtn = styledButton(
+                    "إيقاف الفقاعة العائمة",
+                    new int[]{0x33FF3B7F, 0x33FF6B4A},
+                    0xFFFFC8D8);
+            stopBtn.setOnClickListener(v -> {
+                OverlayService.setBubbleEnabledPref(this, false);
+                stopService(new Intent(this, OverlayService.class));
+                dismissSilently();
+            });
+            card.addView(stopBtn, buttonLayout());
+        }
+
+        FrameLayout.LayoutParams cardParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+        cardParams.setMargins(dp(14), dp(14), dp(14), dp(22));
+        backdrop.addView(card, cardParams);
+        setContentView(backdrop);
     }
 
-    private LinearLayout.LayoutParams fullWidth() {
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
-        p.setMargins(0, 12, 0, 12);
+    private Button styledButton(String label, int[] colors, int textColor) {
+        Button btn = new Button(this);
+        btn.setText(label);
+        btn.setAllCaps(false);
+        btn.setTextSize(14);
+        btn.setTypeface(Typeface.DEFAULT_BOLD);
+        btn.setTextColor(textColor);
+        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+        bg.setCornerRadius(dp(999));
+        bg.setStroke(dp(1), 0x44FFFFFF);
+        btn.setBackground(bg);
+        btn.setPadding(dp(16), dp(12), dp(16), dp(12));
+        return btn;
+    }
+
+    private LinearLayout.LayoutParams buttonLayout() {
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        p.setMargins(0, dp(5), 0, dp(5));
         return p;
     }
 
@@ -142,20 +248,15 @@ public class MainActivity extends Activity {
         return Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this);
     }
 
-    private void launchOverlay() {
-        if (!hasOverlayPermission()) {
-            startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName())), OVERLAY_REQUEST);
-            return;
-        }
-        startAssistantService(OverlayService.ACTION_SHOW, RESULT_CANCELED, null);
-        moveTaskToBack(true);
+    private void openOverlayPermissionScreen() {
+        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName())), OVERLAY_REQUEST);
     }
 
     private boolean ensureOverlayPermission() {
         if (hasOverlayPermission()) return true;
-        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + getPackageName())), OVERLAY_REQUEST);
+        showGlassSheet(false);
+        openOverlayPermissionScreen();
         return false;
     }
 
@@ -188,16 +289,17 @@ public class MainActivity extends Activity {
         Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-SA")
-                .putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث إلى SPARTA AI");
+                .putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدّث إلى فقاعة AURA الذكية");
         try {
             startActivityForResult(voice, VOICE_REQUEST);
         } catch (Exception error) {
             OverlayService.notifyVoiceError("لا توجد خدمة تعرّف صوتي متاحة على هذا الهاتف.");
-            moveTaskToBack(true);
+            dismissSilently();
         }
     }
 
     private void startAssistantService(String action, int resultCode, Intent source) {
+        OverlayService.setBubbleEnabledPref(this, true);
         Intent service = new Intent(this, OverlayService.class).setAction(action);
         if (source != null) {
             service.putExtra(OverlayService.EXTRA_RESULT_CODE, resultCode);
@@ -207,11 +309,20 @@ public class MainActivity extends Activity {
         else startService(service);
     }
 
-    @Override protected void onActivityResult(int request, int result, Intent data) {
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (request == OVERLAY_REQUEST) {
-            if (hasOverlayPermission()) continuePendingAction();
-            else OverlayService.notifyPermissionError("يلزم السماح بالظهور فوق التطبيقات لتشغيل الفقاعة.");
+            if (hasOverlayPermission()) {
+                if (ACTION_SHARE.equals(pendingAction)) {
+                    requestCapture();
+                } else {
+                    startAssistantService(OverlayService.ACTION_OPEN_DOCK, RESULT_CANCELED, null);
+                    dismissSilently();
+                }
+            } else {
+                OverlayService.notifyPermissionError("يلزم السماح بالظهور فوق التطبيقات لتشغيل الفقاعة.");
+            }
             return;
         }
         if (request == CAPTURE_REQUEST) {
@@ -220,7 +331,7 @@ public class MainActivity extends Activity {
             } else {
                 OverlayService.notifyShareDenied();
             }
-            moveTaskToBack(true);
+            dismissSilently();
             return;
         }
         if (request == IMAGE_REQUEST) {
@@ -229,7 +340,7 @@ public class MainActivity extends Activity {
             } else {
                 OverlayService.notifyImageError("لم يتم اختيار صورة.");
             }
-            moveTaskToBack(true);
+            dismissSilently();
             return;
         }
         if (request == VOICE_REQUEST) {
@@ -240,7 +351,7 @@ public class MainActivity extends Activity {
             } else {
                 OverlayService.notifyVoiceError("أُلغي الإدخال الصوتي.");
             }
-            moveTaskToBack(true);
+            dismissSilently();
         }
     }
 }
