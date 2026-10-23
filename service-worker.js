@@ -6,7 +6,7 @@
    - لا يخزّن /api ولا مفاتيح ولا ردود الذكاء الاصطناعي.
    ========================================================== */
 
-const CACHE_VERSION = "sparta-ai-cache-v2026-10-23-aura";
+const CACHE_VERSION = "sparta-ai-cache-v2026-10-23-cosmos-dedication";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -20,6 +20,7 @@ const APP_SHELL = [
   "/floating-assistant.css",
   "/seedance-studio.css",
   "/eraser-studio.css",
+  "/dedication.css",
   "/app.js",
   "/video-studio.js",
   "/eraser-studio.js",

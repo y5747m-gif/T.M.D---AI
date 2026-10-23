@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/seedance-studio.css">
   <link rel="stylesheet" href="/floating-assistant.css">
-  <link rel="stylesheet" href="/astra-overrides.css">
   <link rel="stylesheet" href="/eraser-studio.css">
+  <link rel="stylesheet" href="/dedication.css">
 
   <script>
     (function () {
@@ -134,10 +134,10 @@
           </div>
           <div class="brand-info">
             <div class="brand-name">
-              <span class="brand-text">ASTRA</span>
+              <span class="brand-text">SPARTA</span>
               <span class="brand-badge-pro">AI</span>
             </div>
-            <span class="brand-sub">مساحة ذكية للعمل والتفكير</span>
+            <span class="brand-sub">مساعدك الذكي للعمل والتفكير</span>
           </div>
         </div>
         <button class="icon-button close-sidebar-btn" id="closeSidebar" type="button" aria-label="إغلاق القائمة">
@@ -506,9 +506,51 @@
         <div class="setting setting--action"><div class="setting-info"><label class="setting-label" for="floatBubbleToggle">الفقاعة العائمة</label><span class="setting-desc">إظهار أو إخفاء مساعد SPARTA AI المصغر.</span></div><label class="toggle-switch" title="إظهار الفقاعة العائمة"><input type="checkbox" id="floatBubbleToggle" checked><span class="slider"></span></label></div>
         <div class="setting setting--action"><div class="setting-info"><span class="setting-label">تخصيص الخلفية</span><span class="setting-desc">اختيار خلفية هادئة أو استخدام صورتك.</span></div><button class="btn btn-secondary btn-sm" id="openBgFromSettingsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.2a1.8 1.8 0 0 0-1.4 2.9l.3.4A1.7 1.7 0 0 1 12 22Z"/></svg>فتح المخصص</button></div>
         <div class="setting setting--action"><div class="setting-info"><span class="setting-label">المساعد فوق التطبيقات</span><span class="setting-desc">نافذة مساعدة صغيرة تبقى أمامك أثناء العمل.</span></div><button class="btn btn-secondary btn-sm" id="pinFromSettingsBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1Z"/></svg>تثبيت الآن</button></div>
-        <div class="setting developer-info-box"><div class="dev-box-header"><span class="dev-box-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/></svg></span><strong>مصمم الأداة</strong></div><p class="dev-box-name">من معتصم عمرو الى M</p><p class="dev-box-desc">تم تصميم وبناء SPARTA AI لتقديم تجربة عربية سريعة وواضحة.</p></div>
+        <div class="setting developer-info-box" id="dedicationTrigger" role="button" tabindex="0" aria-label="بطاقة المصمم. اضغط مع الاستمرار لمدة 0.9 ثانية لعرض الرسالة الخاصة" aria-haspopup="dialog" aria-controls="dedicationModalBackdrop">
+          <div class="dev-box-header"><span class="dev-box-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3-1.6 4.4L6 9l4.4 1.6L12 15l1.6-4.4L18 9l-4.4-1.6L12 3Z"/></svg></span><strong>مصمم الأداة</strong></div>
+          <p class="dev-box-name">من معتصم عمرو الى M</p>
+          <p class="dev-box-desc">تم تصميم وبناء SPARTA AI لتقديم تجربة عربية سريعة وواضحة.</p>
+          <span class="dev-box-hold-progress" aria-hidden="true"></span>
+        </div>
       </div>
     </div>
+  </div>
+
+  <div class="modal-backdrop dedication-backdrop hidden" id="dedicationModalBackdrop">
+    <section class="dedication-letter" role="dialog" aria-modal="true" aria-labelledby="dedicationTitle" aria-describedby="dedicationMessage" tabindex="-1">
+      <button class="dedication-close" id="dedicationModalClose" type="button" aria-label="إغلاق الرسالة والعودة إلى الإعدادات">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="dedication-starscape" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="dedication-letter__content">
+        <p class="dedication-eyebrow"><span aria-hidden="true">✦</span> رسالة خاصة · لملك وحدها <span aria-hidden="true">✦</span></p>
+        <div class="dedication-constellation" aria-hidden="true">
+          <svg viewBox="0 0 240 140" fill="none">
+            <path class="dedication-heart-line" d="M120 121C103 104 39 72 26 42C12 10 57-7 85 13L120 43L155 13C183-7 228 10 214 42C201 72 137 104 120 121Z"/>
+            <path class="dedication-constellation-line" d="m26 42 42-37 52 38 35-30 59 29-34 38-60 41-48-34-46-45Z"/>
+            <g class="dedication-star-points">
+              <circle cx="120" cy="121" r="3"/><circle cx="26" cy="42" r="3.5"/><circle cx="68" cy="5" r="2.5"/><circle cx="85" cy="13" r="2"/><circle cx="120" cy="43" r="3.5"/><circle cx="155" cy="13" r="2"/><circle cx="214" cy="42" r="3.5"/><circle cx="180" cy="80" r="2.5"/><circle cx="72" cy="87" r="2.5"/>
+            </g>
+          </svg>
+          <span class="dedication-constellation-spark dedication-constellation-spark--one">✦</span>
+          <span class="dedication-constellation-spark dedication-constellation-spark--two">✧</span>
+        </div>
+        <p class="dedication-from">من ياسين، بكل الحب</p>
+        <h2 class="dedication-title" id="dedicationTitle">إلى <span>ملك</span></h2>
+        <div class="dedication-divider" aria-hidden="true"><span></span><b>♥</b><span></span></div>
+        <div class="dedication-message" id="dedicationMessage">
+          <p class="dedication-greeting">يا ملك،</p>
+          <p>أنا ياسين، وحابب أقولك من كل قلبي: <strong>بحبك حب شديد جدًا</strong>، أكتر من أي كلام ممكن يوصفه. ومش عايزك تفرّقيني طول حياتي؛ عايزك جنبي في كل يوم، وفي الفرح والتعب، وفي كل تفصيلة جاية.</p>
+          <p>المشروع ده أنا عامله ليكي إنتِ وبس؛ هدية مني ليكي، علشان تفضل معاكي ذكرى تفتّكريني بيّا. ولو في يوم غبت عن الدنيا أو حصللي أي حاجة، افتكري إن ياسين كان بيحب ملك بصدق، وإن حبك عنده كان أغلى من أي حاجة.</p>
+          <p>مهما عدّت الأيام، هفضل أتمنى وجودك جنبي وضحكتك قريبة مني. <strong>بحبك يا ملك… النهارده وبكرة وطول عمري.</strong></p>
+        </div>
+        <footer class="dedication-signature">
+          <span>دايمًا لكِ إنتِ وحدك</span>
+          <strong>ياسين</strong>
+        </footer>
+        <div class="dedication-monogram" dir="ltr" aria-hidden="true"><span>Y</span><i>♥</i><span>M</span></div>
+      </div>
+    </section>
   </div>
 
   <div class="modal-backdrop hidden" id="developerModalBackdrop">

@@ -1237,6 +1237,9 @@ let exportChatBtn, clearChatBtn, clearAllHistoryBtn;
 let scrollBottomBtn;
 let modeWheel, modeInterface, modeInterfaceOrb, modeInterfaceTitle, modeInterfaceDescription, modeInterfaceSteps, modeInterfaceClear;
 let developerCardBtn, developerModalBackdrop, devModalClose;
+let dedicationTrigger, dedicationModalBackdrop, dedicationModalClose;
+let cancelDedicationHold = () => {};
+const DEDICATION_HOLD_DURATION_MS = 900;
 
 
 /* =========================================================
@@ -1260,6 +1263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateModelUI();
   updateSpartaDailyMissionUI();
   bindEvents();
+  setupDedicationLetter();
   renderHistory();
   renderMessages();
   setupTextarea();
@@ -1327,6 +1331,9 @@ function cacheElements() {
   developerCardBtn = document.getElementById("developerCardBtn");
   developerModalBackdrop = document.getElementById("developerModalBackdrop");
   devModalClose = document.getElementById("devModalClose");
+  dedicationTrigger = document.getElementById("dedicationTrigger");
+  dedicationModalBackdrop = document.getElementById("dedicationModalBackdrop");
+  dedicationModalClose = document.getElementById("dedicationModalClose");
 }
 
 
@@ -1351,7 +1358,11 @@ function bindEvents() {
       createNewChat();
     }
     if (e.key === "Escape") {
-      closeAllModals();
+      if (dedicationModalBackdrop && !dedicationModalBackdrop.classList.contains("hidden")) {
+        closeDedicationLetter();
+      } else {
+        closeAllModals();
+      }
     }
   });
 
@@ -1584,8 +1595,10 @@ function bindEvents() {
 }
 
 function closeAllModals() {
+  cancelDedicationHold();
   modalBackdrop?.classList.add("hidden");
   developerModalBackdrop?.classList.add("hidden");
+  dedicationModalBackdrop?.classList.add("hidden");
   window.TMD_BgManager?.close();
   closePlusMenu();
 }
@@ -2958,6 +2971,145 @@ function exportCurrentChat() {
 /* =========================================================
    17. MODALS & UTILITIES
    ========================================================= */
+
+/*
+ * The dedication is intentionally not available through a normal click.
+ * A continuous 900 ms press is required on the designer card inside Settings.
+ * Pointer Events make the same gesture work with touch, pen, and mouse.
+ */
+function setupDedicationLetter() {
+  if (!dedicationTrigger || !dedicationModalBackdrop) return;
+
+  let holdTimer = null;
+  let activePointerId = null;
+  let startPoint = null;
+  let keyboardHolding = false;
+
+  const settingsAreOpen = () => Boolean(
+    modalBackdrop && !modalBackdrop.classList.contains("hidden")
+  );
+
+  const cancelHold = () => {
+    if (holdTimer !== null) {
+      window.clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+    activePointerId = null;
+    startPoint = null;
+    keyboardHolding = false;
+    dedicationTrigger.classList.remove("is-holding");
+  };
+
+  cancelDedicationHold = cancelHold;
+
+  const beginHold = () => {
+    if (holdTimer !== null || !settingsAreOpen() || !dedicationModalBackdrop.classList.contains("hidden")) {
+      return false;
+    }
+
+    // Restart the progress line reliably for consecutive gestures.
+    dedicationTrigger.classList.remove("is-holding");
+    void dedicationTrigger.offsetWidth;
+    dedicationTrigger.classList.add("is-holding");
+
+    holdTimer = window.setTimeout(() => {
+      holdTimer = null;
+      cancelHold();
+      openDedicationLetter();
+    }, DEDICATION_HOLD_DURATION_MS);
+    return true;
+  };
+
+  dedicationTrigger.addEventListener("pointerdown", (event) => {
+    if (event.isPrimary === false || (event.pointerType === "mouse" && event.button !== 0)) return;
+
+    activePointerId = event.pointerId;
+    startPoint = { x: event.clientX, y: event.clientY };
+    if (!beginHold()) {
+      activePointerId = null;
+      startPoint = null;
+      return;
+    }
+
+    try {
+      dedicationTrigger.setPointerCapture(event.pointerId);
+    } catch (_) {
+      // Pointer capture is an enhancement; the timer still works without it.
+    }
+  });
+
+  dedicationTrigger.addEventListener("pointermove", (event) => {
+    if (event.pointerId !== activePointerId || !startPoint) return;
+    const distance = Math.hypot(event.clientX - startPoint.x, event.clientY - startPoint.y);
+    if (distance > 14) cancelHold();
+  });
+
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((eventName) => {
+    dedicationTrigger.addEventListener(eventName, (event) => {
+      if (event.pointerId === activePointerId) cancelHold();
+    });
+  });
+
+  // A keyboard user can perform the same deliberate hold with Enter or Space.
+  dedicationTrigger.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    if (event.repeat || keyboardHolding) return;
+    keyboardHolding = beginHold();
+  });
+
+  dedicationTrigger.addEventListener("keyup", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    if (keyboardHolding) cancelHold();
+  });
+
+  dedicationTrigger.addEventListener("blur", () => {
+    if (keyboardHolding) cancelHold();
+  });
+
+  // Prevent the browser's own long-press menu from interrupting the gesture.
+  dedicationTrigger.addEventListener("contextmenu", (event) => event.preventDefault());
+  dedicationTrigger.addEventListener("dragstart", (event) => event.preventDefault());
+  dedicationTrigger.addEventListener("click", (event) => event.preventDefault());
+
+  window.addEventListener("blur", cancelHold);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) cancelHold();
+  });
+
+  dedicationModalClose?.addEventListener("click", () => closeDedicationLetter());
+  dedicationModalBackdrop.addEventListener("click", (event) => {
+    if (event.target === dedicationModalBackdrop) closeDedicationLetter();
+  });
+
+  // The close button is the only tab stop in this quiet, letter-like dialog.
+  dedicationModalBackdrop.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+    event.preventDefault();
+    dedicationModalClose?.focus();
+  });
+}
+
+function openDedicationLetter() {
+  if (!dedicationModalBackdrop) return;
+  cancelDedicationHold();
+  modalBackdrop?.classList.add("hidden");
+  developerModalBackdrop?.classList.add("hidden");
+  dedicationModalBackdrop.classList.remove("hidden");
+  requestAnimationFrame(() => dedicationModalClose?.focus());
+}
+
+function closeDedicationLetter(returnToSettings = true) {
+  if (!dedicationModalBackdrop) return;
+  cancelDedicationHold();
+  dedicationModalBackdrop.classList.add("hidden");
+  if (returnToSettings && modalBackdrop) {
+    modalBackdrop.classList.remove("hidden");
+    requestAnimationFrame(() => dedicationTrigger?.focus());
+  }
+}
+
 function openSettings() {
   syncFloatingBubbleToggle();
   openSettings.previouslyFocused = document.activeElement;
@@ -2966,6 +3118,7 @@ function openSettings() {
 }
 
 function closeSettings() {
+  cancelDedicationHold();
   modalBackdrop?.classList.add("hidden");
   if (openSettings.previouslyFocused instanceof HTMLElement) openSettings.previouslyFocused.focus();
 }
