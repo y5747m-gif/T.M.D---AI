@@ -533,7 +533,7 @@
       // التحقق من توفر ملف APK المحلي المباشر، وإلا التوجيه إلى صفحة التحميل المبنية تلقائيًا
       const apkBtn = document.getElementById("downloadApkBtn");
       const apkNote = document.getElementById("apkStatusNote");
-      const actionsUrl = "https://github.com/y5747m-gif/T.M.D---AI/actions/workflows/android-apk.yml";
+      const actionsUrl = "https://github.com/y5747m-gif/T.M.D---AI/actions/runs/39918652626";
       fetch("/TMD-AI.apk", { method: "HEAD" })
         .then((res) => {
           const ctype = (res.headers.get("content-type") || "").toLowerCase();
