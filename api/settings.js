@@ -1,7 +1,7 @@
 const DEFAULT_SETTINGS = {
   siteName: "Aso AI (آسو إي آي)",
   siteDescription: "المساعد الذكي",
-  developerName: "من معتصم عمرو الى M",
+  developerName: "ياسين عمرو",
 
   primaryColor: "#c9a227",
   secondaryColor: "#ffffff",

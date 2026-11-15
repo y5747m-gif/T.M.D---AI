@@ -157,7 +157,7 @@ public class MainActivity extends Activity {
         card.addView(title);
 
         TextView credit = new TextView(this);
-        credit.setText("من معتصم عمرو الى M");
+        credit.setText("ياسين عمرو");
         credit.setTextSize(13f);
         credit.setTypeface(Typeface.DEFAULT_BOLD);
         credit.setTextColor(0xFF7EF9FF);

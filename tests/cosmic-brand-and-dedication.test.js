@@ -122,7 +122,7 @@ test("preserves all platform features and public attribution", () => {
     assert.match(indexHtml, new RegExp(`id="${requiredId}"`), `index.html must preserve #${requiredId}`);
   }
 
-  assert.match(indexHtml, /من معتصم عمرو الى M/);
+  assert.match(indexHtml, /ياسين عمرو/);
   assert.match(indexHtml, /video-studio\.js/);
   assert.match(indexHtml, /eraser-studio\.js/);
   assert.match(indexHtml, /floating-assistant\.js/);
@@ -137,13 +137,16 @@ test("dedication love letter has corrected Arabic spelling and phrasing", () => 
   const modalHtml = indexHtml.slice(modalStart, modalEnd);
 
   // Corrected classical/refined Arabic forms
-  assert.match(modalHtml, /رسالة خاصة · إلى ملك وحدها/);
-  assert.match(modalHtml, /إلى <span>ملك<\/span>/);
+  assert.match(modalHtml, /رسالة خاصة · إلى أمي وحدها/);
+  assert.match(modalHtml, /إلى <span>أمي<\/span>/);
   assert.match(modalHtml, /أحبكِ حبًا شديدًا جدًا/);
   assert.match(modalHtml, /لا أريدكِ أن تفارقيني طوال حياتي/);
   assert.match(modalHtml, /تُذكّركِ بي دائمًا/);
   assert.match(modalHtml, /أو حدث لي أي شيء/);
-  assert.match(modalHtml, /أحبكِ يا ملك… اليوم، وغدًا، وطوال عمري\./);
+  assert.match(modalHtml, /أحبكِ يا أمي… اليوم، وغدًا، وطوال عمري\./);
+  assert.match(modalHtml, /<p class="dedication-greeting">يا أمي،<\/p>/);
+  assert.match(modalHtml, /أن ياسين أحبَّ أمي بصدق وإخلاص/);
+  assert.doesNotMatch(modalHtml, /ملك/);
   assert.match(modalHtml, /<strong>ياسين<\/strong>/);
 
   // Old spelling/colloquial errors must be absent

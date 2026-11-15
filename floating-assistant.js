@@ -39,7 +39,7 @@
     "أجب بإيجاز شديد وبأسلوب طبيعي واضح ومباشر مناسب للقراءة الصوتية السريعة (2-4 جمل غالبًا) ما لم يطلب المستخدم التفصيل. " +
     "تجنّب الحشو والرموز الزائدة. " +
     "إذا أُرسلت لك لقطة من شاشة المستخدم فركّز على محتوى التطبيق أو الصفحة الظاهرة للمستخدم وتجاهل شريط الدردشة الزجاجي الصغير في أسفل الشاشة، وساعده عمليًا فيما يراه أمامه. " +
-    "مصمم ومطور الأداة: من معتصم عمرو الى M.";
+    "مصمم ومطور الأداة: ياسين عمرو.";
 
   const LIVE_SYSTEM_PROMPT =
     SYSTEM_PROMPT +
@@ -361,7 +361,7 @@
     '<button type="button" class="tmd-dock-btn tmd-dock-btn--icon" data-el="micBtn" title="تحدّث بصوتك">' + ICONS.mic + "</button>" +
     '<button type="button" class="tmd-mini__send" data-el="send" title="إرسال">' + ICONS.send + "</button>" +
     "</div>" +
-    '<div class="tmd-signature" data-el="signature">من معتصم عمرو الى M</div>';
+    '<div class="tmd-signature" data-el="signature">ياسين عمرو</div>';
 
   const el = {};
   win.querySelectorAll("[data-el]").forEach((node) => {
