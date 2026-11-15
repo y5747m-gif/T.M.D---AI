@@ -336,7 +336,7 @@ test("CSS and Android native sources enforce 100% transparent background, edge a
   assert.match(overlayJava, /speakText/);
   assert.match(overlayJava, /getFrameChangePercent/);
 
-  const expectedCredit = "من معتصم عمرو الى M";
+  const expectedCredit = "ياسين عمرو";
   for (const rel of [
     "floating-assistant.js",
     "assistant.html",
